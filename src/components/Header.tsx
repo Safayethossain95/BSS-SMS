@@ -4,7 +4,8 @@ import {
   History,
   FileText,
   Plus,
-  Coins
+  Coins,
+  FolderPlus
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -12,6 +13,7 @@ interface HeaderProps {
   onOpenHistory: () => void;
   onOpenTemplates: () => void;
   onOpenAddStudent: () => void;
+  onOpenCustomGroups: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -19,6 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenHistory,
   onOpenTemplates,
   onOpenAddStudent,
+  onOpenCustomGroups,
 }) => {
   return (
     <header className="bg-[#fafafa] border-b border-gray-300 sticky top-0 z-30 shadow-xs">
@@ -52,6 +55,16 @@ export const Header: React.FC<HeaderProps> = ({
                 {balance.toLocaleString()}
               </span>
             </div>
+
+            <button
+              type="button"
+              onClick={onOpenCustomGroups}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 transition cursor-pointer shadow-2xs"
+              title="Manage Custom Groups"
+            >
+              <FolderPlus className="w-3.5 h-3.5 text-[#1b1e42]" />
+              <span>Groups</span>
+            </button>
 
             <button
               type="button"

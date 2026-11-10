@@ -9,7 +9,8 @@ import type {
   Student, 
   ClassInfo, 
   SmsTemplate, 
-  SentBroadcastRecord 
+  SentBroadcastRecord,
+  CustomGroup 
 } from './types';
 import { calculateSmsMetrics } from './utils/smsCalculator';
 
@@ -28,6 +29,7 @@ import { HistoryModal } from './components/HistoryModal';
 import { TemplateManagerModal } from './components/TemplateManagerModal';
 import { TestSmsModal } from './components/TestSmsModal';
 import { AddStudentModal } from './components/AddStudentModal';
+import { CustomGroupModal } from './components/CustomGroupModal';
 
 export function App() {
   const [classes] = useState<ClassInfo[]>(INITIAL_CLASSES);
@@ -95,7 +97,26 @@ export function App() {
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const [isTestSmsOpen, setIsTestSmsOpen] = useState(false);
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
+  const [isCustomGroupModalOpen, setIsCustomGroupModalOpen] = useState(false);
   const [singleStudentForTest, setSingleStudentForTest] = useState<Student | null>(null);
+
+  // Custom Groups State
+  const [customGroups, setCustomGroups] = useState<CustomGroup[]>(() => {
+    const saved = localStorage.getItem('bss_sms_custom_groups');
+    return saved
+      ? JSON.parse(saved)
+      : [
+          {
+            id: 'cg-junior',
+            name: 'Junior Wing (Play+Nur)',
+            targets: [
+              { classId: 'play', className: 'Play Group', sectionId: 'all', sectionName: 'All Sections' },
+              { classId: 'nur', className: 'Nursery', sectionId: 'all', sectionName: 'All Sections' },
+            ],
+            createdAt: 'Initial',
+          },
+        ];
+  });
 
   useEffect(() => {
     localStorage.setItem('bss_sms_students', JSON.stringify(students));
@@ -113,8 +134,26 @@ export function App() {
     localStorage.setItem('bss_sms_balance', balance.toString());
   }, [balance]);
 
-  // Load students based on destinationGroups
-  const syncStudentsFromDestinationGroups = (destGroups: string[]) => {
+  useEffect(() => {
+    localStorage.setItem('bss_sms_custom_groups', JSON.stringify(customGroups));
+  }, [customGroups]);
+
+  // Sync custom groups into available groups list
+  useEffect(() => {
+    const customNames = customGroups.map((cg) => cg.name);
+    setAvailableGroups((prev) => {
+      const activeInDest = new Set(destinationGroups);
+      const existingInAvail = new Set(prev);
+      const toAdd = customNames.filter((name) => !activeInDest.has(name) && !existingInAvail.has(name));
+      return toAdd.length > 0 ? [...toAdd, ...prev] : prev;
+    });
+  }, [customGroups, destinationGroups]);
+
+  // Load students based on destinationGroups and customGroups
+  const syncStudentsFromDestinationGroups = (
+    destGroups: string[],
+    groupsList: CustomGroup[] = customGroups
+  ) => {
     setIsLoadingStudents(true);
     setTimeout(() => {
       if (destGroups.length === 0) {
@@ -124,11 +163,26 @@ export function App() {
         return;
       }
 
-      const normalized = destGroups.map((g) => g.toLowerCase().trim());
       const matched = students.filter((s) => {
         const sec = s.section.toLowerCase().trim();
         const cls = s.className.toLowerCase().trim();
-        return normalized.some((g) => {
+
+        return destGroups.some((groupName) => {
+          // 1. Check if groupName matches any custom group
+          const cg = groupsList.find(
+            (c) => c.name.toLowerCase().trim() === groupName.toLowerCase().trim()
+          );
+          if (cg) {
+            return cg.targets.some((target) => {
+              const clsMatch = s.className.toLowerCase() === target.className.toLowerCase();
+              if (!clsMatch) return false;
+              if (target.sectionName === 'All Sections' || target.sectionId === 'all') return true;
+              return s.section.toLowerCase() === target.sectionName.toLowerCase();
+            });
+          }
+
+          // 2. Default matching logic
+          const g = groupName.toLowerCase().trim();
           if (sec === g || sec.includes(g) || g.includes(sec)) return true;
           if (cls === g || cls.includes(g) || g.includes(cls)) return true;
           if (g.includes('teacher') && (sec.includes('teacher') || cls.includes('teacher'))) return true;
@@ -147,6 +201,58 @@ export function App() {
   useEffect(() => {
     syncStudentsFromDestinationGroups(destinationGroups);
   }, []);
+
+  const handleCreateCustomGroup = (newGroup: CustomGroup) => {
+    const updated = [newGroup, ...customGroups];
+    setCustomGroups(updated);
+    setAvailableGroups((prev) => {
+      if (!prev.includes(newGroup.name) && !destinationGroups.includes(newGroup.name)) {
+        return [newGroup.name, ...prev];
+      }
+      return prev;
+    });
+  };
+
+  const handleUpdateCustomGroup = (updatedGroup: CustomGroup) => {
+    const oldGroup = customGroups.find((g) => g.id === updatedGroup.id);
+    const updatedList = customGroups.map((g) => (g.id === updatedGroup.id ? updatedGroup : g));
+    setCustomGroups(updatedList);
+
+    if (oldGroup && oldGroup.name !== updatedGroup.name) {
+      setAvailableGroups((prev) =>
+        prev.map((name) => (name === oldGroup.name ? updatedGroup.name : name))
+      );
+      setDestinationGroups((prev) =>
+        prev.map((name) => (name === oldGroup.name ? updatedGroup.name : name))
+      );
+    }
+
+    if (
+      destinationGroups.includes(updatedGroup.name) ||
+      (oldGroup && destinationGroups.includes(oldGroup.name))
+    ) {
+      const activeDest = destinationGroups.map((n) =>
+        oldGroup && n === oldGroup.name ? updatedGroup.name : n
+      );
+      syncStudentsFromDestinationGroups(activeDest, updatedList);
+    }
+  };
+
+  const handleDeleteCustomGroup = (id: string) => {
+    const groupToDelete = customGroups.find((g) => g.id === id);
+    if (!groupToDelete) return;
+
+    const updatedList = customGroups.filter((g) => g.id !== id);
+    setCustomGroups(updatedList);
+
+    setAvailableGroups((prev) => prev.filter((name) => name !== groupToDelete.name));
+    const nextDest = destinationGroups.filter((name) => name !== groupToDelete.name);
+    setDestinationGroups(nextDest);
+
+    if (destinationGroups.includes(groupToDelete.name)) {
+      syncStudentsFromDestinationGroups(nextDest, updatedList);
+    }
+  };
 
   const handleClassChange = (newClassId: string) => {
     setSelectedClassId(newClassId);
@@ -323,6 +429,7 @@ export function App() {
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenTemplates={() => setIsTemplatesOpen(true)}
         onOpenAddStudent={() => setIsAddStudentOpen(true)}
+        onOpenCustomGroups={() => setIsCustomGroupModalOpen(true)}
       />
 
       {/* Main Content */}
@@ -336,6 +443,7 @@ export function App() {
           onClassChange={handleClassChange}
           onSectionChange={handleSectionChange}
           onLoadStudents={handleLoadFromDropdown}
+          onAddToCustomGroup={() => setIsCustomGroupModalOpen(true)}
           alertSentToText={alertSentToText}
           totalLoadedStudents={displayedStudents.length}
           isLoading={isLoadingStudents}
@@ -353,6 +461,7 @@ export function App() {
               onTransferToAvailable={handleTransferToAvailable}
               onTransferAllToDestination={handleTransferAllToDestination}
               onTransferAllToAvailable={handleTransferAllToAvailable}
+              onOpenCustomGroupModal={() => setIsCustomGroupModalOpen(true)}
             />
           </div>
 
@@ -486,6 +595,19 @@ export function App() {
             setSelectedStudentIds((prev) => new Set(prev).add(newStudent.id));
           }
         }}
+      />
+
+      <CustomGroupModal
+        isOpen={isCustomGroupModalOpen}
+        onClose={() => setIsCustomGroupModalOpen(false)}
+        classes={classes}
+        students={students}
+        customGroups={customGroups}
+        onCreateCustomGroup={handleCreateCustomGroup}
+        onUpdateCustomGroup={handleUpdateCustomGroup}
+        onDeleteCustomGroup={handleDeleteCustomGroup}
+        initialSelectedClassId={selectedClassId}
+        initialSelectedSectionId={selectedSectionId}
       />
 
     </div>

@@ -54,3 +54,17 @@ export interface SentBroadcastRecord {
   }>;
 }
 
+export interface CustomGroupTarget {
+  classId: string;
+  className: string;
+  sectionId: string;
+  sectionName: string;
+}
+
+export interface CustomGroup {
+  id: string;
+  name: string;
+  targets: CustomGroupTarget[];
+  createdAt: string;
+}
+

@@ -54,7 +54,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
           type="button"
           onClick={onTestSendClick}
           disabled={isMessageEmpty}
-          className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-red-50 text-[#1b1e42] font-medium text-xs rounded-lg border border-red-300 transition cursor-pointer disabled:opacity-50 active:scale-95 shadow-2xs"
+          className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-red-50 text-[#1b1e42] font-medium text-xs rounded-lg border border-gray-300 transition cursor-pointer disabled:opacity-50 active:scale-95 shadow-2xs"
         >
           <Smartphone className="w-3.5 h-3.5" />
           <span>Test SMS</span>
@@ -68,8 +68,8 @@ export const ActionBar: React.FC<ActionBarProps> = ({
           onClick={onSendClick}
           disabled={!canSend}
           className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-xs transition cursor-pointer active:scale-95 ${canSend
-              ? 'bg-[#1b1e42] hover:bg-[#d91920] text-white shadow-xs'
-              : 'bg-gray-200 text-gray-400 border border-gray-300 cursor-not-allowed'
+            ? 'bg-[#1b1e42] hover:bg-[#d91920] text-white shadow-xs'
+            : 'bg-gray-200 text-gray-400 border border-gray-300 cursor-not-allowed'
             }`}
         >
           <SendHorizonal className="w-3.5 h-3.5" />

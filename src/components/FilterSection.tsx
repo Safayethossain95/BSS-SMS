@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, Users } from 'lucide-react';
+import { ChevronRight, Users, FolderPlus } from 'lucide-react';
 import type { ClassInfo, SectionInfo } from '../types';
 
 interface FilterSectionProps {
@@ -9,6 +9,7 @@ interface FilterSectionProps {
   onClassChange: (classId: string) => void;
   onSectionChange: (sectionId: string) => void;
   onLoadStudents: () => void;
+  onAddToCustomGroup: () => void;
   alertSentToText: string;
   totalLoadedStudents: number;
   isLoading: boolean;
@@ -21,6 +22,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   onClassChange,
   onSectionChange,
   onLoadStudents,
+  onAddToCustomGroup,
   alertSentToText,
   totalLoadedStudents,
   isLoading,
@@ -94,6 +96,18 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             <Users className="w-3.5 h-3.5" />
           )}
           <span>Load</span>
+        </button>
+
+        {/* Add to Custom Group Button */}
+        <button
+          type="button"
+          onClick={onAddToCustomGroup}
+          disabled={!selectedClassId}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-gray-100 text-[#1b1e42] font-semibold text-xs rounded-lg border border-gray-300 transition cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50"
+          title="Create or add this Class & Section to a Custom Group"
+        >
+          <FolderPlus className="w-3.5 h-3.5 text-[#1b1e42]" />
+          <span>Add to Custom Group</span>
         </button>
 
       </div>

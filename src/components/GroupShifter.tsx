@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronRight, ChevronsRight, ChevronLeft, ChevronsLeft } from 'lucide-react';
+import { ChevronRight, ChevronsRight, ChevronLeft, ChevronsLeft, FolderPlus } from 'lucide-react';
 
 interface GroupShifterProps {
   availableGroups: string[];
@@ -8,6 +8,7 @@ interface GroupShifterProps {
   onTransferToAvailable: (group: string) => void;
   onTransferAllToDestination: () => void;
   onTransferAllToAvailable: () => void;
+  onOpenCustomGroupModal?: () => void;
 }
 
 export const GroupShifter: React.FC<GroupShifterProps> = ({
@@ -17,6 +18,7 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
   onTransferToAvailable,
   onTransferAllToDestination,
   onTransferAllToAvailable,
+  onOpenCustomGroupModal,
 }) => {
   const [selectedAvailable, setSelectedAvailable] = useState<string>('');
   const [selectedDestination, setSelectedDestination] = useState<string>('');
@@ -45,9 +47,22 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
         
         {/* Available Group */}
         <div className="col-span-5 flex flex-col">
-          <label className="text-xs font-medium text-slate-600 mb-1.5 block">
-            Available Group
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs font-medium text-slate-600 block">
+              Available Group
+            </label>
+            {onOpenCustomGroupModal && (
+              <button
+                type="button"
+                onClick={onOpenCustomGroupModal}
+                className="text-[10px] font-semibold text-[#1b1e42] hover:text-[#d91920] flex items-center gap-1 cursor-pointer transition"
+                title="Create or manage custom groups"
+              >
+                <FolderPlus className="w-3 h-3 text-[#1b1e42]" />
+                <span>+ Group</span>
+              </button>
+            )}
+          </div>
           <div className="h-[135px] bg-white border border-slate-200 rounded-lg p-1.5 overflow-y-auto space-y-0.5">
             {availableGroups.length === 0 ? (
               <div className="text-xs text-gray-400 text-center py-12 italic">
