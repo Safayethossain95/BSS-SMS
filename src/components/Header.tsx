@@ -1,18 +1,21 @@
 import React from 'react';
 import {
-  Send,
-  History,
-  FileText,
-  Plus,
+  Menu,
   Coins,
+  FileText,
+  History,
   FolderPlus,
-  ShieldCheck
+  Plus,
+  Search,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 interface HeaderProps {
   balance: number;
-  isSafeMode?: boolean;
-  safePhoneNumber?: string;
+  isDark: boolean;
+  onToggleTheme: () => void;
+  onOpenMenu: () => void;
   onOpenHistory: () => void;
   onOpenTemplates: () => void;
   onOpenAddStudent: () => void;
@@ -21,96 +24,106 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   balance,
-  isSafeMode = true,
-  safePhoneNumber = '01670319232',
+  isDark,
+  onToggleTheme,
+  onOpenMenu,
   onOpenHistory,
   onOpenTemplates,
   onOpenAddStudent,
   onOpenCustomGroups,
 }) => {
   return (
-    <header className="bg-[#fafafa] border-b border-gray-300 sticky top-0 z-30 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5">
-        <div className="flex items-center justify-between gap-4">
+    <header className="topbar">
+      <div className="topbar-inner flex items-center justify-between w-full">
 
-          {/* Logo & Title */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#1b1e42] flex items-center justify-center text-white shadow-xs">
-              <Send className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-bold text-gray-900 tracking-tight font-serif italic">
-                  bona fide
-                </span>
-                <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 border border-gray-300">
-                  SMS System
-                </span>
-              </div>
-            </div>
+        {/* Left: Hamburger & Breadcrumb */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="menu-btn"
+            onClick={onOpenMenu}
+            aria-label="Open mobile navigation"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+
+          <div className="crumb select-none">
+            <span className="crumb-prefix font-medium">British Standard</span>
+            <span className="crumb-separator text-ink-faint">/</span>
+            <span className="crumb-current font-semibold text-ink">SMS Delivery System</span>
+          </div>
+        </div>
+
+        {/* Center: Search pill */}
+        <div className="tb-search" role="search">
+          <Search className="w-3.5 h-3.5 flex-shrink-0 text-ink-faint" />
+          <input
+            type="text"
+            placeholder="Search students..."
+            className="tb-search-input"
+            onFocus={() => {
+              const el = document.getElementById('table-search-input');
+              el?.focus();
+            }}
+          />
+        </div>
+
+        {/* Right: Actions */}
+        <div className="tb-actions">
+
+          {/* SMS Balance Pill */}
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs shadow-2xs"
+            title="Available SMS credits"
+          >
+            <Coins className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <span className="text-ink-muted hidden sm:inline text-[11px] font-medium">Balance:</span>
+            <span className="text-amber-800 dark:text-amber-300 font-bold font-mono text-xs">
+              {balance.toLocaleString()}
+            </span>
           </div>
 
-          {/* Safety Guard Indicator */}
-          {isSafeMode && (
-            <div 
-              className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-xs text-emerald-800 font-medium shadow-2xs"
-              title={`Safety Intercept Guard Active: All test SMS will strictly be sent only to ${safePhoneNumber}`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
-              <span>Safety Guard: <strong className="font-mono text-emerald-900">{safePhoneNumber}</strong></span>
+          {/* Logs Shortcut */}
+          <button
+            type="button"
+            onClick={onOpenHistory}
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-2 hover:bg-surface text-ink text-xs font-medium border border-gray-200 dark:border-zinc-800 transition cursor-pointer shadow-2xs"
+            title="View Delivery Logs"
+          >
+            <History className="w-3.5 h-3.5 text-ink-muted" />
+            <span>Logs</span>
+          </button>
+
+          {/* Theme Toggle Switch */}
+          <button
+            type="button"
+            className={`theme-toggle ${isDark ? 'active' : ''}`}
+            onClick={onToggleTheme}
+            aria-label="Toggle dark / light theme"
+            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <div className="theme-knob">
+              {isDark ? (
+                <Moon className="w-3 h-3 text-white" />
+              ) : (
+                <Sun className="w-3 h-3 text-white" />
+              )}
             </div>
-          )}
+          </button>
 
-          {/* Balance & Actions */}
-          <div className="flex items-center gap-2.5">
-            {/* SMS Balance */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-300 text-xs">
-              <Coins className="w-3.5 h-3.5 text-amber-600" />
-              <span className="text-gray-700 font-medium">Balance:</span>
-              <span className="text-amber-800 font-bold">
-                {balance.toLocaleString()}
-              </span>
+          {/* Avatar Chip */}
+          <div className="avatar-chip hidden md:flex select-none">
+            <div className="avatar-circle">
+              AD
             </div>
-
-            <button
-              type="button"
-              onClick={onOpenCustomGroups}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 transition cursor-pointer shadow-2xs"
-              title="Manage Custom Groups"
-            >
-              <FolderPlus className="w-3.5 h-3.5 text-[#1b1e42]" />
-              <span>Groups</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onOpenTemplates}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 transition cursor-pointer shadow-2xs"
-            >
-              <FileText className="w-3.5 h-3.5 text-gray-500" />
-              <span>Templates</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onOpenHistory}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 transition cursor-pointer shadow-2xs"
-            >
-              <History className="w-3.5 h-3.5 text-gray-500" />
-              <span>Logs</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onOpenAddStudent}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#1b1e42] hover:bg-[#d91920] text-white transition cursor-pointer shadow-xs active:scale-95"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add Student</span>
-            </button>
+            <div>
+              <div className="avatar-name">Administrator</div>
+              <div className="avatar-role">Campus 4 &bull; Admin</div>
+            </div>
           </div>
 
         </div>
+
       </div>
     </header>
   );

@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { ChevronRight, ChevronsRight, ChevronLeft, ChevronsLeft, FolderPlus } from 'lucide-react';
+import {
+  ChevronRight,
+  ChevronsRight,
+  ChevronLeft,
+  ChevronsLeft,
+  Users,
+  FolderPlus
+} from 'lucide-react';
 
 interface GroupShifterProps {
   availableGroups: string[];
@@ -42,31 +49,41 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
   };
 
   return (
-    <div className="bg-[#fafafa] border border-gray-200 rounded-xl p-3.5 shadow-2xs h-full flex flex-col justify-center">
-      <div className="grid grid-cols-11 gap-2 items-center">
-        
+    <div className="card !p-5 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card h-full flex flex-col justify-between">
+
+      {/* Card Header */}
+      <div className="card-head !mb-3">
+        <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
+          <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
+            <Users className="w-4 h-4" />
+          </span>
+          Target Groups / Shifter
+        </h3>
+        {onOpenCustomGroupModal && (
+          <button
+            type="button"
+            onClick={onOpenCustomGroupModal}
+            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-surface-2 hover:bg-surface text-[#1b1e42] dark:text-accent border border-gray-200 dark:border-zinc-800 transition shadow-2xs cursor-pointer"
+            title="Create or manage custom groups"
+          >
+            <FolderPlus className="w-3.5 h-3.5" />
+            <span>+ Custom Group</span>
+          </button>
+        )}
+      </div>
+
+      {/* Lists & Shift Controls */}
+      <div className="grid grid-cols-11 gap-2 items-center flex-1 my-1">
+
         {/* Available Group */}
-        <div className="col-span-5 flex flex-col">
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-medium text-slate-600 block">
-              Available Group
-            </label>
-            {onOpenCustomGroupModal && (
-              <button
-                type="button"
-                onClick={onOpenCustomGroupModal}
-                className="text-[10px] font-semibold text-[#1b1e42] hover:text-[#d91920] flex items-center gap-1 cursor-pointer transition"
-                title="Create or manage custom groups"
-              >
-                <FolderPlus className="w-3 h-3 text-[#1b1e42]" />
-                <span>+ Group</span>
-              </button>
-            )}
-          </div>
-          <div className="h-[135px] bg-white border border-slate-200 rounded-lg p-1.5 overflow-y-auto space-y-0.5">
+        <div className="col-span-5 flex flex-col h-full">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1.5 select-none block">
+            Available Group
+          </label>
+          <div className="h-[140px] bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-sm p-1.5 overflow-y-auto space-y-1">
             {availableGroups.length === 0 ? (
-              <div className="text-xs text-gray-400 text-center py-12 italic">
-                Empty
+              <div className="text-xs text-ink-faint text-center py-12 italic">
+                All shifted
               </div>
             ) : (
               availableGroups.map((group) => (
@@ -77,12 +94,11 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
                     onTransferToDestination(group);
                     setSelectedAvailable('');
                   }}
-                  className={`px-2.5 py-1 rounded text-xs transition cursor-pointer select-none truncate ${
-                    selectedAvailable === group
-                      ? 'bg-slate-100 text-slate-900 font-semibold'
-                      : 'text-slate-700 hover:bg-slate-50'
-                  }`}
-                  title={`${group} (Double-click to move)`}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition select-none truncate ${selectedAvailable === group
+                    ? 'bg-[#1b1e42] dark:bg-accent text-white font-semibold shadow-xs'
+                    : 'text-ink hover:bg-surface'
+                    }`}
+                  title={`${group} (Double-click to shift)`}
                 >
                   {group}
                 </div>
@@ -91,15 +107,15 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
           </div>
         </div>
 
-        {/* Middle buttons: >, >>, <, << */}
-        <div className="col-span-1 flex flex-col items-center justify-center gap-1 pt-5">
+        {/* Center buttons: >, >>, <, << */}
+        <div className="col-span-1 flex flex-col items-center justify-center gap-1.5 pt-5">
           {/* > Move one */}
           <button
             type="button"
             onClick={handleShiftOneRight}
             disabled={availableGroups.length === 0}
-            className="w-6 h-6 rounded border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-500 hover:text-slate-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
-            title="Move selected (>)"
+            className="w-7 h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
+            title="Shift selected (>)"
           >
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
@@ -109,44 +125,44 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
             type="button"
             onClick={onTransferAllToDestination}
             disabled={availableGroups.length === 0}
-            className="w-6 h-6 rounded border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-500 hover:text-slate-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
-            title="Move all (>>)"
+            className="w-7 h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
+            title="Shift all (>>)"
           >
             <ChevronsRight className="w-3.5 h-3.5" />
           </button>
 
-          {/* < Remove one */}
+          {/* < Return one */}
           <button
             type="button"
             onClick={handleShiftOneLeft}
             disabled={destinationGroups.length === 0}
-            className="w-6 h-6 rounded border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-500 hover:text-slate-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
-            title="Remove selected (<)"
+            className="w-7 h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
+            title="Return selected (<)"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
 
-          {/* << Remove all */}
+          {/* << Return all */}
           <button
             type="button"
             onClick={onTransferAllToAvailable}
             disabled={destinationGroups.length === 0}
-            className="w-6 h-6 rounded border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-500 hover:text-slate-700 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
-            title="Remove all (<<)"
+            className="w-7 h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
+            title="Return all (<<)"
           >
             <ChevronsLeft className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Destination Group */}
-        <div className="col-span-5 flex flex-col">
-          <label className="text-xs font-medium text-slate-600 mb-1.5 block">
+        <div className="col-span-5 flex flex-col h-full">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1.5 select-none block">
             Destination Group
           </label>
-          <div className="h-[135px] bg-white border border-slate-200 rounded-lg p-1.5 overflow-y-auto space-y-0.5">
+          <div className="h-[140px] bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-sm p-1.5 overflow-y-auto space-y-1">
             {destinationGroups.length === 0 ? (
-              <div className="text-xs text-gray-400 text-center py-12 italic">
-                Empty
+              <div className="text-xs text-ink-faint text-center py-12 italic">
+                None selected
               </div>
             ) : (
               destinationGroups.map((group) => (
@@ -157,14 +173,13 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
                     onTransferToAvailable(group);
                     setSelectedDestination('');
                   }}
-                  className={`px-2.5 py-1 rounded text-xs transition cursor-pointer select-none truncate ${
-                    selectedDestination === group
-                      ? 'bg-slate-100 text-slate-900 font-semibold'
-                      : 'text-slate-700 hover:bg-slate-50'
-                  }`}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition select-none truncate ${selectedDestination === group
+                    ? 'bg-[#1b1e42] dark:bg-accent text-white font-semibold shadow-xs'
+                    : 'text-ink hover:bg-surface'
+                    }`}
                   title={`${group} (Double-click to remove)`}
                 >
-                  {group}
+                  &bull; {group}
                 </div>
               ))
             )}
@@ -172,6 +187,13 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
         </div>
 
       </div>
+
+      {/* Footer hint */}
+      <div className="pt-2 border-t border-gray-200 dark:border-zinc-800 mt-2 flex items-center justify-between text-[11px] text-ink-muted">
+        <span>Double-click item to shift instantly</span>
+        <span className="font-semibold text-ink">{destinationGroups.length} active target{destinationGroups.length === 1 ? '' : 's'}</span>
+      </div>
+
     </div>
   );
 };

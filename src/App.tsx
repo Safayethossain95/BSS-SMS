@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import type { 
-  Student, 
-  ClassInfo, 
-  SmsTemplate, 
+import type {
+  Student,
+  ClassInfo,
+  SmsTemplate,
   SentBroadcastRecord,
-  CustomGroup 
+  CustomGroup
 } from './types';
 import type { SmsBalanceInfo } from './types/api';
 import { calculateSmsMetrics } from './utils/smsCalculator';
@@ -17,6 +17,7 @@ import { templateService } from './services/templateService';
 import { smsService } from './services/smsService';
 
 // Components
+import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { FilterSection } from './components/FilterSection';
 import { GroupShifter } from './components/GroupShifter';
@@ -65,7 +66,7 @@ export function App() {
 
   // Message State
   const [message, setMessage] = useState<string>(
-    'Dear {StudentName}, you are requested to attend the school session on time. Regards, Bona Fide School.'
+    'Dear {StudentName}, you are requested to attend the school session on time. Regards, BSS School.'
   );
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
@@ -78,6 +79,39 @@ export function App() {
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
   const [isCustomGroupModalOpen, setIsCustomGroupModalOpen] = useState(false);
   const [singleStudentForTest, setSingleStudentForTest] = useState<Student | null>(null);
+
+  // Theme State
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('bss_theme');
+      if (savedTheme) {
+        return savedTheme === 'dark';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('bss_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('bss_theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark((prev) => !prev);
+
+  // Sidebar State
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 1350;
+    }
+    return false;
+  });
 
   // Custom Groups State
   const [customGroups, setCustomGroups] = useState<CustomGroup[]>(() => {
@@ -261,7 +295,7 @@ export function App() {
     setIsLoadingStudents(true);
     try {
       const loaded = await studentService.getStudentsByClassAndSection(
-        selectedClassId, 
+        selectedClassId,
         selectedSectionId || undefined
       );
       setDisplayedStudents(loaded);
@@ -399,112 +433,140 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-200 text-slate-800 flex flex-col font-sans">
-      
-      {/* 1. Top Header */}
-      <Header
-        balance={balance}
-        isSafeMode={safetyInfo.isSafeTestMode}
-        safePhoneNumber={safetyInfo.safeTestPhoneNumber}
-        onOpenHistory={() => setIsHistoryOpen(true)}
+    <div className={`app-shell ${isDark ? 'dark' : ''}`}>
+
+      {/* 1. Floating BSS Sidebar */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
         onOpenTemplates={() => setIsTemplatesOpen(true)}
+        onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenAddStudent={() => setIsAddStudentOpen(true)}
         onOpenCustomGroups={() => setIsCustomGroupModalOpen(true)}
+        isDark={isDark}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-3 space-y-3">
-        
-        {/* 2. Compact Dropdowns Bar */}
-        <FilterSection
-          classes={classes}
-          selectedClassId={selectedClassId}
-          selectedSectionId={selectedSectionId}
-          onClassChange={handleClassChange}
-          onSectionChange={handleSectionChange}
-          onLoadStudents={handleLoadFromDropdown}
-          onAddToCustomGroup={() => setIsCustomGroupModalOpen(true)}
-          alertSentToText={alertSentToText}
-          totalLoadedStudents={displayedStudents.length}
-          isLoading={isLoadingStudents}
+      <div className="main-content">
+        {/* 2. BSS Topbar */}
+        <Header
+          balance={balance}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
+          onOpenMenu={() => setSidebarOpen(true)}
+          onOpenHistory={() => setIsHistoryOpen(true)}
+          onOpenTemplates={() => setIsTemplatesOpen(true)}
+          onOpenAddStudent={() => setIsAddStudentOpen(true)}
+          onOpenCustomGroups={() => setIsCustomGroupModalOpen(true)}
         />
 
-        {/* 3. Group Shifter (Left) & Compact Message Composer (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
-          
-          {/* Left: Small Group Shifter */}
-          <div className="lg:col-span-5 flex flex-col">
-            <GroupShifter
-              availableGroups={availableGroups}
-              destinationGroups={destinationGroups}
-              onTransferToDestination={handleTransferToDestination}
-              onTransferToAvailable={handleTransferToAvailable}
-              onTransferAllToDestination={handleTransferAllToDestination}
-              onTransferAllToAvailable={handleTransferAllToAvailable}
-              onOpenCustomGroupModal={() => setIsCustomGroupModalOpen(true)}
-            />
-          </div>
+        {/* 3. Main Page Content */}
+        <main className="page-main space-y-4">
 
-          {/* Right: Compact Message Composer */}
-          <div className="lg:col-span-7 flex flex-col">
-            <MessageComposer
-              message={message}
-              onChangeMessage={setMessage}
-              templates={templates}
-              selectedTemplateId={selectedTemplateId}
-              onSelectTemplate={handleSelectTemplate}
-              metrics={metrics}
-              totalRecipients={selectedStudentIds.size}
-              sampleStudentName={sampleStudent?.name}
-              onOpenPhonePreview={() => setIsPhonePreviewOpen(true)}
-            />
-          </div>
-
-        </div>
-
-        {/* 4. Action Bar */}
-        <ActionBar
-          onSearchClick={() => {
-            const el = document.getElementById('class-select');
-            el?.focus();
-          }}
-          onResetClick={handleReset}
-          onSendClick={() => setIsSendConfirmOpen(true)}
-          onTestSendClick={() => setIsTestSmsOpen(true)}
-          totalRecipientsSelected={selectedStudentIds.size}
-          isMessageEmpty={!message.trim()}
-          totalSmsCost={metrics.totalSmsCost}
-        />
-
-        {/* 5. Student Table */}
-        <StudentTable
-          students={filteredStudents}
-          selectedStudentIds={selectedStudentIds}
-          onToggleStudent={handleToggleStudent}
-          onToggleSelectAll={handleToggleSelectAll}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onQuickSendSingle={(student) => {
-            setSingleStudentForTest(student);
-            setIsTestSmsOpen(true);
-          }}
-        />
-
-      </main>
-
-      {/* 6. Iconic Bottom Ribbon */}
-      <footer className="mt-auto py-3 bg-[#fafafa] border-t border-gray-300">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center space-y-1">
-          <div className="relative inline-block">
-            <div className="px-10 py-1 bg-[#1b2b8c] text-white font-serif italic text-lg font-bold tracking-wider rounded shadow-xs">
-              bona fide
+          {/* Page Head Banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold font-serif text-ink tracking-tight mb-0.5">
+                SMS Message Delivery
+              </h1>
+              <p className="text-xs sm:text-sm text-ink-muted">
+                Broadcast notifications, attendance updates, and alerts to classes, sections, and custom student groups.
+              </p>
             </div>
+            {/* 
+            {safetyInfo.isSafeTestMode && (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>
+                  Safe Mode Active &bull; Test Redirect: <strong>{safetyInfo.safeTestPhoneNumber}</strong>
+                </span>
+              </div>
+            )} */}
           </div>
-          <p className="text-[10px] text-gray-500 font-medium">
-            SMS Message Delivery System • Connected to BSS-MVC SQL Server
-          </p>
-        </div>
-      </footer>
+
+          {/* 4. Filter Section */}
+          <FilterSection
+            classes={classes}
+            selectedClassId={selectedClassId}
+            selectedSectionId={selectedSectionId}
+            onClassChange={handleClassChange}
+            onSectionChange={handleSectionChange}
+            onLoadStudents={handleLoadFromDropdown}
+            onAddToCustomGroup={() => setIsCustomGroupModalOpen(true)}
+            alertSentToText={alertSentToText}
+            totalLoadedStudents={displayedStudents.length}
+            isLoading={isLoadingStudents}
+          />
+
+          {/* 5. Group Shifter (Left) & Compact Message Composer (Right) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+            {/* Left: Small Group Shifter */}
+            <div className="lg:col-span-5 flex flex-col">
+              <GroupShifter
+                availableGroups={availableGroups}
+                destinationGroups={destinationGroups}
+                onTransferToDestination={handleTransferToDestination}
+                onTransferToAvailable={handleTransferToAvailable}
+                onTransferAllToDestination={handleTransferAllToDestination}
+                onTransferAllToAvailable={handleTransferAllToAvailable}
+                onOpenCustomGroupModal={() => setIsCustomGroupModalOpen(true)}
+              />
+            </div>
+
+            {/* Right: Compact Message Composer */}
+            <div className="lg:col-span-7 flex flex-col">
+              <MessageComposer
+                message={message}
+                onChangeMessage={setMessage}
+                templates={templates}
+                selectedTemplateId={selectedTemplateId}
+                onSelectTemplate={handleSelectTemplate}
+                metrics={metrics}
+                totalRecipients={selectedStudentIds.size}
+                sampleStudentName={sampleStudent?.name}
+                onOpenPhonePreview={() => setIsPhonePreviewOpen(true)}
+              />
+            </div>
+
+          </div>
+
+          {/* 6. Action Bar */}
+          <ActionBar
+            onSearchClick={() => {
+              const el = document.getElementById('class-select');
+              el?.focus();
+            }}
+            onResetClick={handleReset}
+            onSendClick={() => setIsSendConfirmOpen(true)}
+            onTestSendClick={() => setIsTestSmsOpen(true)}
+            totalRecipientsSelected={selectedStudentIds.size}
+            isMessageEmpty={!message.trim()}
+            totalSmsCost={metrics.totalSmsCost}
+          />
+
+          {/* 7. Student Table */}
+          <StudentTable
+            students={filteredStudents}
+            selectedStudentIds={selectedStudentIds}
+            onToggleStudent={handleToggleStudent}
+            onToggleSelectAll={handleToggleSelectAll}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onQuickSendSingle={(student) => {
+              setSingleStudentForTest(student);
+              setIsTestSmsOpen(true);
+            }}
+          />
+
+          {/* 8. Footer Ribbon */}
+          <div className="pt-4 pb-2 text-center text-xs text-ink-faint">
+            British Standard School &bull; SMS Message Delivery System
+          </div>
+
+        </main>
+      </div>
 
       {/* Modals */}
       <PhonePreviewModal
@@ -551,11 +613,11 @@ export function App() {
         message={
           singleStudentForTest
             ? message
-                .replace(/{StudentName}/g, singleStudentForTest.name)
-                .replace(/{StudentID}/g, singleStudentForTest.id)
-                .replace(/{Class}/g, singleStudentForTest.className)
-                .replace(/{Section}/g, singleStudentForTest.section)
-                .replace(/{Roll}/g, singleStudentForTest.roll || '01')
+              .replace(/{StudentName}/g, singleStudentForTest.name)
+              .replace(/{StudentID}/g, singleStudentForTest.id)
+              .replace(/{Class}/g, singleStudentForTest.className)
+              .replace(/{Section}/g, singleStudentForTest.section)
+              .replace(/{Roll}/g, singleStudentForTest.roll || '01')
             : message
         }
       />
