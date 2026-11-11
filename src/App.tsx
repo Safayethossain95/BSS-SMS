@@ -4,7 +4,9 @@ import type {
   ClassInfo,
   SmsTemplate,
   SentBroadcastRecord,
-  CustomGroup
+  CustomGroup,
+  AuthUser,
+  AppPage
 } from './types';
 import type { SmsBalanceInfo } from './types/api';
 import { calculateSmsMetrics } from './utils/smsCalculator';
@@ -24,6 +26,14 @@ import { GroupShifter } from './components/GroupShifter';
 import { MessageComposer } from './components/MessageComposer';
 import { StudentTable } from './components/StudentTable';
 import { ActionBar } from './components/ActionBar';
+import { LoginPage } from './components/LoginPage';
+
+// Pages
+import { CustomGroupsPage } from './pages/CustomGroupsPage';
+import { TemplatesPage } from './pages/TemplatesPage';
+import { BroadcastLogsPage } from './pages/BroadcastLogsPage';
+import { StudentsPage } from './pages/StudentsPage';
+import { AddStudentPage } from './pages/AddStudentPage';
 
 // Modals
 import { PhonePreviewModal } from './components/PhonePreviewModal';
@@ -42,7 +52,7 @@ export function App() {
   const [isLoadingHistory, setIsLoadingHistory] = useState<boolean>(false);
 
   const [balance, setBalance] = useState<number>(5000);
-  const [safetyInfo, setSafetyInfo] = useState<SmsBalanceInfo>({
+  const [_safetyInfo, setSafetyInfo] = useState<SmsBalanceInfo>({
     currentBalance: 5000,
     activeGatewayName: 'Active Gateway',
     isMasking: false,
@@ -92,6 +102,31 @@ export function App() {
     return false;
   });
 
+  // Authentication State
+  const [authUser, setAuthUser] = useState<AuthUser | null>(() => {
+    if (typeof window !== 'undefined') {
+      const savedUser = localStorage.getItem('bss_sms_auth_user');
+      if (savedUser) {
+        try {
+          return JSON.parse(savedUser);
+        } catch {
+          return null;
+        }
+      }
+    }
+    return null;
+  });
+
+  const handleLogin = (user: AuthUser) => {
+    setAuthUser(user);
+    localStorage.setItem('bss_sms_auth_user', JSON.stringify(user));
+  };
+
+  const handleLogout = () => {
+    setAuthUser(null);
+    localStorage.removeItem('bss_sms_auth_user');
+  };
+
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
@@ -112,6 +147,9 @@ export function App() {
     }
     return false;
   });
+
+  // Active Navigation Page
+  const [currentPage, setCurrentPage] = useState<AppPage>('delivery');
 
   // Custom Groups State
   const [customGroups, setCustomGroups] = useState<CustomGroup[]>(() => {
@@ -432,6 +470,16 @@ export function App() {
     status: 'active' as const,
   };
 
+  if (!authUser) {
+    return (
+      <LoginPage
+        onLogin={handleLogin}
+        isDark={isDark}
+        onToggleTheme={toggleTheme}
+      />
+    );
+  }
+
   return (
     <div className={`app-shell ${isDark ? 'dark' : ''}`}>
 
@@ -441,11 +489,13 @@ export function App() {
         onClose={() => setSidebarOpen(false)}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
-        onOpenTemplates={() => setIsTemplatesOpen(true)}
-        onOpenHistory={() => setIsHistoryOpen(true)}
-        onOpenAddStudent={() => setIsAddStudentOpen(true)}
-        onOpenCustomGroups={() => setIsCustomGroupModalOpen(true)}
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
         isDark={isDark}
+        onToggleTheme={toggleTheme}
+        user={authUser}
+        onLogout={handleLogout}
+        balance={balance}
       />
 
       <div className="main-content">
@@ -455,110 +505,169 @@ export function App() {
           isDark={isDark}
           onToggleTheme={toggleTheme}
           onOpenMenu={() => setSidebarOpen(true)}
-          onOpenHistory={() => setIsHistoryOpen(true)}
-          onOpenTemplates={() => setIsTemplatesOpen(true)}
-          onOpenAddStudent={() => setIsAddStudentOpen(true)}
-          onOpenCustomGroups={() => setIsCustomGroupModalOpen(true)}
+          currentPage={currentPage}
+          onNavigate={setCurrentPage}
+          user={authUser}
+          onLogout={handleLogout}
         />
 
         {/* 3. Main Page Content */}
         <main className="page-main space-y-4">
 
-          {/* Page Head Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold font-serif text-ink tracking-tight mb-0.5">
-                SMS Message Delivery
-              </h1>
-              <p className="text-xs sm:text-sm text-ink-muted">
-                Broadcast notifications, attendance updates, and alerts to classes, sections, and custom student groups.
-              </p>
-            </div>
-            {/* 
-            {safetyInfo.isSafeTestMode && (
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>
-                  Safe Mode Active &bull; Test Redirect: <strong>{safetyInfo.safeTestPhoneNumber}</strong>
-                </span>
+          {currentPage === 'delivery' && (
+            <>
+              {/* Page Head Banner */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold font-serif text-ink tracking-tight mb-0.5">
+                    SMS Message Delivery
+                  </h1>
+                  <p className="text-xs sm:text-sm text-ink-muted">
+                    Broadcast notifications, attendance updates, and alerts to classes, sections, and custom student groups.
+                  </p>
+                </div>
+                {/* 
+                {safetyInfo.isSafeTestMode && (
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 shadow-2xs">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>
+                      Safe Mode Active &bull; Test Redirect: <strong>{safetyInfo.safeTestPhoneNumber}</strong>
+                    </span>
+                  </div>
+                )} */}
               </div>
-            )} */}
-          </div>
 
-          {/* 4. Filter Section */}
-          <FilterSection
-            classes={classes}
-            selectedClassId={selectedClassId}
-            selectedSectionId={selectedSectionId}
-            onClassChange={handleClassChange}
-            onSectionChange={handleSectionChange}
-            onLoadStudents={handleLoadFromDropdown}
-            onAddToCustomGroup={() => setIsCustomGroupModalOpen(true)}
-            alertSentToText={alertSentToText}
-            totalLoadedStudents={displayedStudents.length}
-            isLoading={isLoadingStudents}
-          />
-
-          {/* 5. Group Shifter (Left) & Compact Message Composer (Right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-
-            {/* Left: Small Group Shifter */}
-            <div className="lg:col-span-5 flex flex-col">
-              <GroupShifter
-                availableGroups={availableGroups}
-                destinationGroups={destinationGroups}
-                onTransferToDestination={handleTransferToDestination}
-                onTransferToAvailable={handleTransferToAvailable}
-                onTransferAllToDestination={handleTransferAllToDestination}
-                onTransferAllToAvailable={handleTransferAllToAvailable}
-                onOpenCustomGroupModal={() => setIsCustomGroupModalOpen(true)}
+              {/* 4. Filter Section */}
+              <FilterSection
+                classes={classes}
+                selectedClassId={selectedClassId}
+                selectedSectionId={selectedSectionId}
+                onClassChange={handleClassChange}
+                onSectionChange={handleSectionChange}
+                onLoadStudents={handleLoadFromDropdown}
+                onAddToCustomGroup={() => setCurrentPage('custom-groups')}
+                alertSentToText={alertSentToText}
+                totalLoadedStudents={displayedStudents.length}
+                isLoading={isLoadingStudents}
               />
-            </div>
 
-            {/* Right: Compact Message Composer */}
-            <div className="lg:col-span-7 flex flex-col">
-              <MessageComposer
-                message={message}
-                onChangeMessage={setMessage}
-                templates={templates}
-                selectedTemplateId={selectedTemplateId}
-                onSelectTemplate={handleSelectTemplate}
-                metrics={metrics}
-                totalRecipients={selectedStudentIds.size}
-                sampleStudentName={sampleStudent?.name}
-                onOpenPhonePreview={() => setIsPhonePreviewOpen(true)}
+              {/* 5. Group Shifter (Left) & Compact Message Composer (Right) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+                {/* Left: Small Group Shifter */}
+                <div className="lg:col-span-5 flex flex-col">
+                  <GroupShifter
+                    availableGroups={availableGroups}
+                    destinationGroups={destinationGroups}
+                    onTransferToDestination={handleTransferToDestination}
+                    onTransferToAvailable={handleTransferToAvailable}
+                    onTransferAllToDestination={handleTransferAllToDestination}
+                    onTransferAllToAvailable={handleTransferAllToAvailable}
+                    onOpenCustomGroupModal={() => setCurrentPage('custom-groups')}
+                  />
+                </div>
+
+                {/* Right: Compact Message Composer */}
+                <div className="lg:col-span-7 flex flex-col">
+                  <MessageComposer
+                    message={message}
+                    onChangeMessage={setMessage}
+                    templates={templates}
+                    selectedTemplateId={selectedTemplateId}
+                    onSelectTemplate={handleSelectTemplate}
+                    metrics={metrics}
+                    totalRecipients={selectedStudentIds.size}
+                    sampleStudentName={sampleStudent?.name}
+                    onOpenPhonePreview={() => setIsPhonePreviewOpen(true)}
+                  />
+                </div>
+
+              </div>
+
+              {/* 6. Action Bar */}
+              <ActionBar
+                onSearchClick={() => {
+                  const el = document.getElementById('class-select');
+                  el?.focus();
+                }}
+                onResetClick={handleReset}
+                onSendClick={() => setIsSendConfirmOpen(true)}
+                onTestSendClick={() => setIsTestSmsOpen(true)}
+                totalRecipientsSelected={selectedStudentIds.size}
+                isMessageEmpty={!message.trim()}
+                totalSmsCost={metrics.totalSmsCost}
               />
-            </div>
 
-          </div>
+              {/* 7. Student Table */}
+              <StudentTable
+                students={filteredStudents}
+                selectedStudentIds={selectedStudentIds}
+                onToggleStudent={handleToggleStudent}
+                onToggleSelectAll={handleToggleSelectAll}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onQuickSendSingle={(student) => {
+                  setSingleStudentForTest(student);
+                  setIsTestSmsOpen(true);
+                }}
+              />
+            </>
+          )}
 
-          {/* 6. Action Bar */}
-          <ActionBar
-            onSearchClick={() => {
-              const el = document.getElementById('class-select');
-              el?.focus();
-            }}
-            onResetClick={handleReset}
-            onSendClick={() => setIsSendConfirmOpen(true)}
-            onTestSendClick={() => setIsTestSmsOpen(true)}
-            totalRecipientsSelected={selectedStudentIds.size}
-            isMessageEmpty={!message.trim()}
-            totalSmsCost={metrics.totalSmsCost}
-          />
+          {currentPage === 'custom-groups' && (
+            <CustomGroupsPage
+              classes={classes}
+              students={students}
+              customGroups={customGroups}
+              onCreateCustomGroup={handleCreateCustomGroup}
+              onUpdateCustomGroup={handleUpdateCustomGroup}
+              onDeleteCustomGroup={handleDeleteCustomGroup}
+              onNavigate={setCurrentPage}
+            />
+          )}
 
-          {/* 7. Student Table */}
-          <StudentTable
-            students={filteredStudents}
-            selectedStudentIds={selectedStudentIds}
-            onToggleStudent={handleToggleStudent}
-            onToggleSelectAll={handleToggleSelectAll}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onQuickSendSingle={(student) => {
-              setSingleStudentForTest(student);
-              setIsTestSmsOpen(true);
-            }}
-          />
+          {currentPage === 'templates' && (
+            <TemplatesPage
+              templates={templates}
+              onAddTemplate={(tpl) => setTemplates((prev) => [tpl, ...prev])}
+              onDeleteTemplate={(id) => setTemplates((prev) => prev.filter((t) => t.id !== id))}
+              onApplyTemplate={(tpl) => handleSelectTemplate(tpl.id)}
+              onNavigate={setCurrentPage}
+            />
+          )}
+
+          {currentPage === 'logs' && (
+            <BroadcastLogsPage
+              records={historyRecords}
+              onRefresh={fetchHistory}
+              isLoading={isLoadingHistory}
+              onNavigate={setCurrentPage}
+              onReuseMessage={(msg) => setMessage(msg)}
+            />
+          )}
+
+          {currentPage === 'students' && (
+            <StudentsPage
+              students={students}
+              classes={classes}
+              selectedClassId={selectedClassId}
+              selectedSectionId={selectedSectionId}
+              onClassChange={handleClassChange}
+              onSectionChange={handleSectionChange}
+              onNavigate={setCurrentPage}
+            />
+          )}
+
+          {currentPage === 'add-student' && (
+            <AddStudentPage
+              classes={classes}
+              onAddStudent={(newStudent) => {
+                setStudents((prev) => [newStudent, ...prev]);
+                setDisplayedStudents((prev) => [newStudent, ...prev]);
+              }}
+              onNavigate={setCurrentPage}
+            />
+          )}
 
           {/* 8. Footer Ribbon */}
           <div className="pt-4 pb-2 text-center text-xs text-ink-faint">

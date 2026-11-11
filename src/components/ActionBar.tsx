@@ -67,13 +67,12 @@ export const ActionBar: React.FC<ActionBarProps> = ({
           type="button"
           onClick={onSendClick}
           disabled={!canSend}
-          className={`inline-flex items-center gap-2 px-7 py-2.5 rounded-full font-semibold text-xs sm:text-sm transition-all cursor-pointer active:scale-[0.98] ${
-            canSend
+          className={`inline-flex items-center gap-2 px-7 py-2.5 rounded-full font-semibold text-xs sm:text-sm transition-all cursor-pointer active:scale-[0.98] ${canSend
               ? 'bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white shadow-sm'
               : 'bg-surface-2 text-ink-faint border border-gray-200 dark:border-zinc-800 cursor-not-allowed'
-          }`}
+            }`}
         >
-          <SendHorizonal className="w-4 h-4" />
+          <SendHorizonal className="w-4 h-4 mt-2 md:mt-0" />
           <span>
             Send SMS ({totalRecipientsSelected} Selected &bull; {totalSmsCost} Credits)
           </span>

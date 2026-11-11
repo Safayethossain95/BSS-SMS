@@ -83,7 +83,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left text-xs sm:text-sm">
+        <table className="w-full min-w-[900px] border-collapse text-left text-xs sm:text-sm">
           <thead>
             <tr className="border-b border-dashed border-gray-200 dark:border-zinc-800 text-ink font-semibold bg-surface-2/60">
               <th scope="col" className="w-12 py-3 px-3.5 text-center border-r border-dashed border-gray-200 dark:border-zinc-800">

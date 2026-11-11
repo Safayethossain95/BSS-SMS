@@ -202,6 +202,10 @@
   .sidebar.open {
     transform: translateX(0);
   }
+
+  .sidebar-collapse-btn {
+    display: none !important;
+  }
 }
 
 .scrim {

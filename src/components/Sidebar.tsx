@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  LayoutDashboard,
+  UserPlus,
   Send,
   Users,
   FileText,
@@ -8,20 +8,26 @@ import {
   FolderPlus,
   ChevronLeft,
   ChevronRight,
-  X
+  X,
+  LogOut,
+  Moon,
+  Sun,
+  Coins
 } from 'lucide-react';
+import type { AppPage, AuthUser } from '../types';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
-  onOpenTemplates: () => void;
-  onOpenHistory: () => void;
-  onOpenAddStudent: () => void;
-  onOpenCustomGroups: () => void;
-  activeTab?: string;
+  currentPage: AppPage;
+  onNavigate: (page: AppPage) => void;
   isDark?: boolean;
+  onToggleTheme?: () => void;
+  user?: AuthUser | null;
+  onLogout?: () => void;
+  balance?: number;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -29,12 +35,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onClose,
   isCollapsed,
   onToggleCollapse,
-  onOpenTemplates,
-  onOpenHistory,
-  onOpenAddStudent,
-  onOpenCustomGroups,
+  currentPage,
+  onNavigate,
   isDark = false,
+  onToggleTheme,
+  user,
+  onLogout,
+  balance,
 }) => {
+  const handleNav = (page: AppPage) => {
+    onNavigate(page);
+    onClose();
+  };
+
   return (
     <>
       <div className={`scrim ${isOpen ? 'show' : ''}`} onClick={onClose} />
@@ -44,7 +57,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {/* Brand */}
         <div className="sidebar-brand">
-          <div className="flex items-center gap-3 cursor-pointer select-none">
+          <div
+            className="flex items-center gap-3 cursor-pointer select-none"
+            onClick={() => handleNav('delivery')}
+          >
             <img
               src={isDark ? "/assets/images/logo/logo_white.webp" : "/assets/images/logo/logo_black.webp"}
               alt="BSS Logo"
@@ -81,7 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Desktop Collapse Button */}
           <button
             type="button"
-            className="sidebar-collapse-btn hidden md:flex"
+            className="sidebar-collapse-btn !hidden md:!flex"
             onClick={onToggleCollapse}
             title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-label="Toggle sidebar"
@@ -98,7 +114,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <button
               type="button"
-              className="nav-item active"
+              onClick={() => handleNav('delivery')}
+              className={`nav-item ${currentPage === 'delivery' ? 'active' : ''}`}
               title="SMS Message Delivery"
             >
               <Send className="w-4 h-4 flex-shrink-0" />
@@ -107,8 +124,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <button
               type="button"
-              onClick={onOpenCustomGroups}
-              className="nav-item"
+              onClick={() => handleNav('custom-groups')}
+              className={`nav-item ${currentPage === 'custom-groups' ? 'active' : ''}`}
               title="Custom Groups Manager"
             >
               <FolderPlus className="w-4 h-4 flex-shrink-0" />
@@ -117,8 +134,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <button
               type="button"
-              onClick={onOpenTemplates}
-              className="nav-item"
+              onClick={() => handleNav('templates')}
+              className={`nav-item ${currentPage === 'templates' ? 'active' : ''}`}
               title="SMS Templates"
             >
               <FileText className="w-4 h-4 flex-shrink-0" />
@@ -127,8 +144,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <button
               type="button"
-              onClick={onOpenHistory}
-              className="nav-item"
+              onClick={() => handleNav('logs')}
+              className={`nav-item ${currentPage === 'logs' ? 'active' : ''}`}
               title="Broadcast Logs"
             >
               <History className="w-4 h-4 flex-shrink-0" />
@@ -142,11 +159,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <button
               type="button"
-              onClick={() => {
-                const table = document.getElementById('students-table-section');
-                table?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="nav-item"
+              onClick={() => handleNav('students')}
+              className={`nav-item ${currentPage === 'students' ? 'active' : ''}`}
               title="Students Directory"
             >
               <Users className="w-4 h-4 flex-shrink-0" />
@@ -155,23 +169,111 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <button
               type="button"
-              onClick={onOpenAddStudent}
-              className="nav-item"
+              onClick={() => handleNav('add-student')}
+              className={`nav-item ${currentPage === 'add-student' ? 'active' : ''}`}
               title="Add New Student"
             >
-              <LayoutDashboard className="w-4 h-4 flex-shrink-0" />
+              <UserPlus className="w-4 h-4 flex-shrink-0" />
               <span>Add Student</span>
             </button>
           </div>
         </nav>
 
-        {/* Footer info in sidebar */}
-        {!isCollapsed && (
-          <div className="pt-3 border-t border-gray-200 dark:border-zinc-800 mt-auto flex flex-col text-[11px] text-ink-faint">
-            <span className="font-semibold text-ink">Campus 4 &bull; Wari Branch</span>
-            <span>SMS Message Delivery</span>
+        {/* Footer & User Profile Section */}
+        <div className="pt-3 border-t border-gray-200 dark:border-zinc-800 mt-auto space-y-2.5">
+          {/* Mobile-only Strip: Balance & Theme Toggle (hidden on md+) */}
+          <div className="md:hidden flex items-center justify-between px-1">
+            {balance !== undefined && (
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs shadow-2xs"
+                title="Available SMS credits"
+              >
+                <Coins className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                <span className="text-ink-muted text-[11px] font-medium">Balance:</span>
+                <span className="text-amber-800 dark:text-amber-300 font-bold font-mono text-xs">
+                  {balance.toLocaleString()}
+                </span>
+              </div>
+            )}
+
+            {onToggleTheme && (
+              <button
+                type="button"
+                className={`theme-toggle ${isDark ? 'active' : ''}`}
+                onClick={onToggleTheme}
+                aria-label="Toggle dark / light theme"
+                title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                <div className="theme-knob">
+                  {isDark ? (
+                    <Moon className="w-3 h-3 text-white" />
+                  ) : (
+                    <Sun className="w-3 h-3 text-white" />
+                  )}
+                </div>
+              </button>
+            )}
           </div>
-        )}
+
+          {/* User Account / Login & Logout Info */}
+          {!isCollapsed ? (
+            <div className="p-2 rounded-xl bg-surface-2 border border-gray-200 dark:border-zinc-800 flex items-center justify-between gap-2 shadow-2xs">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="avatar-circle w-8 h-8 text-[11px] flex-shrink-0">
+                  {user?.initials || 'AD'}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-ink truncate leading-tight">
+                    {user?.name || 'Administrator'}
+                  </div>
+                  <div className="text-[10px] text-ink-muted truncate leading-tight mt-0.5">
+                    {user?.role || 'Campus 4 • Admin'}
+                  </div>
+                </div>
+              </div>
+
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onLogout();
+                  }}
+                  className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition cursor-pointer flex-shrink-0"
+                  title="Logout"
+                  aria-label="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <div className="avatar-circle w-8 h-8 text-[11px]" title={user?.name || 'Administrator'}>
+                {user?.initials || 'AD'}
+              </div>
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="p-1.5 text-red-600 dark:text-red-400 hover:bg-surface-2 rounded-lg transition cursor-pointer"
+                  title="Logout"
+                  aria-label="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Branch Sub-footer */}
+          {!isCollapsed && (
+            <div className="px-1 flex flex-col text-[10.5px] text-ink-faint">
+              <span className="font-semibold text-ink">Campus 4 &bull; Wari Branch</span>
+              <span>SMS Message Delivery</span>
+            </div>
+          )}
+        </div>
       </aside>
     </>
   );

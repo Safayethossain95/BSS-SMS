@@ -107,7 +107,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
           value={message}
           onChange={(e) => onChangeMessage(e.target.value)}
           placeholder="Type SMS message or pick a template above..."
-          className="w-full flex-1 min-h-[105px] bg-surface-2 border border-gray-200 dark:border-zinc-800 focus:border-[#1b1e42] dark:focus:border-accent rounded-sm p-3 text-xs sm:text-sm text-ink placeholder:text-ink-faint outline-none resize-none leading-relaxed transition-colors font-sans shadow-2xs"
+          className="w-full flex-1 min-h-[105px] bg-surface-2 border border-gray-200 dark:border-zinc-800 focus:border-[#1b1e42] dark:focus:border-accent rounded-md p-3 text-xs sm:text-sm text-ink placeholder:text-ink-faint outline-none resize-none leading-relaxed transition-colors font-sans shadow-2xs"
         />
 
         {metrics.isUnicode && (
@@ -134,8 +134,8 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
           </span>
         </div>
 
-        <div>
-          <span className="px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold text-xs">
+        <div className='mt-2 md:mt-0'>
+          <span className="px-3 py-1  rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold text-xs">
             {metrics.totalSmsCost} Credits
           </span>
         </div>

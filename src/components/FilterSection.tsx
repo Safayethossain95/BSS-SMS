@@ -23,8 +23,8 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   onSectionChange,
   onLoadStudents,
   onAddToCustomGroup,
-  alertSentToText,
-  totalLoadedStudents,
+  alertSentToText: _alertSentToText,
+  totalLoadedStudents: _totalLoadedStudents,
   isLoading,
 }) => {
   const currentClass = classes.find((c) => c.id === selectedClassId);

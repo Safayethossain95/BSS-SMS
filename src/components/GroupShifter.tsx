@@ -80,7 +80,7 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
           <label className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1.5 select-none block">
             Available Group
           </label>
-          <div className="h-[140px] bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-sm p-1.5 overflow-y-auto space-y-1">
+          <div className="h-[140px] bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-md p-1.5 overflow-y-auto space-y-1">
             {availableGroups.length === 0 ? (
               <div className="text-xs text-ink-faint text-center py-12 italic">
                 All shifted
@@ -159,7 +159,7 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
           <label className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1.5 select-none block">
             Destination Group
           </label>
-          <div className="h-[140px] bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-sm p-1.5 overflow-y-auto space-y-1">
+          <div className="h-[140px] bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-md p-1.5 overflow-y-auto space-y-1">
             {destinationGroups.length === 0 ? (
               <div className="text-xs text-ink-faint text-center py-12 italic">
                 None selected
