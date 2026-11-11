@@ -3,10 +3,14 @@ import {
   X,
   SendHorizonal,
   CheckCircle2,
-  Loader2
+  Loader2,
+  AlertCircle,
+  ShieldCheck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import type { SmsMetrics, Student } from '../types';
+import type { BroadcastSubmissionResult } from '../types/api';
+import { smsService } from '../services/smsService';
 
 interface SendConfirmModalProps {
   isOpen: boolean;
@@ -26,41 +30,45 @@ export const SendConfirmModal: React.FC<SendConfirmModalProps> = ({
   onSendSuccess,
 }) => {
   const [isSending, setIsSending] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [isDone, setIsDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<BroadcastSubmissionResult | null>(null);
 
   if (!isOpen) return null;
 
-  const handleConfirmSend = () => {
+  const handleConfirmSend = async () => {
     setIsSending(true);
-    setProgress(15);
+    setError(null);
 
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 90) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setProgress(100);
-            setIsSending(false);
-            setIsDone(true);
-            confetti({
-              particleCount: 80,
-              spread: 60,
-              origin: { y: 0.6 },
-            });
-            onSendSuccess(selectedStudents, message);
-          }, 350);
-          return 90;
-        }
-        return prev + 25;
+    try {
+      const response = await smsService.sendBroadcast({
+        templateText: message,
+        recipients: selectedStudents,
       });
-    }, 250);
+
+      setResult(response);
+      setIsDone(true);
+
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.6 },
+      });
+
+      onSendSuccess(selectedStudents, message);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : 'Failed to enqueue broadcast job.';
+      setError(errMsg);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const handleFinish = () => {
     setIsDone(false);
-    setProgress(0);
     setIsSending(false);
+    setError(null);
+    setResult(null);
     onClose();
   };
 
@@ -82,14 +90,21 @@ export const SendConfirmModal: React.FC<SendConfirmModalProps> = ({
 
         <div>
           <h3 className="text-base font-bold text-slate-900">
-            {isDone ? 'SMS Sent Successfully' : 'Confirm SMS Broadcast'}
+            {isDone ? 'Broadcast Accepted for Dispatch' : 'Confirm SMS Broadcast'}
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
             {isDone
-              ? 'Your messages have been delivered to telco gateways.'
-              : 'Please review before sending.'}
+              ? 'Job queued in background Channel Queue for high-speed delivery.'
+              : 'Please review before enqueueing broadcast.'}
           </p>
         </div>
+
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-xs text-red-700">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
 
         {!isDone && (
           <>
@@ -117,21 +132,12 @@ export const SendConfirmModal: React.FC<SendConfirmModalProps> = ({
               </div>
             </div>
 
-            {/* Progress Bar during sending */}
+            {/* Progress / Spinner during sending */}
             {isSending && (
               <div className="space-y-1.5 pt-1">
-                <div className="flex justify-between text-xs text-slate-600">
-                  <span className="flex items-center gap-1.5">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1b1e42]" />
-                    Transmitting...
-                  </span>
-                  <span className="font-semibold text-[#1b1e42]">{progress}%</span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                  <div
-                    className="h-full bg-[#1b1e42] transition-all duration-300 rounded-full"
-                    style={{ width: `${progress}%` }}
-                  />
+                <div className="flex items-center justify-center gap-2 text-xs text-slate-700 py-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#1b1e42]" />
+                  <span>Enqueuing into Channel Queue...</span>
                 </div>
               </div>
             )}
@@ -159,16 +165,35 @@ export const SendConfirmModal: React.FC<SendConfirmModalProps> = ({
           </>
         )}
 
-        {isDone && (
-          <div className="text-center py-4 space-y-3">
-            <CheckCircle2 className="w-12 h-12 text-[#1b1e42] mx-auto" />
-            <p className="text-xs text-slate-600">
-              Dispatched to {selectedStudents.length} student guardians.
-            </p>
+        {isDone && result && (
+          <div className="text-center py-3 space-y-3">
+            <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
+            <div className="space-y-1 bg-white p-3 rounded-lg border border-slate-200 text-xs">
+              <div className="flex justify-between text-slate-600">
+                <span>Job ID:</span>
+                <span className="font-mono font-bold text-slate-800">{result.jobId}</span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Total Recipients:</span>
+                <span className="font-bold text-slate-800">{result.totalRecipients}</span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Dispatch Mode:</span>
+                <span className="font-semibold text-emerald-700">
+                  {result.isPersonalized ? 'Personalized Multi-Threaded' : `Bulk Batched (${result.batchCount} batches)`}
+                </span>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-emerald-800 bg-emerald-50 py-1.5 px-3 rounded-lg border border-emerald-200">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Safety Guard Active: Only 01670319232 receives SMS</span>
+            </div>
+
             <button
               type="button"
               onClick={handleFinish}
-              className="px-5 py-2 rounded-lg bg-[#1b1e42] hover:bg-[#d91920] text-white text-xs font-semibold cursor-pointer shadow-xs active:scale-95"
+              className="px-6 py-2 rounded-lg bg-[#1b1e42] hover:bg-[#d91920] text-white text-xs font-semibold cursor-pointer shadow-xs active:scale-95"
             >
               Done
             </button>

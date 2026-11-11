@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, Send, CheckCircle2 } from 'lucide-react';
+import { X, Send, CheckCircle2, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
+import { smsService } from '../services/smsService';
 import { formatPhoneNumber } from '../utils/smsCalculator';
 
 interface TestSmsModalProps {
@@ -13,21 +14,35 @@ export const TestSmsModal: React.FC<TestSmsModalProps> = ({
   onClose,
   message,
 }) => {
-  const [phoneNumber, setPhoneNumber] = useState('8801700000000');
+  const [phoneNumber, setPhoneNumber] = useState('01670319232');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSendTest = (e: React.FormEvent) => {
+  const handleSendTest = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!message.trim()) return;
+
     setStatus('sending');
-    setTimeout(() => {
+    setError(null);
+
+    try {
+      await smsService.sendTestSms({
+        phoneNumber: phoneNumber.trim(),
+        message: message.trim(),
+      });
+
       setStatus('sent');
       setTimeout(() => {
         setStatus('idle');
         onClose();
-      }, 1200);
-    }, 600);
+      }, 1500);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : 'Failed to deliver test SMS.';
+      setError(errMsg);
+      setStatus('idle');
+    }
   };
 
   return (
@@ -46,17 +61,32 @@ export const TestSmsModal: React.FC<TestSmsModalProps> = ({
 
         <h3 className="text-base font-bold text-slate-900">Send Test SMS</h3>
 
+        {/* Safety Guard Notice */}
+        <div className="flex items-center gap-1.5 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800">
+          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>
+            Safety Guard Active: In test mode, SMS is <strong>STRICTLY intercepted to 01670319232</strong>.
+          </span>
+        </div>
+
+        {error && (
+          <div className="p-2.5 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-xs text-red-700">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
         {status === 'sent' ? (
           <div className="py-6 text-center space-y-1.5">
-            <CheckCircle2 className="w-10 h-10 text-[#1b1e42] mx-auto" />
-            <h4 className="text-sm font-bold text-slate-900">Test SMS Sent!</h4>
-            <p className="text-xs text-slate-500">{formatPhoneNumber(phoneNumber)}</p>
+            <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
+            <h4 className="text-sm font-bold text-slate-900">Test SMS Sent Safely!</h4>
+            <p className="text-xs text-slate-500 font-mono">Dispatched to: {formatPhoneNumber(phoneNumber)}</p>
           </div>
         ) : (
           <form onSubmit={handleSendTest} className="space-y-3">
             <div>
               <label htmlFor="test-phone-input" className="block text-xs font-semibold text-slate-700 mb-1">
-                Mobile Number:
+                Recipient Number:
               </label>
               <input
                 id="test-phone-input"
@@ -69,8 +99,8 @@ export const TestSmsModal: React.FC<TestSmsModalProps> = ({
             </div>
 
             <div>
-              <span className="block text-xs font-semibold text-slate-700 mb-1">Preview:</span>
-              <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-xs text-slate-700 font-mono max-h-24 overflow-y-auto whitespace-pre-wrap">
+              <span className="block text-xs font-semibold text-slate-700 mb-1">Message Body:</span>
+              <div className="bg-white p-2.5 rounded-lg border border-slate-200 text-xs text-slate-700 font-mono max-h-24 overflow-y-auto whitespace-pre-wrap">
                 {message || 'No message provided.'}
               </div>
             </div>
@@ -89,7 +119,10 @@ export const TestSmsModal: React.FC<TestSmsModalProps> = ({
                 className="px-4 py-1.5 rounded-lg bg-[#1b1e42] hover:bg-[#d91920] text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 shadow-xs active:scale-95"
               >
                 {status === 'sending' ? (
-                  <span>Sending...</span>
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>Sending...</span>
+                  </>
                 ) : (
                   <>
                     <Send className="w-3 h-3" />

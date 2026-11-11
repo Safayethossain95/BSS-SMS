@@ -1,10 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
-import { 
-  INITIAL_CLASSES, 
-  INITIAL_STUDENTS, 
-  INITIAL_TEMPLATES, 
-  AVAILABLE_GROUPS 
-} from './data/mockData';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { 
   Student, 
   ClassInfo, 
@@ -12,7 +6,15 @@ import type {
   SentBroadcastRecord,
   CustomGroup 
 } from './types';
+import type { SmsBalanceInfo } from './types/api';
 import { calculateSmsMetrics } from './utils/smsCalculator';
+
+// API Services
+import { academicService } from './services/academicService';
+import { groupService } from './services/groupService';
+import { studentService } from './services/studentService';
+import { templateService } from './services/templateService';
+import { smsService } from './services/smsService';
 
 // Components
 import { Header } from './components/Header';
@@ -32,50 +34,27 @@ import { AddStudentModal } from './components/AddStudentModal';
 import { CustomGroupModal } from './components/CustomGroupModal';
 
 export function App() {
-  const [classes] = useState<ClassInfo[]>(INITIAL_CLASSES);
-  const [students, setStudents] = useState<Student[]>(() => {
-    const saved = localStorage.getItem('bss_sms_students');
-    return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
-  });
+  const [classes, setClasses] = useState<ClassInfo[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [templates, setTemplates] = useState<SmsTemplate[]>([]);
+  const [historyRecords, setHistoryRecords] = useState<SentBroadcastRecord[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState<boolean>(false);
 
-  const [templates, setTemplates] = useState<SmsTemplate[]>(() => {
-    const saved = localStorage.getItem('bss_sms_templates');
-    return saved ? JSON.parse(saved) : INITIAL_TEMPLATES;
-  });
-
-  const [historyRecords, setHistoryRecords] = useState<SentBroadcastRecord[]>(() => {
-    const saved = localStorage.getItem('bss_sms_history');
-    return saved ? JSON.parse(saved) : [
-      {
-        id: 'hist-init-1',
-        timestamp: 'Today, 09:30 AM',
-        className: 'Play Group',
-        section: 'Starter',
-        message: 'Dear Guardian, Please note school dismissal is at 12:30 PM today.',
-        totalRecipients: 4,
-        totalSmsUnits: 4,
-        status: 'Delivered',
-        recipients: [
-          { name: 'JULAYBIB MUHAMMAD', mobile: '8801749421005', status: 'Delivered' },
-          { name: 'IFZA MARIYAM ISLAM', mobile: '8801786377188', status: 'Delivered' },
-          { name: 'SHAH IHAN AHMED', mobile: '8801755555338', status: 'Delivered' },
-          { name: 'YAZDAAN MANZOOR', mobile: '8801613677566', status: 'Delivered' },
-        ],
-      },
-    ];
-  });
-
-  const [balance, setBalance] = useState<number>(() => {
-    const saved = localStorage.getItem('bss_sms_balance');
-    return saved ? Number(saved) : 4850;
+  const [balance, setBalance] = useState<number>(5000);
+  const [safetyInfo, setSafetyInfo] = useState<SmsBalanceInfo>({
+    currentBalance: 5000,
+    activeGatewayName: 'Active Gateway',
+    isMasking: false,
+    isSafeTestMode: true,
+    safeTestPhoneNumber: '01670319232',
   });
 
   // Filter States
-  const [selectedClassId, setSelectedClassId] = useState<string>('play');
-  const [selectedSectionId, setSelectedSectionId] = useState<string>('starter');
+  const [selectedClassId, setSelectedClassId] = useState<string>('');
+  const [selectedSectionId, setSelectedSectionId] = useState<string>('');
 
   // Group Shifter (Available <-> Destination)
-  const [availableGroups, setAvailableGroups] = useState<string[]>(() => [...AVAILABLE_GROUPS]);
+  const [availableGroups, setAvailableGroups] = useState<string[]>([]);
   const [destinationGroups, setDestinationGroups] = useState<string[]>([]);
 
   // Table & Selection States
@@ -86,9 +65,9 @@ export function App() {
 
   // Message State
   const [message, setMessage] = useState<string>(
-    'Dear Guardian, Please be informed that Bona Fide School will remain closed tomorrow due to unavoidable circumstances.'
+    'Dear {StudentName}, you are requested to attend the school session on time. Regards, Bona Fide School.'
   );
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('tpl-1');
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
   // Modals
   const [isPhonePreviewOpen, setIsPhonePreviewOpen] = useState(false);
@@ -103,40 +82,80 @@ export function App() {
   // Custom Groups State
   const [customGroups, setCustomGroups] = useState<CustomGroup[]>(() => {
     const saved = localStorage.getItem('bss_sms_custom_groups');
-    return saved
-      ? JSON.parse(saved)
-      : [
-          {
-            id: 'cg-junior',
-            name: 'Junior Wing (Play+Nur)',
-            targets: [
-              { classId: 'play', className: 'Play Group', sectionId: 'all', sectionName: 'All Sections' },
-              { classId: 'nur', className: 'Nursery', sectionId: 'all', sectionName: 'All Sections' },
-            ],
-            createdAt: 'Initial',
-          },
-        ];
+    return saved ? JSON.parse(saved) : [];
   });
-
-  useEffect(() => {
-    localStorage.setItem('bss_sms_students', JSON.stringify(students));
-  }, [students]);
-
-  useEffect(() => {
-    localStorage.setItem('bss_sms_templates', JSON.stringify(templates));
-  }, [templates]);
-
-  useEffect(() => {
-    localStorage.setItem('bss_sms_history', JSON.stringify(historyRecords));
-  }, [historyRecords]);
-
-  useEffect(() => {
-    localStorage.setItem('bss_sms_balance', balance.toString());
-  }, [balance]);
 
   useEffect(() => {
     localStorage.setItem('bss_sms_custom_groups', JSON.stringify(customGroups));
   }, [customGroups]);
+
+  // Initial Data Fetching from ASP.NET Core 10 Web API
+  const fetchClasses = useCallback(async () => {
+    try {
+      const data = await academicService.getClassesWithSections();
+      setClasses(data);
+      if (data.length > 0) {
+        setSelectedClassId(data[0].id);
+        if (data[0].sections && data[0].sections.length > 0) {
+          setSelectedSectionId(data[0].sections[0].id);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load academic hierarchy:', err);
+    }
+  }, []);
+
+  const fetchGroups = useCallback(async () => {
+    try {
+      const data = await groupService.getAvailableGroups();
+      setAvailableGroups(data);
+    } catch (err) {
+      console.error('Failed to load recipient groups:', err);
+    }
+  }, []);
+
+  const fetchTemplates = useCallback(async () => {
+    try {
+      const data = await templateService.getTemplates();
+      setTemplates(data);
+      if (data.length > 0 && !selectedTemplateId) {
+        setSelectedTemplateId(data[0].id);
+        setMessage(data[0].body);
+      }
+    } catch (err) {
+      console.error('Failed to load templates:', err);
+    }
+  }, [selectedTemplateId]);
+
+  const fetchBalance = useCallback(async () => {
+    try {
+      const info = await smsService.getBalance();
+      setSafetyInfo(info);
+      setBalance(info.currentBalance);
+    } catch (err) {
+      console.error('Failed to load balance info:', err);
+    }
+  }, []);
+
+  const fetchHistory = useCallback(async () => {
+    setIsLoadingHistory(true);
+    try {
+      const data = await smsService.getHistory(50);
+      setHistoryRecords(data);
+    } catch (err) {
+      console.error('Failed to load history records:', err);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchClasses();
+    fetchGroups();
+    fetchTemplates();
+    fetchBalance();
+    fetchHistory();
+  }, [fetchClasses, fetchGroups, fetchTemplates, fetchBalance, fetchHistory]);
 
   // Sync custom groups into available groups list
   useEffect(() => {
@@ -149,57 +168,26 @@ export function App() {
     });
   }, [customGroups, destinationGroups]);
 
-  // Load students based on destinationGroups and customGroups
-  const syncStudentsFromDestinationGroups = (
-    destGroups: string[],
-    groupsList: CustomGroup[] = customGroups
+  // Load students based on destinationGroups from Backend
+  const syncStudentsFromDestinationGroups = useCallback(async (
+    destGroups: string[]
   ) => {
+    if (destGroups.length === 0) {
+      setDisplayedStudents([]);
+      setSelectedStudentIds(new Set());
+      return;
+    }
+
     setIsLoadingStudents(true);
-    setTimeout(() => {
-      if (destGroups.length === 0) {
-        setDisplayedStudents([]);
-        setSelectedStudentIds(new Set());
-        setIsLoadingStudents(false);
-        return;
-      }
-
-      const matched = students.filter((s) => {
-        const sec = s.section.toLowerCase().trim();
-        const cls = s.className.toLowerCase().trim();
-
-        return destGroups.some((groupName) => {
-          // 1. Check if groupName matches any custom group
-          const cg = groupsList.find(
-            (c) => c.name.toLowerCase().trim() === groupName.toLowerCase().trim()
-          );
-          if (cg) {
-            return cg.targets.some((target) => {
-              const clsMatch = s.className.toLowerCase() === target.className.toLowerCase();
-              if (!clsMatch) return false;
-              if (target.sectionName === 'All Sections' || target.sectionId === 'all') return true;
-              return s.section.toLowerCase() === target.sectionName.toLowerCase();
-            });
-          }
-
-          // 2. Default matching logic
-          const g = groupName.toLowerCase().trim();
-          if (sec === g || sec.includes(g) || g.includes(sec)) return true;
-          if (cls === g || cls.includes(g) || g.includes(cls)) return true;
-          if (g.includes('teacher') && (sec.includes('teacher') || cls.includes('teacher'))) return true;
-          if (g.includes('class 1') && cls.includes('class 1')) return true;
-          if (g.includes('class 2') && cls.includes('class 2')) return true;
-          return false;
-        });
-      });
-
-      setDisplayedStudents(matched);
-      setSelectedStudentIds(new Set(matched.map((s) => s.id)));
+    try {
+      const resolved = await groupService.resolveRecipients(destGroups);
+      setDisplayedStudents(resolved);
+      setSelectedStudentIds(new Set(resolved.map((s) => s.id)));
+    } catch (err) {
+      console.error('Failed to resolve recipients from destination groups:', err);
+    } finally {
       setIsLoadingStudents(false);
-    }, 120);
-  };
-
-  useEffect(() => {
-    syncStudentsFromDestinationGroups(destinationGroups);
+    }
   }, []);
 
   const handleCreateCustomGroup = (newGroup: CustomGroup) => {
@@ -234,7 +222,7 @@ export function App() {
       const activeDest = destinationGroups.map((n) =>
         oldGroup && n === oldGroup.name ? updatedGroup.name : n
       );
-      syncStudentsFromDestinationGroups(activeDest, updatedList);
+      syncStudentsFromDestinationGroups(activeDest);
     }
   };
 
@@ -250,7 +238,7 @@ export function App() {
     setDestinationGroups(nextDest);
 
     if (destinationGroups.includes(groupToDelete.name)) {
-      syncStudentsFromDestinationGroups(nextDest, updatedList);
+      syncStudentsFromDestinationGroups(nextDest);
     }
   };
 
@@ -268,19 +256,20 @@ export function App() {
     setSelectedSectionId(newSectionId);
   };
 
-  const handleLoadFromDropdown = () => {
-    const currentCls = classes.find((c) => c.id === selectedClassId);
-    const currentSec = currentCls?.sections.find((s) => s.id === selectedSectionId);
-    if (currentSec) {
-      const secName = currentSec.name;
-      if (!destinationGroups.includes(secName)) {
-        const nextDest = [...destinationGroups, secName];
-        setDestinationGroups(nextDest);
-        setAvailableGroups((prev) => prev.filter((g) => g !== secName));
-        syncStudentsFromDestinationGroups(nextDest);
-      } else {
-        syncStudentsFromDestinationGroups(destinationGroups);
-      }
+  const handleLoadFromDropdown = async () => {
+    if (!selectedClassId) return;
+    setIsLoadingStudents(true);
+    try {
+      const loaded = await studentService.getStudentsByClassAndSection(
+        selectedClassId, 
+        selectedSectionId || undefined
+      );
+      setDisplayedStudents(loaded);
+      setSelectedStudentIds(new Set(loaded.map((s) => s.id)));
+    } catch (err) {
+      console.error('Failed to load students from class/section:', err);
+    } finally {
+      setIsLoadingStudents(false);
     }
   };
 
@@ -322,7 +311,7 @@ export function App() {
         s.name.toLowerCase().includes(q) ||
         s.id.toLowerCase().includes(q) ||
         s.mobile.toLowerCase().includes(q) ||
-        s.headerId.toLowerCase().includes(q)
+        (s.headerId && s.headerId.toLowerCase().includes(q))
     );
   }, [displayedStudents, searchQuery]);
 
@@ -343,7 +332,7 @@ export function App() {
   };
 
   const handleToggleSelectAll = () => {
-    const isAll = filteredStudents.every((s) => selectedStudentIds.has(s.id));
+    const isAll = filteredStudents.length > 0 && filteredStudents.every((s) => selectedStudentIds.has(s.id));
     if (isAll) {
       setSelectedStudentIds((prev) => {
         const next = new Set(prev);
@@ -372,34 +361,14 @@ export function App() {
     setSelectedTemplateId('');
     setSelectedStudentIds(new Set());
     setDestinationGroups([]);
-    setAvailableGroups([...AVAILABLE_GROUPS]);
+    fetchGroups();
     setDisplayedStudents([]);
   };
 
-  const handleSendSuccess = (recipients: Student[], smsBody: string) => {
-    const newUnitsCost = metrics.totalSmsCost;
-    setBalance((prev) => Math.max(0, prev - newUnitsCost));
-
-    const now = new Date();
-    const formattedDate = `Today, ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-
-    const newRecord: SentBroadcastRecord = {
-      id: `hist-${Date.now()}`,
-      timestamp: formattedDate,
-      className: destinationGroups.join(', ') || 'Selected Groups',
-      section: `${recipients.length} Students`,
-      message: smsBody,
-      totalRecipients: recipients.length,
-      totalSmsUnits: newUnitsCost,
-      status: 'Delivered',
-      recipients: recipients.map((r) => ({
-        name: r.name,
-        mobile: r.mobile,
-        status: 'Delivered',
-      })),
-    };
-
-    setHistoryRecords((prev) => [newRecord, ...prev]);
+  const handleSendSuccess = () => {
+    // Re-fetch real balance and updated history from SQL Server
+    fetchBalance();
+    fetchHistory();
   };
 
   const selectedStudentsList = useMemo(() => {
@@ -418,7 +387,16 @@ export function App() {
     return '';
   }, [classes, selectedClassId, selectedSectionId, destinationGroups]);
 
-  const sampleStudent = displayedStudents[0] || INITIAL_STUDENTS[0];
+  const sampleStudent = displayedStudents[0] || {
+    headerId: '1',
+    id: '2606093807',
+    name: 'Julaybib Muhammad',
+    mobile: '8801749421005',
+    className: 'Play Group',
+    section: 'Starter',
+    roll: '01',
+    status: 'active' as const,
+  };
 
   return (
     <div className="min-h-screen bg-gray-200 text-slate-800 flex flex-col font-sans">
@@ -426,6 +404,8 @@ export function App() {
       {/* 1. Top Header */}
       <Header
         balance={balance}
+        isSafeMode={safetyInfo.isSafeTestMode}
+        safePhoneNumber={safetyInfo.safeTestPhoneNumber}
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenTemplates={() => setIsTemplatesOpen(true)}
         onOpenAddStudent={() => setIsAddStudentOpen(true)}
@@ -521,7 +501,7 @@ export function App() {
             </div>
           </div>
           <p className="text-[10px] text-gray-500 font-medium">
-            SMS Message Delivery System
+            SMS Message Delivery System • Connected to BSS-MVC SQL Server
           </p>
         </div>
       </footer>
@@ -547,14 +527,15 @@ export function App() {
         isOpen={isHistoryOpen}
         onClose={() => setIsHistoryOpen(false)}
         records={historyRecords}
+        onRefresh={fetchHistory}
+        isLoading={isLoadingHistory}
       />
 
       <TemplateManagerModal
         isOpen={isTemplatesOpen}
         onClose={() => setIsTemplatesOpen(false)}
         templates={templates}
-        onAddTemplate={(newTpl) => setTemplates((prev) => [newTpl, ...prev])}
-        onDeleteTemplate={(id) => setTemplates((prev) => prev.filter((t) => t.id !== id))}
+        onRefreshTemplates={fetchTemplates}
         onApplyTemplate={(tpl) => {
           setSelectedTemplateId(tpl.id);
           setMessage(tpl.body);
@@ -585,15 +566,8 @@ export function App() {
         classes={classes}
         onAddStudent={(newStudent) => {
           setStudents((prev) => [newStudent, ...prev]);
-          const currentCls = classes.find((c) => c.id === selectedClassId);
-          const currentSec = currentCls?.sections.find((s) => s.id === selectedSectionId);
-          if (
-            currentCls?.name.toLowerCase() === newStudent.className.toLowerCase() &&
-            currentSec?.name.toLowerCase() === newStudent.section.toLowerCase()
-          ) {
-            setDisplayedStudents((prev) => [newStudent, ...prev]);
-            setSelectedStudentIds((prev) => new Set(prev).add(newStudent.id));
-          }
+          setDisplayedStudents((prev) => [newStudent, ...prev]);
+          setSelectedStudentIds((prev) => new Set(prev).add(newStudent.id));
         }}
       />
 

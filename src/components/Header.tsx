@@ -5,11 +5,14 @@ import {
   FileText,
   Plus,
   Coins,
-  FolderPlus
+  FolderPlus,
+  ShieldCheck
 } from 'lucide-react';
 
 interface HeaderProps {
   balance: number;
+  isSafeMode?: boolean;
+  safePhoneNumber?: string;
   onOpenHistory: () => void;
   onOpenTemplates: () => void;
   onOpenAddStudent: () => void;
@@ -18,6 +21,8 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   balance,
+  isSafeMode = true,
+  safePhoneNumber = '01670319232',
   onOpenHistory,
   onOpenTemplates,
   onOpenAddStudent,
@@ -44,6 +49,17 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Safety Guard Indicator */}
+          {isSafeMode && (
+            <div 
+              className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-xs text-emerald-800 font-medium shadow-2xs"
+              title={`Safety Intercept Guard Active: All test SMS will strictly be sent only to ${safePhoneNumber}`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
+              <span>Safety Guard: <strong className="font-mono text-emerald-900">{safePhoneNumber}</strong></span>
+            </div>
+          )}
 
           {/* Balance & Actions */}
           <div className="flex items-center gap-2.5">
