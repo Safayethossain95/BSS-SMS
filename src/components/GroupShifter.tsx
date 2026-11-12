@@ -4,6 +4,10 @@ import {
   ChevronsRight,
   ChevronLeft,
   ChevronsLeft,
+  ChevronDown,
+  ChevronsDown,
+  ChevronUp,
+  ChevronsUp,
   Users,
   FolderPlus
 } from 'lucide-react';
@@ -72,17 +76,17 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
         )}
       </div>
 
-      {/* Lists & Shift Controls */}
-      <div className="grid grid-cols-11 gap-2 items-center flex-1 my-1">
+      {/* Lists & Shift Controls (1 column on mobile, 11-col grid on sm+) */}
+      <div className="flex flex-col sm:grid sm:grid-cols-11 gap-2.5 sm:gap-2 items-center flex-1 my-1 w-full">
 
         {/* Available Group */}
-        <div className="col-span-5 flex flex-col h-full">
+        <div className="w-full sm:col-span-5 flex flex-col h-full">
           <label className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1.5 select-none block">
             Available Group
           </label>
-          <div className="h-[140px] bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-md p-1.5 overflow-y-auto space-y-1">
+          <div className="h-[130px] sm:h-[140px] bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-md p-1.5 overflow-y-auto space-y-1">
             {availableGroups.length === 0 ? (
-              <div className="text-xs text-ink-faint text-center py-12 italic">
+              <div className="text-xs text-ink-faint text-center py-10 sm:py-12 italic">
                 All shifted
               </div>
             ) : (
@@ -107,61 +111,65 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
           </div>
         </div>
 
-        {/* Center buttons: >, >>, <, << */}
-        <div className="col-span-1 flex flex-col items-center justify-center gap-1.5 pt-5">
-          {/* > Move one */}
+        {/* Center buttons: horizontal row on mobile, vertical stack on sm+ */}
+        <div className="w-full sm:w-auto sm:col-span-1 flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-1.5 py-1 sm:py-0 sm:pt-5">
+          {/* Shift one */}
           <button
             type="button"
             onClick={handleShiftOneRight}
             disabled={availableGroups.length === 0}
             className="w-7 h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
-            title="Shift selected (>)"
+            title="Shift selected"
           >
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronDown className="w-3.5 h-3.5 sm:hidden" />
+            <ChevronRight className="w-3.5 h-3.5 hidden sm:block" />
           </button>
 
-          {/* >> Move all */}
+          {/* Shift all */}
           <button
             type="button"
             onClick={onTransferAllToDestination}
             disabled={availableGroups.length === 0}
             className="w-7 h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
-            title="Shift all (>>)"
+            title="Shift all"
           >
-            <ChevronsRight className="w-3.5 h-3.5" />
+            <ChevronsDown className="w-3.5 h-3.5 sm:hidden" />
+            <ChevronsRight className="w-3.5 h-3.5 hidden sm:block" />
           </button>
 
-          {/* < Return one */}
+          {/* Return one */}
           <button
             type="button"
             onClick={handleShiftOneLeft}
             disabled={destinationGroups.length === 0}
             className="w-7 h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
-            title="Return selected (<)"
+            title="Return selected"
           >
-            <ChevronLeft className="w-3.5 h-3.5" />
+            <ChevronUp className="w-3.5 h-3.5 sm:hidden" />
+            <ChevronLeft className="w-3.5 h-3.5 hidden sm:block" />
           </button>
 
-          {/* << Return all */}
+          {/* Return all */}
           <button
             type="button"
             onClick={onTransferAllToAvailable}
             disabled={destinationGroups.length === 0}
             className="w-7 h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
-            title="Return all (<<)"
+            title="Return all"
           >
-            <ChevronsLeft className="w-3.5 h-3.5" />
+            <ChevronsUp className="w-3.5 h-3.5 sm:hidden" />
+            <ChevronsLeft className="w-3.5 h-3.5 hidden sm:block" />
           </button>
         </div>
 
         {/* Destination Group */}
-        <div className="col-span-5 flex flex-col h-full">
+        <div className="w-full sm:col-span-5 flex flex-col h-full">
           <label className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1.5 select-none block">
             Destination Group
           </label>
-          <div className="h-[140px] bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-md p-1.5 overflow-y-auto space-y-1">
+          <div className="h-[130px] sm:h-[140px] bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-md p-1.5 overflow-y-auto space-y-1">
             {destinationGroups.length === 0 ? (
-              <div className="text-xs text-ink-faint text-center py-12 italic">
+              <div className="text-xs text-ink-faint text-center py-10 sm:py-12 italic">
                 None selected
               </div>
             ) : (

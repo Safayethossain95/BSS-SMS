@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Menu,
-  Coins,
-  History,
   Search,
   Sun,
   Moon,
@@ -23,7 +21,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  balance,
+  balance: _balance,
   isDark,
   onToggleTheme,
   onOpenMenu,
@@ -39,9 +37,8 @@ export const Header: React.FC<HeaderProps> = ({
     'delivery': 'SMS Delivery System',
     'custom-groups': 'Custom Groups Manager',
     'templates': 'SMS Templates',
+    'status': 'Message Delivery Status',
     'logs': 'Broadcast Delivery Logs',
-    'students': 'Students Directory',
-    'add-student': 'Add New Student',
   };
   const currentTitle = pageTitles[currentPage] || 'SMS Delivery System';
 
@@ -90,8 +87,8 @@ export const Header: React.FC<HeaderProps> = ({
             placeholder="Search students..."
             className="tb-search-input"
             onFocus={() => {
-              if (currentPage !== 'students') {
-                onNavigate?.('students');
+              if (currentPage !== 'delivery') {
+                onNavigate?.('delivery');
               }
               setTimeout(() => {
                 const el = document.getElementById('table-search-input');
@@ -103,29 +100,6 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right: Actions (Hidden on mobile, visible on desktop md+) */}
         <div className="tb-actions !hidden md:!flex">
-
-          {/* SMS Balance Pill */}
-          <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs shadow-2xs"
-            title="Available SMS credits"
-          >
-            <Coins className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-            <span className="text-ink-muted hidden sm:inline text-[11px] font-medium">Balance:</span>
-            <span className="text-amber-800 dark:text-amber-300 font-bold font-mono text-xs">
-              {balance.toLocaleString()}
-            </span>
-          </div>
-
-          {/* Logs Shortcut */}
-          <button
-            type="button"
-            onClick={() => onNavigate?.('logs')}
-            className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${currentPage === 'logs' ? 'bg-[#1b1e42] dark:bg-accent text-white font-semibold' : 'bg-surface-2 hover:bg-surface text-ink border border-gray-200 dark:border-zinc-800 font-medium'} text-xs transition cursor-pointer shadow-2xs`}
-            title="View Delivery Logs"
-          >
-            <History className="w-3.5 h-3.5 text-ink-muted" />
-            <span>Logs</span>
-          </button>
 
           {/* Theme Toggle Switch */}
           <button

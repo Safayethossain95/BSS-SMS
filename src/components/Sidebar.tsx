@@ -1,11 +1,10 @@
 import React from 'react';
 import {
-  UserPlus,
   Send,
-  Users,
   FileText,
   History,
   FolderPlus,
+  Activity,
   ChevronLeft,
   ChevronRight,
   X,
@@ -107,7 +106,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation */}
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav flex flex-col">
           {/* Main Navigation Group */}
           <div className="nav-group">
             <div className="nav-label">{isCollapsed ? '' : 'SMS Services'}</div>
@@ -144,37 +143,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <button
               type="button"
+              onClick={() => handleNav('status')}
+              className={`nav-item ${currentPage === 'status' ? 'active' : ''}`}
+              title="Delivery Status"
+            >
+              <Activity className="w-4 h-4 flex-shrink-0" />
+              <span>Status</span>
+            </button>
+          </div>
+
+          {/* Bottom Nav: Broadcast Logs */}
+          <div className="mt-auto pb-1.5">
+            <button
+              type="button"
               onClick={() => handleNav('logs')}
               className={`nav-item ${currentPage === 'logs' ? 'active' : ''}`}
               title="Broadcast Logs"
             >
               <History className="w-4 h-4 flex-shrink-0" />
               <span>Broadcast Logs</span>
-            </button>
-          </div>
-
-          {/* Directory & Quick Actions */}
-          <div className="nav-group">
-            <div className="nav-label">{isCollapsed ? '' : 'Directory & Tools'}</div>
-
-            <button
-              type="button"
-              onClick={() => handleNav('students')}
-              className={`nav-item ${currentPage === 'students' ? 'active' : ''}`}
-              title="Students Directory"
-            >
-              <Users className="w-4 h-4 flex-shrink-0" />
-              <span>Students Table</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleNav('add-student')}
-              className={`nav-item ${currentPage === 'add-student' ? 'active' : ''}`}
-              title="Add New Student"
-            >
-              <UserPlus className="w-4 h-4 flex-shrink-0" />
-              <span>Add Student</span>
             </button>
           </div>
         </nav>

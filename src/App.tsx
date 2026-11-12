@@ -32,8 +32,7 @@ import { LoginPage } from './components/LoginPage';
 import { CustomGroupsPage } from './pages/CustomGroupsPage';
 import { TemplatesPage } from './pages/TemplatesPage';
 import { BroadcastLogsPage } from './pages/BroadcastLogsPage';
-import { StudentsPage } from './pages/StudentsPage';
-import { AddStudentPage } from './pages/AddStudentPage';
+import { StatusPage } from './pages/StatusPage';
 
 // Modals
 import { PhonePreviewModal } from './components/PhonePreviewModal';
@@ -41,12 +40,11 @@ import { SendConfirmModal } from './components/SendConfirmModal';
 import { HistoryModal } from './components/HistoryModal';
 import { TemplateManagerModal } from './components/TemplateManagerModal';
 import { TestSmsModal } from './components/TestSmsModal';
-import { AddStudentModal } from './components/AddStudentModal';
 import { CustomGroupModal } from './components/CustomGroupModal';
 
 export function App() {
   const [classes, setClasses] = useState<ClassInfo[]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
+  const [students] = useState<Student[]>([]);
   const [templates, setTemplates] = useState<SmsTemplate[]>([]);
   const [historyRecords, setHistoryRecords] = useState<SentBroadcastRecord[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState<boolean>(false);
@@ -86,7 +84,6 @@ export function App() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
   const [isTestSmsOpen, setIsTestSmsOpen] = useState(false);
-  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
   const [isCustomGroupModalOpen, setIsCustomGroupModalOpen] = useState(false);
   const [singleStudentForTest, setSingleStudentForTest] = useState<Student | null>(null);
 
@@ -330,14 +327,56 @@ export function App() {
 
   const handleLoadFromDropdown = async () => {
     if (!selectedClassId) return;
+
+    const currentCls = classes.find((c) => c.id === selectedClassId);
+    if (!currentCls) return;
+
+    const currentSec = currentCls.sections.find((s) => s.id === selectedSectionId);
+
+    // Determine group name to append to Destination Group
+    let groupToAppend = '';
+    if (currentSec) {
+      const matchingAvail = availableGroups.find(
+        (g) =>
+          g.toLowerCase() === currentSec.name.toLowerCase() ||
+          g.toLowerCase() === `${currentCls.name} - ${currentSec.name}`.toLowerCase() ||
+          g.toLowerCase() === `${currentCls.name} ${currentSec.name}`.toLowerCase()
+      );
+      groupToAppend = matchingAvail || currentSec.name;
+    } else {
+      const matchingAvail = availableGroups.find(
+        (g) => g.toLowerCase() === currentCls.name.toLowerCase()
+      );
+      groupToAppend = matchingAvail || currentCls.name;
+    }
+
+    if (groupToAppend && !destinationGroups.includes(groupToAppend)) {
+      setDestinationGroups((prev) => [...prev, groupToAppend]);
+      setAvailableGroups((prev) => prev.filter((g) => g !== groupToAppend));
+    }
+
     setIsLoadingStudents(true);
     try {
       const loaded = await studentService.getStudentsByClassAndSection(
         selectedClassId,
         selectedSectionId || undefined
       );
-      setDisplayedStudents(loaded);
-      setSelectedStudentIds(new Set(loaded.map((s) => s.id)));
+      setDisplayedStudents((prev) => {
+        const existingIds = new Set(prev.map((s) => s.id));
+        const combined = [...prev];
+        for (const s of loaded) {
+          if (!existingIds.has(s.id)) {
+            combined.push(s);
+            existingIds.add(s.id);
+          }
+        }
+        return combined.length > 0 ? combined : loaded;
+      });
+      setSelectedStudentIds((prev) => {
+        const next = new Set(prev);
+        loaded.forEach((s) => next.add(s.id));
+        return next;
+      });
     } catch (err) {
       console.error('Failed to load students from class/section:', err);
     } finally {
@@ -636,6 +675,14 @@ export function App() {
             />
           )}
 
+          {currentPage === 'status' && (
+            <StatusPage
+              classes={classes}
+              customGroups={customGroups}
+              onNavigate={setCurrentPage}
+            />
+          )}
+
           {currentPage === 'logs' && (
             <BroadcastLogsPage
               records={historyRecords}
@@ -643,29 +690,6 @@ export function App() {
               isLoading={isLoadingHistory}
               onNavigate={setCurrentPage}
               onReuseMessage={(msg) => setMessage(msg)}
-            />
-          )}
-
-          {currentPage === 'students' && (
-            <StudentsPage
-              students={students}
-              classes={classes}
-              selectedClassId={selectedClassId}
-              selectedSectionId={selectedSectionId}
-              onClassChange={handleClassChange}
-              onSectionChange={handleSectionChange}
-              onNavigate={setCurrentPage}
-            />
-          )}
-
-          {currentPage === 'add-student' && (
-            <AddStudentPage
-              classes={classes}
-              onAddStudent={(newStudent) => {
-                setStudents((prev) => [newStudent, ...prev]);
-                setDisplayedStudents((prev) => [newStudent, ...prev]);
-              }}
-              onNavigate={setCurrentPage}
             />
           )}
 
@@ -729,17 +753,6 @@ export function App() {
               .replace(/{Roll}/g, singleStudentForTest.roll || '01')
             : message
         }
-      />
-
-      <AddStudentModal
-        isOpen={isAddStudentOpen}
-        onClose={() => setIsAddStudentOpen(false)}
-        classes={classes}
-        onAddStudent={(newStudent) => {
-          setStudents((prev) => [newStudent, ...prev]);
-          setDisplayedStudents((prev) => [newStudent, ...prev]);
-          setSelectedStudentIds((prev) => new Set(prev).add(newStudent.id));
-        }}
       />
 
       <CustomGroupModal

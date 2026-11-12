@@ -65,9 +65,27 @@ export type AppPage =
   | 'delivery'
   | 'custom-groups'
   | 'templates'
-  | 'logs'
-  | 'students'
-  | 'add-student';
+  | 'status'
+  | 'logs';
+
+export interface StatusLogRecord {
+  id: string;
+  time: string;
+  alertName: string;
+  receiverName: string;
+  receiverMobile: string;
+  receiverId?: string;
+  channel: 'Masking' | 'Non-Masking';
+  operator: 'Grameenphone' | 'Robi' | 'Banglalink' | 'Teletalk' | 'Airtel';
+  messageCount: number;
+  classId?: string;
+  className?: string;
+  sectionId?: string;
+  sectionName?: string;
+  customGroupId?: string;
+  customGroupName?: string;
+  status: 'Delivered' | 'Processing' | 'Failed' | 'Sent' | 'Queued';
+}
 
 export interface CustomGroup {
   id: string;
