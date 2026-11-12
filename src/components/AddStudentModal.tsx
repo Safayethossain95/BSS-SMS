@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Plus, UserPlus } from 'lucide-react';
 import type { ClassInfo, Student } from '../types';
 
 interface AddStudentModalProps {
@@ -63,32 +63,42 @@ export const AddStudentModal: React.FC<AddStudentModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
       <div
-        className="relative bg-slate-100 border border-slate-300 rounded-2xl p-5 max-w-md w-full shadow-xl space-y-3"
+        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 max-w-lg w-full shadow-2xl space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-3 right-3 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-        >
-          <X className="w-4 h-4" />
-        </button>
-
-        <h3 className="text-base font-bold text-slate-900">Add Student</h3>
-
-        <form onSubmit={handleSubmit} className="space-y-2.5">
-          <div className="grid grid-cols-2 gap-2">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-zinc-800">
+          <div className="flex items-center gap-2.5">
+            <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
+              <UserPlus className="w-4 h-4" />
+            </span>
             <div>
-              <label htmlFor="new-student-class" className="block text-xs font-semibold text-slate-700 mb-1">
+              <h3 className="text-base font-bold text-ink">Add New Student</h3>
+              <p className="text-xs text-ink-muted">Add student record into directory</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 text-ink-muted hover:text-ink rounded-lg hover:bg-surface-2 transition cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="new-student-class" className="block text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1 select-none">
                 Class:
               </label>
               <select
                 id="new-student-class"
                 value={selectedClassId}
                 onChange={(e) => handleClassChange(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#1b1e42]"
+                className="w-full bg-surface-2 border border-transparent focus:border-[#1b1e42] dark:focus:border-accent text-ink rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium outline-none transition-colors cursor-pointer"
               >
                 {classes.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -99,14 +109,14 @@ export const AddStudentModal: React.FC<AddStudentModalProps> = ({
             </div>
 
             <div>
-              <label htmlFor="new-student-section" className="block text-xs font-semibold text-slate-700 mb-1">
+              <label htmlFor="new-student-section" className="block text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1 select-none">
                 Section:
               </label>
               <select
                 id="new-student-section"
                 value={selectedSectionId}
                 onChange={(e) => setSelectedSectionId(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#1b1e42]"
+                className="w-full bg-surface-2 border border-transparent focus:border-[#1b1e42] dark:focus:border-accent text-ink rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium outline-none transition-colors cursor-pointer"
               >
                 {sections.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -117,105 +127,111 @@ export const AddStudentModal: React.FC<AddStudentModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="new-student-header-id" className="block text-xs font-semibold text-slate-700 mb-1">
-                HEADER ID:
+              <label htmlFor="new-student-name" className="block text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1 select-none">
+                Full Name: <span className="text-brand-red">*</span>
+              </label>
+              <input
+                id="new-student-name"
+                type="text"
+                placeholder="e.g. AHMAD HOSSAIN"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full bg-surface-2 border border-transparent focus:border-[#1b1e42] dark:focus:border-accent text-ink rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium outline-none transition-colors"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="new-student-id" className="block text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1 select-none">
+                Student ID: <span className="text-brand-red">*</span>
+              </label>
+              <input
+                id="new-student-id"
+                type="text"
+                placeholder="e.g. 2609074005"
+                value={studentId}
+                onChange={(e) => setStudentId(e.target.value)}
+                required
+                className="w-full bg-surface-2 border border-transparent focus:border-[#1b1e42] dark:focus:border-accent text-ink font-mono rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium outline-none transition-colors"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="new-student-mobile" className="block text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1 select-none">
+                Mobile Number: <span className="text-brand-red">*</span>
+              </label>
+              <input
+                id="new-student-mobile"
+                type="tel"
+                placeholder="e.g. 8801749421005"
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value)}
+                required
+                className="w-full bg-surface-2 border border-transparent focus:border-[#1b1e42] dark:focus:border-accent text-ink font-mono rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium outline-none transition-colors"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="new-student-guardian" className="block text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1 select-none">
+                Guardian Name:
+              </label>
+              <input
+                id="new-student-guardian"
+                type="text"
+                placeholder="Parent or Guardian"
+                value={guardianName}
+                onChange={(e) => setGuardianName(e.target.value)}
+                className="w-full bg-surface-2 border border-transparent focus:border-[#1b1e42] dark:focus:border-accent text-ink rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium outline-none transition-colors"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="new-student-header-id" className="block text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1 select-none">
+                Header ID:
               </label>
               <input
                 id="new-student-header-id"
                 type="text"
                 value={headerId}
                 onChange={(e) => setHeaderId(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-mono focus:outline-none focus:border-[#1b1e42]"
+                className="w-full bg-surface-2 border border-transparent focus:border-[#1b1e42] dark:focus:border-accent text-ink font-mono rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium outline-none transition-colors"
               />
             </div>
 
             <div>
-              <label htmlFor="new-student-id" className="block text-xs font-semibold text-slate-700 mb-1">
-                Student ID:
-              </label>
-              <input
-                id="new-student-id"
-                type="text"
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-mono focus:outline-none focus:border-[#1b1e42]"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="new-student-roll" className="block text-xs font-semibold text-slate-700 mb-1">
-                Roll No:
+              <label htmlFor="new-student-roll" className="block text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1 select-none">
+                Roll:
               </label>
               <input
                 id="new-student-roll"
                 type="text"
                 value={roll}
                 onChange={(e) => setRoll(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-mono focus:outline-none focus:border-[#1b1e42]"
+                className="w-full bg-surface-2 border border-transparent focus:border-[#1b1e42] dark:focus:border-accent text-ink font-mono rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium outline-none transition-colors"
               />
             </div>
           </div>
 
-          <div>
-            <label htmlFor="new-student-name" className="block text-xs font-semibold text-slate-700 mb-1">
-              Student Full Name:
-            </label>
-            <input
-              id="new-student-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 uppercase focus:outline-none focus:border-[#1b1e42]"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label htmlFor="new-student-phone" className="block text-xs font-semibold text-slate-700 mb-1">
-                Mobile Number:
-              </label>
-              <input
-                id="new-student-phone"
-                type="tel"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                placeholder="8801749421005"
-                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-mono focus:outline-none focus:border-[#1b1e42]"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="new-student-guardian" className="block text-xs font-semibold text-slate-700 mb-1">
-                Guardian Name:
-              </label>
-              <input
-                id="new-student-guardian"
-                type="text"
-                value={guardianName}
-                onChange={(e) => setGuardianName(e.target.value)}
-                className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#1b1e42]"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end gap-2 pt-2">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-200 dark:border-zinc-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer"
+              className="px-4 py-2 text-xs font-semibold rounded-full bg-surface-2 hover:bg-surface-3 text-ink transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-1.5 rounded-lg bg-[#1b1e42] hover:bg-[#d91920] text-white text-xs font-semibold cursor-pointer shadow-xs active:scale-95"
+              className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white font-semibold text-xs sm:text-sm rounded-full transition shadow-sm active:scale-95 cursor-pointer"
             >
-              Save
+              <Plus className="w-4 h-4" />
+              <span>Save Student</span>
             </button>
           </div>
         </form>

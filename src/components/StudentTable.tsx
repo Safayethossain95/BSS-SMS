@@ -46,70 +46,79 @@ export const StudentTable: React.FC<StudentTableProps> = ({
   };
 
   return (
-    <div className="bg-[#fafafa] border border-gray-300 rounded-xl shadow-xs overflow-hidden">
+    <div id="students-table-section" className="card !p-0 overflow-hidden border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card transition-colors">
       
-      {/* Top Filter Bar: Select All + Search */}
-      <div className="p-3 border-b border-gray-300 bg-[#f3f4f6] flex items-center justify-between gap-3">
-        <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-gray-800">
+      {/* Top Filter Bar: Select All + Live Search */}
+      <div className="p-4 border-b border-gray-200 dark:border-zinc-800 bg-surface-2/50 flex flex-wrap items-center justify-between gap-3">
+        
+        {/* Select All Checkbox */}
+        <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-ink px-3 py-1.5 rounded-full bg-surface border border-gray-200 dark:border-zinc-800 shadow-2xs">
           <input
             type="checkbox"
             ref={selectAllRef}
             checked={isAllSelected}
             onChange={onToggleSelectAll}
             disabled={students.length === 0}
-            className="w-4 h-4 rounded text-gray-600 focus:ring-gray-300 border-gray-300 cursor-pointer accent-gray-500"
+            className="w-4 h-4 rounded border-gray-300 dark:border-zinc-700 text-[#1b1e42] dark:text-accent focus:ring-accent cursor-pointer"
           />
           <span>Select All</span>
-          <span className="text-gray-500 font-normal">
+          <span className="text-ink-muted font-mono font-normal">
             ({selectedStudentIds.size}/{students.length})
           </span>
         </label>
 
+        {/* Search Input */}
         <div className="relative max-w-xs w-full">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
           <input
+            id="table-search-input"
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search students..."
-            className="w-full bg-white border border-gray-300 focus:border-gray-400 focus:ring-1 focus:ring-gray-300 rounded-lg pl-8 pr-3 py-1.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none shadow-2xs"
+            placeholder="Search loaded students..."
+            className="w-full bg-surface text-ink text-xs sm:text-sm font-medium rounded-xl pl-9 pr-3.5 py-2 border border-gray-200 dark:border-zinc-800 focus:border-[#1b1e42] dark:focus:border-accent outline-none shadow-2xs transition-colors"
           />
         </div>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse text-xs">
+        <table className="w-full min-w-[900px] border-collapse text-left text-xs sm:text-sm">
           <thead>
-            <tr className="border-b border-gray-300 bg-gray-200/90 text-[11px] font-semibold text-gray-700 uppercase">
-              <th scope="col" className="w-12 px-3 py-2.5 text-center">
+            <tr className="border-b border-dashed border-gray-200 dark:border-zinc-800 text-ink font-semibold bg-surface-2/60">
+              <th scope="col" className="w-12 py-3 px-3.5 text-center border-r border-dashed border-gray-200 dark:border-zinc-800">
                 Select
               </th>
-              <th scope="col" className="px-3 py-2.5">
-                HEADERID
+              <th scope="col" className="py-3 px-4 border-r border-dashed border-gray-200 dark:border-zinc-800">
+                HEADER ID
               </th>
-              <th scope="col" className="px-3 py-2.5">
-                ID
+              <th scope="col" className="py-3 px-4 border-r border-dashed border-gray-200 dark:border-zinc-800">
+                STUDENT ID
               </th>
-              <th scope="col" className="px-3 py-2.5">
-                NAME
+              <th scope="col" className="py-3 px-4 border-r border-dashed border-gray-200 dark:border-zinc-800">
+                STUDENT NAME
               </th>
-              <th scope="col" className="px-3 py-2.5">
-                MOBILE
+              <th scope="col" className="py-3 px-4 border-r border-dashed border-gray-200 dark:border-zinc-800">
+                MOBILE PHONE
               </th>
-              <th scope="col" className="px-3 py-2.5">
+              <th scope="col" className="py-3 px-4 border-r border-dashed border-gray-200 dark:border-zinc-800">
                 SECTION
               </th>
-              <th scope="col" className="px-3 py-2.5 text-right">
+              <th scope="col" className="py-3 px-4 text-right">
                 Action
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody>
             {students.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500 text-xs bg-white">
-                  No students loaded. Shift a group to Destination or select a class &amp; section above and click "Load".
+                <td colSpan={7} className="py-12 px-4 text-center text-ink-muted text-xs bg-surface">
+                  <div className="flex flex-col items-center justify-center gap-1.5">
+                    <span className="font-semibold text-sm text-ink">No students currently loaded</span>
+                    <span className="text-xs text-ink-muted">
+                      Shift a group from Available to Destination, or select Class &amp; Section above and click &quot;Load&quot;.
+                    </span>
+                  </div>
                 </td>
               </tr>
             ) : (
@@ -119,31 +128,31 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                   <tr
                     key={student.id}
                     onClick={() => onToggleStudent(student.id)}
-                    className={`transition-colors cursor-pointer ${
+                    className={`border-b border-dashed border-gray-200 dark:border-zinc-800 transition-colors cursor-pointer ${
                       isSelected
-                        ? 'bg-gray-200/80 hover:bg-gray-200'
+                        ? 'bg-surface-2/80 font-medium'
                         : idx % 2 === 0
-                        ? 'bg-white hover:bg-gray-100/70'
-                        : 'bg-[#fcfcfc] hover:bg-gray-100/70'
+                        ? 'bg-surface hover:bg-surface-2/40'
+                        : 'bg-surface-2/20 hover:bg-surface-2/50'
                     }`}
                   >
                     {/* Checkbox */}
-                    <td className="px-3 py-2 text-center" onClick={(e) => e.stopPropagation()}>
+                    <td className="py-3 px-3.5 text-center border-r border-dashed border-gray-200 dark:border-zinc-800" onClick={(e) => e.stopPropagation()}>
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => onToggleStudent(student.id)}
-                        className="w-4 h-4 rounded text-gray-600 focus:ring-gray-300 border-gray-300 cursor-pointer accent-gray-500"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-zinc-700 text-[#1b1e42] dark:text-accent focus:ring-accent cursor-pointer"
                       />
                     </td>
 
-                    {/* HEADERID */}
-                    <td className="px-3 py-2 font-mono text-gray-600">
+                    {/* HEADER ID */}
+                    <td className="py-3 px-4 font-mono text-ink-muted border-r border-dashed border-gray-200 dark:border-zinc-800">
                       {student.headerId}
                     </td>
 
                     {/* ID */}
-                    <td className="px-3 py-2 font-mono font-medium text-gray-900">
+                    <td className="py-3 px-4 font-mono font-medium text-ink border-r border-dashed border-gray-200 dark:border-zinc-800">
                       <div className="flex items-center gap-1">
                         <span>{student.id}</span>
                         <button
@@ -152,25 +161,28 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                             e.stopPropagation();
                             handleCopy(student.id, `id-${student.id}`);
                           }}
-                          className="p-0.5 text-gray-400 hover:text-gray-600"
+                          className="p-1 text-ink-faint hover:text-ink rounded transition"
                           title="Copy ID"
                         >
                           {copiedId === `id-${student.id}` ? (
-                            <Check className="w-3 h-3 text-emerald-600" />
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
                           ) : (
-                            <Copy className="w-3 h-3" />
+                            <Copy className="w-3.5 h-3.5" />
                           )}
                         </button>
                       </div>
                     </td>
 
                     {/* NAME */}
-                    <td className="px-3 py-2 font-medium text-gray-900">
-                      {student.name}
+                    <td className="py-3 px-4 font-medium text-ink border-r border-dashed border-gray-200 dark:border-zinc-800">
+                      <div>{student.name}</div>
+                      {student.guardianName && (
+                        <div className="text-[11px] text-ink-faint">{student.guardianName}</div>
+                      )}
                     </td>
 
                     {/* MOBILE */}
-                    <td className="px-3 py-2 font-mono text-gray-800">
+                    <td className="py-3 px-4 font-mono text-ink border-r border-dashed border-gray-200 dark:border-zinc-800">
                       <div className="flex items-center gap-1">
                         <span>{formatPhoneNumber(student.mobile)}</span>
                         <button
@@ -179,32 +191,34 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                             e.stopPropagation();
                             handleCopy(student.mobile, `phone-${student.id}`);
                           }}
-                          className="p-0.5 text-gray-400 hover:text-gray-600"
+                          className="p-1 text-ink-faint hover:text-ink rounded transition"
                           title="Copy Mobile"
                         >
                           {copiedId === `phone-${student.id}` ? (
-                            <Check className="w-3 h-3 text-emerald-600" />
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
                           ) : (
-                            <Copy className="w-3 h-3" />
+                            <Copy className="w-3.5 h-3.5" />
                           )}
                         </button>
                       </div>
                     </td>
 
                     {/* SECTION */}
-                    <td className="px-3 py-2 text-gray-600">
-                      {student.section}
+                    <td className="py-3 px-4 border-r border-dashed border-gray-200 dark:border-zinc-800">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-2 border border-gray-200 dark:border-zinc-800 text-ink">
+                        {student.section}
+                      </span>
                     </td>
 
-                    {/* Action */}
-                    <td className="px-3 py-2 text-right" onClick={(e) => e.stopPropagation()}>
+                    {/* Action Send */}
+                    <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
                         onClick={() => onQuickSendSingle(student)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-gray-200 hover:bg-gray-300 text-gray-800 text-[11px] font-medium transition cursor-pointer shadow-2xs border border-gray-300"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface-2 hover:bg-surface-3 text-ink font-semibold text-xs border border-gray-200 dark:border-zinc-800 transition cursor-pointer shadow-2xs active:scale-[0.98]"
                         title="Send SMS to this student"
                       >
-                        <Send className="w-2.5 h-2.5 text-gray-600" />
+                        <Send className="w-3 h-3 text-[#1b1e42] dark:text-accent" />
                         <span>Send</span>
                       </button>
                     </td>
@@ -214,6 +228,16 @@ export const StudentTable: React.FC<StudentTableProps> = ({
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination Footer */}
+      <div className="p-3.5 border-t border-gray-200 dark:border-zinc-800 bg-surface-2/30 flex items-center justify-between text-xs text-ink-muted">
+        <div>
+          Showing <strong className="text-ink">{students.length}</strong> loaded student{students.length === 1 ? '' : 's'}
+        </div>
+        <div className="text-ink-faint">
+          Bona Fide School &bull; SMS Portal
+        </div>
       </div>
 
     </div>

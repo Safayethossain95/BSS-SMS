@@ -61,10 +61,37 @@ export interface CustomGroupTarget {
   sectionName: string;
 }
 
+export type AppPage =
+  | 'delivery'
+  | 'custom-groups'
+  | 'templates'
+  | 'logs'
+  | 'students'
+  | 'add-student';
+
 export interface CustomGroup {
   id: string;
   name: string;
   targets: CustomGroupTarget[];
   createdAt: string;
 }
+
+export interface AuthUser {
+  id: string;
+  username: string;
+  name: string;
+  role: string;
+  campus: string;
+  initials: string;
+}
+
+export const DEMO_USER: AuthUser = {
+  id: 'admin-01',
+  username: 'admin',
+  name: 'Administrator',
+  role: 'Campus 4 • Admin',
+  campus: 'Campus 4',
+  initials: 'AD',
+};
+
 

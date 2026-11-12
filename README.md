@@ -1,6 +1,6 @@
 # BSS SMS - Institutional SMS Dispatch & Broadcast System
 
-A modern, fast, and feature-rich Web-based SMS Sending Portal inspired by the legacy **MailMessageDeliveryForm** ("bona fide"). Built with **React 19**, **Vite**, **TypeScript**, and **Tailwind CSS**.
+A modern, fast, and feature-rich Web-based SMS Sending Portal inspired by the legacy **MailMessageDeliveryForm** ("BSS"). Built with **React 19**, **Vite**, **TypeScript**, and **Tailwind CSS**.
 
 ---
 
@@ -37,7 +37,7 @@ A modern, fast, and feature-rich Web-based SMS Sending Portal inspired by the le
 - **Test SMS Tool**: Send a test SMS to your personal mobile number before broadcasting to parents.
 - **Add Recipient**: Easily register new students to any class or section on the fly.
 - **LocalStorage Persistence**: Student directory, templates, delivery logs, and SMS balance automatically persist across page reloads.
-- **Iconic Bona Fide Branding Ribbon**: Faithful bottom blue ribbon banner preserving the institutional aesthetic.
+- **Iconic BSS Branding Ribbon**: Faithful bottom blue ribbon banner preserving the institutional aesthetic.
 
 ---
 

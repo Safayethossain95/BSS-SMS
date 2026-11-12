@@ -1,26 +1,39 @@
-import { useState, useEffect, useMemo } from 'react';
-import { 
-  INITIAL_CLASSES, 
-  INITIAL_STUDENTS, 
-  INITIAL_TEMPLATES, 
-  AVAILABLE_GROUPS 
-} from './data/mockData';
-import type { 
-  Student, 
-  ClassInfo, 
-  SmsTemplate, 
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import type {
+  Student,
+  ClassInfo,
+  SmsTemplate,
   SentBroadcastRecord,
-  CustomGroup 
+  CustomGroup,
+  AuthUser,
+  AppPage
 } from './types';
+import type { SmsBalanceInfo } from './types/api';
 import { calculateSmsMetrics } from './utils/smsCalculator';
 
+// API Services
+import { academicService } from './services/academicService';
+import { groupService } from './services/groupService';
+import { studentService } from './services/studentService';
+import { templateService } from './services/templateService';
+import { smsService } from './services/smsService';
+
 // Components
+import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { FilterSection } from './components/FilterSection';
 import { GroupShifter } from './components/GroupShifter';
 import { MessageComposer } from './components/MessageComposer';
 import { StudentTable } from './components/StudentTable';
 import { ActionBar } from './components/ActionBar';
+import { LoginPage } from './components/LoginPage';
+
+// Pages
+import { CustomGroupsPage } from './pages/CustomGroupsPage';
+import { TemplatesPage } from './pages/TemplatesPage';
+import { BroadcastLogsPage } from './pages/BroadcastLogsPage';
+import { StudentsPage } from './pages/StudentsPage';
+import { AddStudentPage } from './pages/AddStudentPage';
 
 // Modals
 import { PhonePreviewModal } from './components/PhonePreviewModal';
@@ -32,50 +45,27 @@ import { AddStudentModal } from './components/AddStudentModal';
 import { CustomGroupModal } from './components/CustomGroupModal';
 
 export function App() {
-  const [classes] = useState<ClassInfo[]>(INITIAL_CLASSES);
-  const [students, setStudents] = useState<Student[]>(() => {
-    const saved = localStorage.getItem('bss_sms_students');
-    return saved ? JSON.parse(saved) : INITIAL_STUDENTS;
-  });
+  const [classes, setClasses] = useState<ClassInfo[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [templates, setTemplates] = useState<SmsTemplate[]>([]);
+  const [historyRecords, setHistoryRecords] = useState<SentBroadcastRecord[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState<boolean>(false);
 
-  const [templates, setTemplates] = useState<SmsTemplate[]>(() => {
-    const saved = localStorage.getItem('bss_sms_templates');
-    return saved ? JSON.parse(saved) : INITIAL_TEMPLATES;
-  });
-
-  const [historyRecords, setHistoryRecords] = useState<SentBroadcastRecord[]>(() => {
-    const saved = localStorage.getItem('bss_sms_history');
-    return saved ? JSON.parse(saved) : [
-      {
-        id: 'hist-init-1',
-        timestamp: 'Today, 09:30 AM',
-        className: 'Play Group',
-        section: 'Starter',
-        message: 'Dear Guardian, Please note school dismissal is at 12:30 PM today.',
-        totalRecipients: 4,
-        totalSmsUnits: 4,
-        status: 'Delivered',
-        recipients: [
-          { name: 'JULAYBIB MUHAMMAD', mobile: '8801749421005', status: 'Delivered' },
-          { name: 'IFZA MARIYAM ISLAM', mobile: '8801786377188', status: 'Delivered' },
-          { name: 'SHAH IHAN AHMED', mobile: '8801755555338', status: 'Delivered' },
-          { name: 'YAZDAAN MANZOOR', mobile: '8801613677566', status: 'Delivered' },
-        ],
-      },
-    ];
-  });
-
-  const [balance, setBalance] = useState<number>(() => {
-    const saved = localStorage.getItem('bss_sms_balance');
-    return saved ? Number(saved) : 4850;
+  const [balance, setBalance] = useState<number>(5000);
+  const [_safetyInfo, setSafetyInfo] = useState<SmsBalanceInfo>({
+    currentBalance: 5000,
+    activeGatewayName: 'Active Gateway',
+    isMasking: false,
+    isSafeTestMode: true,
+    safeTestPhoneNumber: '01670319232',
   });
 
   // Filter States
-  const [selectedClassId, setSelectedClassId] = useState<string>('play');
-  const [selectedSectionId, setSelectedSectionId] = useState<string>('starter');
+  const [selectedClassId, setSelectedClassId] = useState<string>('');
+  const [selectedSectionId, setSelectedSectionId] = useState<string>('');
 
   // Group Shifter (Available <-> Destination)
-  const [availableGroups, setAvailableGroups] = useState<string[]>(() => [...AVAILABLE_GROUPS]);
+  const [availableGroups, setAvailableGroups] = useState<string[]>([]);
   const [destinationGroups, setDestinationGroups] = useState<string[]>([]);
 
   // Table & Selection States
@@ -86,9 +76,9 @@ export function App() {
 
   // Message State
   const [message, setMessage] = useState<string>(
-    'Dear Guardian, Please be informed that Bona Fide School will remain closed tomorrow due to unavoidable circumstances.'
+    'Dear {StudentName}, you are requested to attend the school session on time. Regards, BSS School.'
   );
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('tpl-1');
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
   // Modals
   const [isPhonePreviewOpen, setIsPhonePreviewOpen] = useState(false);
@@ -100,43 +90,144 @@ export function App() {
   const [isCustomGroupModalOpen, setIsCustomGroupModalOpen] = useState(false);
   const [singleStudentForTest, setSingleStudentForTest] = useState<Student | null>(null);
 
+  // Theme State
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('bss_theme');
+      if (savedTheme) {
+        return savedTheme === 'dark';
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  // Authentication State
+  const [authUser, setAuthUser] = useState<AuthUser | null>(() => {
+    if (typeof window !== 'undefined') {
+      const savedUser = localStorage.getItem('bss_sms_auth_user');
+      if (savedUser) {
+        try {
+          return JSON.parse(savedUser);
+        } catch {
+          return null;
+        }
+      }
+    }
+    return null;
+  });
+
+  const handleLogin = (user: AuthUser) => {
+    setAuthUser(user);
+    localStorage.setItem('bss_sms_auth_user', JSON.stringify(user));
+  };
+
+  const handleLogout = () => {
+    setAuthUser(null);
+    localStorage.removeItem('bss_sms_auth_user');
+  };
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('bss_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('bss_theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark((prev) => !prev);
+
+  // Sidebar State
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 1350;
+    }
+    return false;
+  });
+
+  // Active Navigation Page
+  const [currentPage, setCurrentPage] = useState<AppPage>('delivery');
+
   // Custom Groups State
   const [customGroups, setCustomGroups] = useState<CustomGroup[]>(() => {
     const saved = localStorage.getItem('bss_sms_custom_groups');
-    return saved
-      ? JSON.parse(saved)
-      : [
-          {
-            id: 'cg-junior',
-            name: 'Junior Wing (Play+Nur)',
-            targets: [
-              { classId: 'play', className: 'Play Group', sectionId: 'all', sectionName: 'All Sections' },
-              { classId: 'nur', className: 'Nursery', sectionId: 'all', sectionName: 'All Sections' },
-            ],
-            createdAt: 'Initial',
-          },
-        ];
+    return saved ? JSON.parse(saved) : [];
   });
-
-  useEffect(() => {
-    localStorage.setItem('bss_sms_students', JSON.stringify(students));
-  }, [students]);
-
-  useEffect(() => {
-    localStorage.setItem('bss_sms_templates', JSON.stringify(templates));
-  }, [templates]);
-
-  useEffect(() => {
-    localStorage.setItem('bss_sms_history', JSON.stringify(historyRecords));
-  }, [historyRecords]);
-
-  useEffect(() => {
-    localStorage.setItem('bss_sms_balance', balance.toString());
-  }, [balance]);
 
   useEffect(() => {
     localStorage.setItem('bss_sms_custom_groups', JSON.stringify(customGroups));
   }, [customGroups]);
+
+  // Initial Data Fetching from ASP.NET Core 10 Web API
+  const fetchClasses = useCallback(async () => {
+    try {
+      const data = await academicService.getClassesWithSections();
+      setClasses(data);
+      if (data.length > 0) {
+        setSelectedClassId(data[0].id);
+        if (data[0].sections && data[0].sections.length > 0) {
+          setSelectedSectionId(data[0].sections[0].id);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load academic hierarchy:', err);
+    }
+  }, []);
+
+  const fetchGroups = useCallback(async () => {
+    try {
+      const data = await groupService.getAvailableGroups();
+      setAvailableGroups(data);
+    } catch (err) {
+      console.error('Failed to load recipient groups:', err);
+    }
+  }, []);
+
+  const fetchTemplates = useCallback(async () => {
+    try {
+      const data = await templateService.getTemplates();
+      setTemplates(data);
+      if (data.length > 0 && !selectedTemplateId) {
+        setSelectedTemplateId(data[0].id);
+        setMessage(data[0].body);
+      }
+    } catch (err) {
+      console.error('Failed to load templates:', err);
+    }
+  }, [selectedTemplateId]);
+
+  const fetchBalance = useCallback(async () => {
+    try {
+      const info = await smsService.getBalance();
+      setSafetyInfo(info);
+      setBalance(info.currentBalance);
+    } catch (err) {
+      console.error('Failed to load balance info:', err);
+    }
+  }, []);
+
+  const fetchHistory = useCallback(async () => {
+    setIsLoadingHistory(true);
+    try {
+      const data = await smsService.getHistory(50);
+      setHistoryRecords(data);
+    } catch (err) {
+      console.error('Failed to load history records:', err);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchClasses();
+    fetchGroups();
+    fetchTemplates();
+    fetchBalance();
+    fetchHistory();
+  }, [fetchClasses, fetchGroups, fetchTemplates, fetchBalance, fetchHistory]);
 
   // Sync custom groups into available groups list
   useEffect(() => {
@@ -149,57 +240,26 @@ export function App() {
     });
   }, [customGroups, destinationGroups]);
 
-  // Load students based on destinationGroups and customGroups
-  const syncStudentsFromDestinationGroups = (
-    destGroups: string[],
-    groupsList: CustomGroup[] = customGroups
+  // Load students based on destinationGroups from Backend
+  const syncStudentsFromDestinationGroups = useCallback(async (
+    destGroups: string[]
   ) => {
+    if (destGroups.length === 0) {
+      setDisplayedStudents([]);
+      setSelectedStudentIds(new Set());
+      return;
+    }
+
     setIsLoadingStudents(true);
-    setTimeout(() => {
-      if (destGroups.length === 0) {
-        setDisplayedStudents([]);
-        setSelectedStudentIds(new Set());
-        setIsLoadingStudents(false);
-        return;
-      }
-
-      const matched = students.filter((s) => {
-        const sec = s.section.toLowerCase().trim();
-        const cls = s.className.toLowerCase().trim();
-
-        return destGroups.some((groupName) => {
-          // 1. Check if groupName matches any custom group
-          const cg = groupsList.find(
-            (c) => c.name.toLowerCase().trim() === groupName.toLowerCase().trim()
-          );
-          if (cg) {
-            return cg.targets.some((target) => {
-              const clsMatch = s.className.toLowerCase() === target.className.toLowerCase();
-              if (!clsMatch) return false;
-              if (target.sectionName === 'All Sections' || target.sectionId === 'all') return true;
-              return s.section.toLowerCase() === target.sectionName.toLowerCase();
-            });
-          }
-
-          // 2. Default matching logic
-          const g = groupName.toLowerCase().trim();
-          if (sec === g || sec.includes(g) || g.includes(sec)) return true;
-          if (cls === g || cls.includes(g) || g.includes(cls)) return true;
-          if (g.includes('teacher') && (sec.includes('teacher') || cls.includes('teacher'))) return true;
-          if (g.includes('class 1') && cls.includes('class 1')) return true;
-          if (g.includes('class 2') && cls.includes('class 2')) return true;
-          return false;
-        });
-      });
-
-      setDisplayedStudents(matched);
-      setSelectedStudentIds(new Set(matched.map((s) => s.id)));
+    try {
+      const resolved = await groupService.resolveRecipients(destGroups);
+      setDisplayedStudents(resolved);
+      setSelectedStudentIds(new Set(resolved.map((s) => s.id)));
+    } catch (err) {
+      console.error('Failed to resolve recipients from destination groups:', err);
+    } finally {
       setIsLoadingStudents(false);
-    }, 120);
-  };
-
-  useEffect(() => {
-    syncStudentsFromDestinationGroups(destinationGroups);
+    }
   }, []);
 
   const handleCreateCustomGroup = (newGroup: CustomGroup) => {
@@ -234,7 +294,7 @@ export function App() {
       const activeDest = destinationGroups.map((n) =>
         oldGroup && n === oldGroup.name ? updatedGroup.name : n
       );
-      syncStudentsFromDestinationGroups(activeDest, updatedList);
+      syncStudentsFromDestinationGroups(activeDest);
     }
   };
 
@@ -250,7 +310,7 @@ export function App() {
     setDestinationGroups(nextDest);
 
     if (destinationGroups.includes(groupToDelete.name)) {
-      syncStudentsFromDestinationGroups(nextDest, updatedList);
+      syncStudentsFromDestinationGroups(nextDest);
     }
   };
 
@@ -268,19 +328,20 @@ export function App() {
     setSelectedSectionId(newSectionId);
   };
 
-  const handleLoadFromDropdown = () => {
-    const currentCls = classes.find((c) => c.id === selectedClassId);
-    const currentSec = currentCls?.sections.find((s) => s.id === selectedSectionId);
-    if (currentSec) {
-      const secName = currentSec.name;
-      if (!destinationGroups.includes(secName)) {
-        const nextDest = [...destinationGroups, secName];
-        setDestinationGroups(nextDest);
-        setAvailableGroups((prev) => prev.filter((g) => g !== secName));
-        syncStudentsFromDestinationGroups(nextDest);
-      } else {
-        syncStudentsFromDestinationGroups(destinationGroups);
-      }
+  const handleLoadFromDropdown = async () => {
+    if (!selectedClassId) return;
+    setIsLoadingStudents(true);
+    try {
+      const loaded = await studentService.getStudentsByClassAndSection(
+        selectedClassId,
+        selectedSectionId || undefined
+      );
+      setDisplayedStudents(loaded);
+      setSelectedStudentIds(new Set(loaded.map((s) => s.id)));
+    } catch (err) {
+      console.error('Failed to load students from class/section:', err);
+    } finally {
+      setIsLoadingStudents(false);
     }
   };
 
@@ -322,7 +383,7 @@ export function App() {
         s.name.toLowerCase().includes(q) ||
         s.id.toLowerCase().includes(q) ||
         s.mobile.toLowerCase().includes(q) ||
-        s.headerId.toLowerCase().includes(q)
+        (s.headerId && s.headerId.toLowerCase().includes(q))
     );
   }, [displayedStudents, searchQuery]);
 
@@ -343,7 +404,7 @@ export function App() {
   };
 
   const handleToggleSelectAll = () => {
-    const isAll = filteredStudents.every((s) => selectedStudentIds.has(s.id));
+    const isAll = filteredStudents.length > 0 && filteredStudents.every((s) => selectedStudentIds.has(s.id));
     if (isAll) {
       setSelectedStudentIds((prev) => {
         const next = new Set(prev);
@@ -372,34 +433,14 @@ export function App() {
     setSelectedTemplateId('');
     setSelectedStudentIds(new Set());
     setDestinationGroups([]);
-    setAvailableGroups([...AVAILABLE_GROUPS]);
+    fetchGroups();
     setDisplayedStudents([]);
   };
 
-  const handleSendSuccess = (recipients: Student[], smsBody: string) => {
-    const newUnitsCost = metrics.totalSmsCost;
-    setBalance((prev) => Math.max(0, prev - newUnitsCost));
-
-    const now = new Date();
-    const formattedDate = `Today, ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-
-    const newRecord: SentBroadcastRecord = {
-      id: `hist-${Date.now()}`,
-      timestamp: formattedDate,
-      className: destinationGroups.join(', ') || 'Selected Groups',
-      section: `${recipients.length} Students`,
-      message: smsBody,
-      totalRecipients: recipients.length,
-      totalSmsUnits: newUnitsCost,
-      status: 'Delivered',
-      recipients: recipients.map((r) => ({
-        name: r.name,
-        mobile: r.mobile,
-        status: 'Delivered',
-      })),
-    };
-
-    setHistoryRecords((prev) => [newRecord, ...prev]);
+  const handleSendSuccess = () => {
+    // Re-fetch real balance and updated history from SQL Server
+    fetchBalance();
+    fetchHistory();
   };
 
   const selectedStudentsList = useMemo(() => {
@@ -418,113 +459,223 @@ export function App() {
     return '';
   }, [classes, selectedClassId, selectedSectionId, destinationGroups]);
 
-  const sampleStudent = displayedStudents[0] || INITIAL_STUDENTS[0];
+  const sampleStudent = displayedStudents[0] || {
+    headerId: '1',
+    id: '2606093807',
+    name: 'Julaybib Muhammad',
+    mobile: '8801749421005',
+    className: 'Play Group',
+    section: 'Starter',
+    roll: '01',
+    status: 'active' as const,
+  };
+
+  if (!authUser) {
+    return (
+      <LoginPage
+        onLogin={handleLogin}
+        isDark={isDark}
+        onToggleTheme={toggleTheme}
+      />
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-200 text-slate-800 flex flex-col font-sans">
-      
-      {/* 1. Top Header */}
-      <Header
+    <div className={`app-shell ${isDark ? 'dark' : ''}`}>
+
+      {/* 1. Floating BSS Sidebar */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
+        isDark={isDark}
+        onToggleTheme={toggleTheme}
+        user={authUser}
+        onLogout={handleLogout}
         balance={balance}
-        onOpenHistory={() => setIsHistoryOpen(true)}
-        onOpenTemplates={() => setIsTemplatesOpen(true)}
-        onOpenAddStudent={() => setIsAddStudentOpen(true)}
-        onOpenCustomGroups={() => setIsCustomGroupModalOpen(true)}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-3 space-y-3">
-        
-        {/* 2. Compact Dropdowns Bar */}
-        <FilterSection
-          classes={classes}
-          selectedClassId={selectedClassId}
-          selectedSectionId={selectedSectionId}
-          onClassChange={handleClassChange}
-          onSectionChange={handleSectionChange}
-          onLoadStudents={handleLoadFromDropdown}
-          onAddToCustomGroup={() => setIsCustomGroupModalOpen(true)}
-          alertSentToText={alertSentToText}
-          totalLoadedStudents={displayedStudents.length}
-          isLoading={isLoadingStudents}
+      <div className="main-content">
+        {/* 2. BSS Topbar */}
+        <Header
+          balance={balance}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
+          onOpenMenu={() => setSidebarOpen(true)}
+          currentPage={currentPage}
+          onNavigate={setCurrentPage}
+          user={authUser}
+          onLogout={handleLogout}
         />
 
-        {/* 3. Group Shifter (Left) & Compact Message Composer (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
-          
-          {/* Left: Small Group Shifter */}
-          <div className="lg:col-span-5 flex flex-col">
-            <GroupShifter
-              availableGroups={availableGroups}
-              destinationGroups={destinationGroups}
-              onTransferToDestination={handleTransferToDestination}
-              onTransferToAvailable={handleTransferToAvailable}
-              onTransferAllToDestination={handleTransferAllToDestination}
-              onTransferAllToAvailable={handleTransferAllToAvailable}
-              onOpenCustomGroupModal={() => setIsCustomGroupModalOpen(true)}
-            />
-          </div>
+        {/* 3. Main Page Content */}
+        <main className="page-main space-y-4">
 
-          {/* Right: Compact Message Composer */}
-          <div className="lg:col-span-7 flex flex-col">
-            <MessageComposer
-              message={message}
-              onChangeMessage={setMessage}
+          {currentPage === 'delivery' && (
+            <>
+              {/* Page Head Banner */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold font-serif text-ink tracking-tight mb-0.5">
+                    SMS Message Delivery
+                  </h1>
+                  <p className="text-xs sm:text-sm text-ink-muted">
+                    Broadcast notifications, attendance updates, and alerts to classes, sections, and custom student groups.
+                  </p>
+                </div>
+                {/* 
+                {safetyInfo.isSafeTestMode && (
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 shadow-2xs">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>
+                      Safe Mode Active &bull; Test Redirect: <strong>{safetyInfo.safeTestPhoneNumber}</strong>
+                    </span>
+                  </div>
+                )} */}
+              </div>
+
+              {/* 4. Filter Section */}
+              <FilterSection
+                classes={classes}
+                selectedClassId={selectedClassId}
+                selectedSectionId={selectedSectionId}
+                onClassChange={handleClassChange}
+                onSectionChange={handleSectionChange}
+                onLoadStudents={handleLoadFromDropdown}
+                onAddToCustomGroup={() => setCurrentPage('custom-groups')}
+                alertSentToText={alertSentToText}
+                totalLoadedStudents={displayedStudents.length}
+                isLoading={isLoadingStudents}
+              />
+
+              {/* 5. Group Shifter (Left) & Compact Message Composer (Right) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+                {/* Left: Small Group Shifter */}
+                <div className="lg:col-span-5 flex flex-col">
+                  <GroupShifter
+                    availableGroups={availableGroups}
+                    destinationGroups={destinationGroups}
+                    onTransferToDestination={handleTransferToDestination}
+                    onTransferToAvailable={handleTransferToAvailable}
+                    onTransferAllToDestination={handleTransferAllToDestination}
+                    onTransferAllToAvailable={handleTransferAllToAvailable}
+                    onOpenCustomGroupModal={() => setCurrentPage('custom-groups')}
+                  />
+                </div>
+
+                {/* Right: Compact Message Composer */}
+                <div className="lg:col-span-7 flex flex-col">
+                  <MessageComposer
+                    message={message}
+                    onChangeMessage={setMessage}
+                    templates={templates}
+                    selectedTemplateId={selectedTemplateId}
+                    onSelectTemplate={handleSelectTemplate}
+                    metrics={metrics}
+                    totalRecipients={selectedStudentIds.size}
+                    sampleStudentName={sampleStudent?.name}
+                    onOpenPhonePreview={() => setIsPhonePreviewOpen(true)}
+                  />
+                </div>
+
+              </div>
+
+              {/* 6. Action Bar */}
+              <ActionBar
+                onSearchClick={() => {
+                  const el = document.getElementById('class-select');
+                  el?.focus();
+                }}
+                onResetClick={handleReset}
+                onSendClick={() => setIsSendConfirmOpen(true)}
+                onTestSendClick={() => setIsTestSmsOpen(true)}
+                totalRecipientsSelected={selectedStudentIds.size}
+                isMessageEmpty={!message.trim()}
+                totalSmsCost={metrics.totalSmsCost}
+              />
+
+              {/* 7. Student Table */}
+              <StudentTable
+                students={filteredStudents}
+                selectedStudentIds={selectedStudentIds}
+                onToggleStudent={handleToggleStudent}
+                onToggleSelectAll={handleToggleSelectAll}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onQuickSendSingle={(student) => {
+                  setSingleStudentForTest(student);
+                  setIsTestSmsOpen(true);
+                }}
+              />
+            </>
+          )}
+
+          {currentPage === 'custom-groups' && (
+            <CustomGroupsPage
+              classes={classes}
+              students={students}
+              customGroups={customGroups}
+              onCreateCustomGroup={handleCreateCustomGroup}
+              onUpdateCustomGroup={handleUpdateCustomGroup}
+              onDeleteCustomGroup={handleDeleteCustomGroup}
+              onNavigate={setCurrentPage}
+            />
+          )}
+
+          {currentPage === 'templates' && (
+            <TemplatesPage
               templates={templates}
-              selectedTemplateId={selectedTemplateId}
-              onSelectTemplate={handleSelectTemplate}
-              metrics={metrics}
-              totalRecipients={selectedStudentIds.size}
-              sampleStudentName={sampleStudent?.name}
-              onOpenPhonePreview={() => setIsPhonePreviewOpen(true)}
+              onAddTemplate={(tpl) => setTemplates((prev) => [tpl, ...prev])}
+              onDeleteTemplate={(id) => setTemplates((prev) => prev.filter((t) => t.id !== id))}
+              onApplyTemplate={(tpl) => handleSelectTemplate(tpl.id)}
+              onNavigate={setCurrentPage}
             />
+          )}
+
+          {currentPage === 'logs' && (
+            <BroadcastLogsPage
+              records={historyRecords}
+              onRefresh={fetchHistory}
+              isLoading={isLoadingHistory}
+              onNavigate={setCurrentPage}
+              onReuseMessage={(msg) => setMessage(msg)}
+            />
+          )}
+
+          {currentPage === 'students' && (
+            <StudentsPage
+              students={students}
+              classes={classes}
+              selectedClassId={selectedClassId}
+              selectedSectionId={selectedSectionId}
+              onClassChange={handleClassChange}
+              onSectionChange={handleSectionChange}
+              onNavigate={setCurrentPage}
+            />
+          )}
+
+          {currentPage === 'add-student' && (
+            <AddStudentPage
+              classes={classes}
+              onAddStudent={(newStudent) => {
+                setStudents((prev) => [newStudent, ...prev]);
+                setDisplayedStudents((prev) => [newStudent, ...prev]);
+              }}
+              onNavigate={setCurrentPage}
+            />
+          )}
+
+          {/* 8. Footer Ribbon */}
+          <div className="pt-4 pb-2 text-center text-xs text-ink-faint">
+            British Standard School &bull; SMS Message Delivery System
           </div>
 
-        </div>
-
-        {/* 4. Action Bar */}
-        <ActionBar
-          onSearchClick={() => {
-            const el = document.getElementById('class-select');
-            el?.focus();
-          }}
-          onResetClick={handleReset}
-          onSendClick={() => setIsSendConfirmOpen(true)}
-          onTestSendClick={() => setIsTestSmsOpen(true)}
-          totalRecipientsSelected={selectedStudentIds.size}
-          isMessageEmpty={!message.trim()}
-          totalSmsCost={metrics.totalSmsCost}
-        />
-
-        {/* 5. Student Table */}
-        <StudentTable
-          students={filteredStudents}
-          selectedStudentIds={selectedStudentIds}
-          onToggleStudent={handleToggleStudent}
-          onToggleSelectAll={handleToggleSelectAll}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onQuickSendSingle={(student) => {
-            setSingleStudentForTest(student);
-            setIsTestSmsOpen(true);
-          }}
-        />
-
-      </main>
-
-      {/* 6. Iconic Bottom Ribbon */}
-      <footer className="mt-auto py-3 bg-[#fafafa] border-t border-gray-300">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center space-y-1">
-          <div className="relative inline-block">
-            <div className="px-10 py-1 bg-[#1b2b8c] text-white font-serif italic text-lg font-bold tracking-wider rounded shadow-xs">
-              bona fide
-            </div>
-          </div>
-          <p className="text-[10px] text-gray-500 font-medium">
-            SMS Message Delivery System
-          </p>
-        </div>
-      </footer>
+        </main>
+      </div>
 
       {/* Modals */}
       <PhonePreviewModal
@@ -547,14 +698,15 @@ export function App() {
         isOpen={isHistoryOpen}
         onClose={() => setIsHistoryOpen(false)}
         records={historyRecords}
+        onRefresh={fetchHistory}
+        isLoading={isLoadingHistory}
       />
 
       <TemplateManagerModal
         isOpen={isTemplatesOpen}
         onClose={() => setIsTemplatesOpen(false)}
         templates={templates}
-        onAddTemplate={(newTpl) => setTemplates((prev) => [newTpl, ...prev])}
-        onDeleteTemplate={(id) => setTemplates((prev) => prev.filter((t) => t.id !== id))}
+        onRefreshTemplates={fetchTemplates}
         onApplyTemplate={(tpl) => {
           setSelectedTemplateId(tpl.id);
           setMessage(tpl.body);
@@ -570,11 +722,11 @@ export function App() {
         message={
           singleStudentForTest
             ? message
-                .replace(/{StudentName}/g, singleStudentForTest.name)
-                .replace(/{StudentID}/g, singleStudentForTest.id)
-                .replace(/{Class}/g, singleStudentForTest.className)
-                .replace(/{Section}/g, singleStudentForTest.section)
-                .replace(/{Roll}/g, singleStudentForTest.roll || '01')
+              .replace(/{StudentName}/g, singleStudentForTest.name)
+              .replace(/{StudentID}/g, singleStudentForTest.id)
+              .replace(/{Class}/g, singleStudentForTest.className)
+              .replace(/{Section}/g, singleStudentForTest.section)
+              .replace(/{Roll}/g, singleStudentForTest.roll || '01')
             : message
         }
       />
@@ -585,15 +737,8 @@ export function App() {
         classes={classes}
         onAddStudent={(newStudent) => {
           setStudents((prev) => [newStudent, ...prev]);
-          const currentCls = classes.find((c) => c.id === selectedClassId);
-          const currentSec = currentCls?.sections.find((s) => s.id === selectedSectionId);
-          if (
-            currentCls?.name.toLowerCase() === newStudent.className.toLowerCase() &&
-            currentSec?.name.toLowerCase() === newStudent.section.toLowerCase()
-          ) {
-            setDisplayedStudents((prev) => [newStudent, ...prev]);
-            setSelectedStudentIds((prev) => new Set(prev).add(newStudent.id));
-          }
+          setDisplayedStudents((prev) => [newStudent, ...prev]);
+          setSelectedStudentIds((prev) => new Set(prev).add(newStudent.id));
         }}
       />
 

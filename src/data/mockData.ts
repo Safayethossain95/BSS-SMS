@@ -329,7 +329,7 @@ export const INITIAL_TEMPLATES: SmsTemplate[] = [
     id: 'tpl-1',
     title: 'Emergency School Closure Notice',
     category: 'emergency',
-    body: 'Dear Guardian, Please be informed that Bona Fide School will remain closed tomorrow due to unavoidable circumstances. Online classes will follow the normal timetable.',
+    body: 'Dear Guardian, Please be informed that BSS School will remain closed tomorrow due to unavoidable circumstances. Online classes will follow the normal timetable.',
   },
   {
     id: 'tpl-2',
@@ -353,13 +353,13 @@ export const INITIAL_TEMPLATES: SmsTemplate[] = [
     id: 'tpl-5',
     title: 'Term Exam Schedule Released',
     category: 'exam',
-    body: 'Dear Guardian, The upcoming Term Examination routine and syllabus have been published on the school portal. Exams commence from next Sunday. Bona Fide School.',
+    body: 'Dear Guardian, The upcoming Term Examination routine and syllabus have been published on the school portal. Exams commence from next Sunday. BSS School.',
   },
   {
     id: 'tpl-6',
     title: 'Holiday Greetings (Eid / Puja / New Year)',
     category: 'general',
-    body: 'Bona Fide School wishes a joyous holiday to {StudentName} and family! Classes will resume on schedule after the vacation.',
+    body: 'BSS School wishes a joyous holiday to {StudentName} and family! Classes will resume on schedule after the vacation.',
   },
 ];
 

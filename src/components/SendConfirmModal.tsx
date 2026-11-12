@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
-import {
-  X,
-  SendHorizonal,
-  CheckCircle2,
-  Loader2
-} from 'lucide-react';
+import { X, Send, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import type { SmsMetrics, Student } from '../types';
+import type { Student, SmsMetrics } from '../types';
 
 interface SendConfirmModalProps {
   isOpen: boolean;
@@ -14,7 +9,7 @@ interface SendConfirmModalProps {
   message: string;
   selectedStudents: Student[];
   metrics: SmsMetrics;
-  onSendSuccess: (recipients: Student[], smsMessage: string) => void;
+  onSendSuccess: (recipients: Student[], message: string) => void;
 }
 
 export const SendConfirmModal: React.FC<SendConfirmModalProps> = ({
@@ -26,155 +21,129 @@ export const SendConfirmModal: React.FC<SendConfirmModalProps> = ({
   onSendSuccess,
 }) => {
   const [isSending, setIsSending] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [isDone, setIsDone] = useState(false);
 
   if (!isOpen) return null;
 
   const handleConfirmSend = () => {
     setIsSending(true);
-    setProgress(15);
 
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 90) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setProgress(100);
-            setIsSending(false);
-            setIsDone(true);
-            confetti({
-              particleCount: 80,
-              spread: 60,
-              origin: { y: 0.6 },
-            });
-            onSendSuccess(selectedStudents, message);
-          }, 350);
-          return 90;
-        }
-        return prev + 25;
+    setTimeout(() => {
+      setIsSending(false);
+      setIsDone(true);
+
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.6 },
       });
-    }, 250);
-  };
 
-  const handleFinish = () => {
-    setIsDone(false);
-    setProgress(0);
-    setIsSending(false);
-    onClose();
+      onSendSuccess(selectedStudents, message);
+
+      setTimeout(() => {
+        setIsDone(false);
+        onClose();
+      }, 1400);
+    }, 1000);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
       <div
-        className="relative bg-slate-100 border border-slate-300 rounded-2xl p-6 max-w-md w-full shadow-xl space-y-4"
+        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 max-w-lg w-full shadow-2xl space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
-        {!isSending && (
-          <button
-            type="button"
-            onClick={handleFinish}
-            className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
-
-        <div>
-          <h3 className="text-base font-bold text-slate-900">
-            {isDone ? 'SMS Sent Successfully' : 'Confirm SMS Broadcast'}
-          </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {isDone
-              ? 'Your messages have been delivered to telco gateways.'
-              : 'Please review before sending.'}
-          </p>
+        <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-zinc-800">
+          <div className="flex items-center gap-2.5">
+            <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
+              <Send className="w-4 h-4" />
+            </span>
+            <div>
+              <h3 className="text-base font-bold text-ink">Confirm SMS Dispatch</h3>
+              <p className="text-xs text-ink-muted">Review broadcast details before sending</p>
+            </div>
+          </div>
+          {!isSending && !isDone && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 text-ink-muted hover:text-ink rounded-lg hover:bg-surface-2 transition cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
-        {!isDone && (
+        {isDone ? (
+          <div className="py-8 text-center space-y-2">
+            <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto animate-bounce" />
+            <h4 className="text-base font-bold text-ink">Broadcast Dispatched!</h4>
+            <p className="text-xs text-ink-muted">
+              {selectedStudents.length} SMS message{selectedStudents.length === 1 ? '' : 's'} queued for instant delivery.
+            </p>
+          </div>
+        ) : (
           <>
-            {/* Quick Metrics */}
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="bg-white p-2.5 rounded-lg border border-slate-300 shadow-2xs">
-                <span className="text-[10px] text-slate-500 block uppercase">Recipients</span>
-                <span className="text-sm font-bold text-slate-800">{selectedStudents.length}</span>
+            {/* Warning strip */}
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 text-xs">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <span>
+                You are about to broadcast this SMS to <strong>{selectedStudents.length}</strong> recipients.
+              </span>
+            </div>
+
+            {/* Metrics Breakdown */}
+            <div className="grid grid-cols-3 gap-2.5 p-3 bg-surface-2 rounded-xl border border-gray-200 dark:border-zinc-800 text-center text-xs">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-ink-faint block">Recipients</span>
+                <span className="font-bold text-sm text-ink">{selectedStudents.length}</span>
               </div>
-              <div className="bg-white p-2.5 rounded-lg border border-slate-300 shadow-2xs">
-                <span className="text-[10px] text-slate-500 block uppercase">Per Person</span>
-                <span className="text-sm font-bold text-[#1b1e42]">{metrics.segments} SMS</span>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-ink-faint block">Segments / SMS</span>
+                <span className="font-bold text-sm text-ink">{metrics.segments}</span>
               </div>
-              <div className="bg-white p-2.5 rounded-lg border border-slate-300 shadow-2xs">
-                <span className="text-[10px] text-slate-500 block uppercase">Total Credits</span>
-                <span className="text-sm font-bold text-slate-800">{metrics.totalSmsCost}</span>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-ink-faint block">Total Cost</span>
+                <span className="font-bold text-sm text-[#1b1e42] dark:text-accent">{metrics.totalSmsCost} Credits</span>
               </div>
             </div>
 
             {/* Message Preview */}
             <div>
-              <span className="text-xs font-semibold text-slate-700 block mb-1">Message:</span>
-              <div className="bg-white p-3 rounded-lg border border-slate-300 text-xs text-slate-700 font-mono max-h-28 overflow-y-auto whitespace-pre-wrap shadow-2xs">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-ink-faint block mb-1">
+                Message Preview:
+              </span>
+              <div className="p-3 bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-xl text-xs text-ink whitespace-pre-wrap leading-relaxed max-h-36 overflow-y-auto font-sans">
                 {message}
               </div>
             </div>
 
-            {/* Progress Bar during sending */}
-            {isSending && (
-              <div className="space-y-1.5 pt-1">
-                <div className="flex justify-between text-xs text-slate-600">
-                  <span className="flex items-center gap-1.5">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1b1e42]" />
-                    Transmitting...
-                  </span>
-                  <span className="font-semibold text-[#1b1e42]">{progress}%</span>
-                </div>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                  <div
-                    className="h-full bg-[#1b1e42] transition-all duration-300 rounded-full"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Buttons */}
-            {!isSending && (
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmSend}
-                  className="px-5 py-2 rounded-lg bg-[#1b1e42] hover:bg-[#d91920] text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
-                >
-                  <SendHorizonal className="w-3.5 h-3.5" />
-                  <span>Send Now</span>
-                </button>
-              </div>
-            )}
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-200 dark:border-zinc-800">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSending}
+                className="px-4 py-2 text-xs font-semibold rounded-full bg-surface-2 hover:bg-surface-3 text-ink transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmSend}
+                disabled={isSending || selectedStudents.length === 0}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white font-semibold text-xs sm:text-sm rounded-full transition shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                {isSending ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                <span>Confirm &amp; Send</span>
+              </button>
+            </div>
           </>
         )}
-
-        {isDone && (
-          <div className="text-center py-4 space-y-3">
-            <CheckCircle2 className="w-12 h-12 text-[#1b1e42] mx-auto" />
-            <p className="text-xs text-slate-600">
-              Dispatched to {selectedStudents.length} student guardians.
-            </p>
-            <button
-              type="button"
-              onClick={handleFinish}
-              className="px-5 py-2 rounded-lg bg-[#1b1e42] hover:bg-[#d91920] text-white text-xs font-semibold cursor-pointer shadow-xs active:scale-95"
-            >
-              Done
-            </button>
-          </div>
-        )}
-
       </div>
     </div>
   );

@@ -38,7 +38,6 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
   initialSelectedClassId,
   initialSelectedSectionId,
 }) => {
-  // Form State
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [groupName, setGroupName] = useState('');
   const [selectedClassId, setSelectedClassId] = useState('');
@@ -46,11 +45,9 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
   const [stagedTargets, setStagedTargets] = useState<CustomGroupTarget[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Quick Append to Existing Group mode
   const [quickAppendGroupId, setQuickAppendGroupId] = useState('');
   const [quickAppendSuccess, setQuickAppendSuccess] = useState(false);
 
-  // Sync initial class & section when modal opens
   useEffect(() => {
     if (isOpen) {
       const clsId = initialSelectedClassId || (classes[0]?.id ?? '');
@@ -72,7 +69,7 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
       setQuickAppendGroupId(customGroups[0]?.id || '');
       setQuickAppendSuccess(false);
     }
-  }, [isOpen, initialSelectedClassId, initialSelectedSectionId, classes]);
+  }, [isOpen, initialSelectedClassId, initialSelectedSectionId, classes, customGroups]);
 
   if (!isOpen) return null;
 
@@ -113,7 +110,6 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
     return matchedStudentIds.size;
   };
 
-  // Add selected class & section to staged targets
   const handleAddTargetToStage = () => {
     if (!selectedClassId) {
       setErrorMessage('Please select a class first.');
@@ -134,7 +130,6 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
       }
     }
 
-    // Check duplicate
     const alreadyExists = stagedTargets.some(
       (t) => t.classId === cls.id && t.sectionId === secId
     );
@@ -159,7 +154,6 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
     setStagedTargets((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  // Save new or updated group
   const handleSaveGroup = (e: React.FormEvent) => {
     e.preventDefault();
     if (!groupName.trim()) {
@@ -201,7 +195,6 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
     setGroupName(group.name);
     setStagedTargets([...group.targets]);
     setErrorMessage('');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCancelEdit = () => {
@@ -211,7 +204,6 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
     setErrorMessage('');
   };
 
-  // Quick append current selected class/sec to an existing group
   const handleQuickAppend = () => {
     if (!quickAppendGroupId) return;
     const targetGroup = customGroups.find((g) => g.id === quickAppendGroupId);
@@ -261,24 +253,24 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
       <div
-        className="relative bg-[#fafafa] border border-gray-300 rounded-2xl max-w-3xl w-full shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl max-w-3xl w-full shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 bg-white border-b border-gray-300 flex items-center justify-between">
+        <div className="p-4 bg-surface border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#1b1e42] flex items-center justify-center text-white shadow-2xs">
+            <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
               <FolderPlus className="w-4 h-4" />
-            </div>
+            </span>
             <div>
-              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-ink flex items-center gap-2">
                 Custom Groups Manager
-                <span className="text-[10px] font-normal px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-2 text-ink border border-gray-200 dark:border-zinc-800">
                   {customGroups.length} Groups
                 </span>
               </h3>
-              <p className="text-[11px] text-gray-500">
-                Group multiple classes and sections together. Once created, they appear in Available Groups.
+              <p className="text-[11px] text-ink-muted">
+                Combine multiple classes and sections into reusable target groups.
               </p>
             </div>
           </div>
@@ -286,7 +278,7 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+            className="p-1.5 text-ink-muted hover:text-ink rounded-lg hover:bg-surface-2 transition cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -295,32 +287,32 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
         {/* Modal Scrollable Content */}
         <div className="p-4 overflow-y-auto space-y-4 flex-1">
 
-          {/* Quick Append Box if groups exist */}
+          {/* Quick Append Box */}
           {customGroups.length > 0 && !editingGroupId && (
-            <div className="p-3 bg-white rounded-xl border border-gray-300 shadow-2xs">
+            <div className="p-3 bg-surface-2 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-2xs">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-gray-800 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#1b1e42]" />
-                  Quick Add Currently Selected Class &amp; Section:
+                <span className="text-xs font-semibold text-ink flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#1b1e42] dark:text-accent" />
+                  Quick Add Active Selection:
                 </span>
                 {quickAppendSuccess && (
-                  <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
-                    <Check className="w-3 h-3" /> Added successfully!
+                  <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                    <Check className="w-3 h-3" /> Added!
                   </span>
                 )}
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs px-2.5 py-1 bg-gray-100 text-gray-800 font-medium rounded-lg border border-gray-200">
+                <span className="text-xs px-2.5 py-1 bg-surface text-ink font-medium rounded-full border border-gray-200 dark:border-zinc-800 shadow-2xs">
                   {currentClass?.name || 'Class'} &bull; {sections.find(s => s.id === selectedSectionId)?.name || 'All Sections'}
                 </span>
 
-                <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+                <ChevronRight className="w-3.5 h-3.5 text-ink-faint" />
 
                 <select
                   value={quickAppendGroupId}
                   onChange={(e) => setQuickAppendGroupId(e.target.value)}
-                  className="bg-white border border-gray-300 rounded-lg px-2.5 py-1 text-xs text-gray-800 focus:outline-none focus:border-[#1b1e42] shadow-2xs"
+                  className="bg-surface border border-gray-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-ink focus:outline-none focus:border-[#1b1e42] shadow-2xs font-medium cursor-pointer"
                 >
                   {customGroups.map((g) => (
                     <option key={g.id} value={g.id}>
@@ -332,9 +324,9 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
                 <button
                   type="button"
                   onClick={handleQuickAppend}
-                  className="px-3 py-1 bg-white hover:bg-gray-100 text-[#1b1e42] font-semibold text-xs rounded-lg border border-gray-300 shadow-2xs transition cursor-pointer"
+                  className="px-4 py-1.5 bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white font-semibold text-xs rounded-full shadow-2xs transition cursor-pointer"
                 >
-                  + Add to this Group
+                  + Add to Group
                 </button>
               </div>
             </div>
@@ -343,21 +335,19 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
           {/* Form: Create or Edit Custom Group */}
           <form
             onSubmit={handleSaveGroup}
-            className={`p-4 rounded-xl border shadow-2xs transition-colors ${
-              editingGroupId ? 'bg-amber-50/60 border-amber-300' : 'bg-white border-gray-300'
-            }`}
+            className="p-4 rounded-xl border border-gray-200 dark:border-zinc-800 bg-surface-2/40 shadow-2xs space-y-3"
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-ink-faint flex items-center gap-1.5">
                 {editingGroupId ? (
                   <>
-                    <Edit2 className="w-3.5 h-3.5 text-amber-700" />
-                    Editing Custom Group: <span className="underline">{groupName}</span>
+                    <Edit2 className="w-3.5 h-3.5 text-amber-600" />
+                    Editing: <span className="text-ink normal-case font-bold">{groupName}</span>
                   </>
                 ) : (
                   <>
-                    <Plus className="w-3.5 h-3.5 text-[#1b1e42]" />
-                    Create New Custom Group
+                    <Plus className="w-3.5 h-3.5 text-[#1b1e42] dark:text-accent" />
+                    Create Custom Group
                   </>
                 )}
               </span>
@@ -366,7 +356,7 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="text-xs text-gray-600 hover:text-gray-900 underline cursor-pointer"
+                  className="text-xs text-ink-muted hover:text-ink underline cursor-pointer"
                 >
                   Cancel Edit
                 </button>
@@ -375,38 +365,37 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
 
             {/* Error banner */}
             {errorMessage && (
-              <div className="mb-3 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
+              <div className="p-2.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl text-xs text-red-700 dark:text-red-300">
                 {errorMessage}
               </div>
             )}
 
             {/* Group Name */}
-            <div className="mb-3">
-              <label htmlFor="group-name-input" className="block text-[11px] font-semibold text-gray-700 mb-1">
-                Group Name: <span className="text-red-500">*</span>
+            <div>
+              <label htmlFor="group-name-input" className="block text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1 select-none">
+                Group Name: <span className="text-brand-red">*</span>
               </label>
               <input
                 id="group-name-input"
                 type="text"
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
-                placeholder="e.g., Morning Shift Primary, Junior Classes (Play+Nur), Bus Route A..."
-                className="w-full bg-white border border-gray-300 focus:border-[#1b1e42] rounded-lg px-3 py-1.5 text-xs text-gray-900 placeholder-gray-400 focus:outline-none shadow-2xs"
+                placeholder="e.g. Primary Wing, Junior Play+Nur, Morning Shift..."
+                className="w-full bg-surface-2 border border-transparent focus:border-[#1b1e42] dark:focus:border-accent text-ink rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium outline-none transition-colors"
               />
             </div>
 
-            {/* Section Picker for this Group */}
-            <div className="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-              <span className="block text-[11px] font-semibold text-gray-700 mb-1.5">
+            {/* Class & Section Picker */}
+            <div className="p-3 bg-surface rounded-xl border border-gray-200 dark:border-zinc-800">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1.5 select-none">
                 Add Classes &amp; Sections to this Group:
-              </span>
+              </label>
 
               <div className="flex flex-wrap items-center gap-2">
-                {/* Class selector */}
                 <select
                   value={selectedClassId}
                   onChange={(e) => handleClassChange(e.target.value)}
-                  className="bg-white border border-gray-300 rounded-lg px-2.5 py-1 text-xs text-gray-800 focus:outline-none focus:border-[#1b1e42] shadow-2xs"
+                  className="bg-surface-2 border border-transparent focus:border-[#1b1e42] text-ink rounded-xl px-3 py-2 text-xs font-medium outline-none cursor-pointer"
                 >
                   <option value="" disabled>Select Class</option>
                   {classes.map((c) => (
@@ -416,11 +405,10 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
                   ))}
                 </select>
 
-                {/* Section selector */}
                 <select
                   value={selectedSectionId}
                   onChange={(e) => setSelectedSectionId(e.target.value)}
-                  className="bg-white border border-gray-300 rounded-lg px-2.5 py-1 text-xs text-gray-800 focus:outline-none focus:border-[#1b1e42] shadow-2xs"
+                  className="bg-surface-2 border border-transparent focus:border-[#1b1e42] text-ink rounded-xl px-3 py-2 text-xs font-medium outline-none cursor-pointer"
                 >
                   <option value="all">All Sections</option>
                   {sections.map((s) => (
@@ -430,27 +418,25 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
                   ))}
                 </select>
 
-                {/* Add button */}
                 <button
                   type="button"
                   onClick={handleAddTargetToStage}
-                  className="flex items-center gap-1 px-3 py-1 bg-white hover:bg-gray-100 text-[#1b1e42] font-semibold text-xs rounded-lg border border-gray-300 shadow-2xs cursor-pointer transition active:scale-95"
+                  className="inline-flex items-center gap-1 px-4 py-2 bg-surface-2 hover:bg-surface-3 text-ink font-semibold text-xs rounded-full border border-gray-200 dark:border-zinc-800 transition shadow-2xs cursor-pointer active:scale-95"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add to Group</span>
                 </button>
               </div>
 
-              {/* Staged items badge list */}
-              <div className="mt-2.5 pt-2 border-t border-gray-200">
-                <span className="text-[10px] text-gray-500 block mb-1">
-                  Included in this group ({stagedTargets.length} sections &bull;{' '}
-                  {calculateGroupStudentCount(stagedTargets)} students):
+              {/* Staged Badges */}
+              <div className="mt-3 pt-2.5 border-t border-gray-200 dark:border-zinc-800">
+                <span className="text-[10.5px] font-bold uppercase tracking-wider text-ink-faint block mb-1.5">
+                  Included Targets ({stagedTargets.length} sections &bull; {calculateGroupStudentCount(stagedTargets)} students):
                 </span>
 
                 {stagedTargets.length === 0 ? (
-                  <div className="text-xs text-gray-400 italic py-1">
-                    No classes or sections added to this group yet. Use dropdowns above and click &quot;Add to Group&quot;.
+                  <div className="text-xs text-ink-faint italic py-1">
+                    No classes or sections added yet. Select from dropdowns and click &quot;Add to Group&quot;.
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-1.5">
@@ -459,19 +445,19 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
                       return (
                         <span
                           key={`${target.classId}-${target.sectionId}-${idx}`}
-                          className="inline-flex items-center gap-1.5 bg-white border border-gray-300 text-gray-800 text-xs px-2.5 py-1 rounded-md shadow-2xs"
+                          className="inline-flex items-center gap-1.5 bg-surface-2 border border-gray-200 dark:border-zinc-800 text-ink text-xs px-3 py-1 rounded-full shadow-2xs"
                         >
-                          <span className="font-medium">{target.className}</span>
-                          <span className="text-gray-400">&bull;</span>
-                          <span className="text-slate-600">{target.sectionName}</span>
-                          <span className="text-[10px] bg-gray-100 text-gray-600 px-1 rounded">
+                          <span className="font-semibold">{target.className}</span>
+                          <span className="text-ink-faint">&bull;</span>
+                          <span className="text-ink-muted">{target.sectionName}</span>
+                          <span className="text-[10px] bg-surface text-ink px-1.5 py-0.2 rounded-full border border-gray-200 dark:border-zinc-800 font-mono">
                             {count} std
                           </span>
                           <button
                             type="button"
                             onClick={() => handleRemoveTarget(idx)}
-                            className="p-0.5 text-gray-400 hover:text-red-600 rounded transition cursor-pointer"
-                            title="Remove from group"
+                            className="p-0.5 text-ink-faint hover:text-brand-red transition cursor-pointer"
+                            title="Remove"
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -484,44 +470,41 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
             </div>
 
             {/* Save Buttons */}
-            <div className="flex items-center justify-end gap-2">
+            <div className="flex items-center justify-end gap-2 pt-1">
               {editingGroupId && (
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="px-3.5 py-1.5 text-xs font-medium rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold rounded-full bg-surface-2 hover:bg-surface-3 text-ink transition cursor-pointer"
                 >
                   Cancel
                 </button>
               )}
               <button
                 type="submit"
-                className="flex items-center gap-1.5 px-4 py-1.5 bg-[#1b1e42] hover:bg-[#d91920] text-white font-semibold text-xs rounded-lg transition cursor-pointer shadow-xs active:scale-95"
+                className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white font-semibold text-xs sm:text-sm rounded-full transition shadow-sm active:scale-95 cursor-pointer"
               >
                 <Check className="w-3.5 h-3.5" />
-                <span>{editingGroupId ? 'Update Custom Group' : 'Save Custom Group'}</span>
+                <span>{editingGroupId ? 'Update Group' : 'Save Custom Group'}</span>
               </button>
             </div>
           </form>
 
           {/* List of Existing Custom Groups */}
-          <div className="space-y-2">
+          <div className="space-y-2.5 pt-1">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-gray-600" />
+              <span className="text-xs font-bold uppercase tracking-wider text-ink-faint flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5" />
                 Existing Custom Groups ({customGroups.length})
-              </span>
-              <span className="text-[11px] text-gray-500">
-                These are automatically available in Available Group
               </span>
             </div>
 
             {customGroups.length === 0 ? (
-              <div className="p-6 bg-white border border-gray-300 rounded-xl text-center text-xs text-gray-500 shadow-2xs">
+              <div className="p-6 bg-surface-2/40 border border-gray-200 dark:border-zinc-800 rounded-2xl text-center text-xs text-ink-muted shadow-2xs">
                 No custom groups created yet. Combine multiple classes above to target them together.
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {customGroups.map((group) => {
                   const studentCount = calculateGroupStudentCount(group.targets);
                   const isCurrentEditing = editingGroupId === group.id;
@@ -529,20 +512,20 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
                   return (
                     <div
                       key={group.id}
-                      className={`p-3 rounded-xl border transition shadow-2xs flex flex-col justify-between ${
+                      className={`p-3.5 rounded-2xl border transition shadow-2xs flex flex-col justify-between ${
                         isCurrentEditing
-                          ? 'bg-amber-50/70 border-amber-300'
-                          : 'bg-white border-gray-300 hover:border-gray-400'
+                          ? 'bg-amber-50/60 dark:bg-amber-950/30 border-amber-300'
+                          : 'bg-surface border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700'
                       }`}
                     >
                       <div>
-                        {/* Top row */}
-                        <div className="flex items-start justify-between gap-2 mb-1.5">
+                        {/* Top info */}
+                        <div className="flex items-start justify-between gap-2 mb-2">
                           <div>
-                            <h4 className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                            <h4 className="text-xs font-bold text-ink">
                               {group.name}
                             </h4>
-                            <span className="text-[10px] text-gray-500">
+                            <span className="text-[10px] text-ink-faint">
                               Created: {group.createdAt}
                             </span>
                           </div>
@@ -551,7 +534,7 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
                             <button
                               type="button"
                               onClick={() => handleStartEdit(group)}
-                              className="p-1 text-gray-500 hover:text-[#1b1e42] hover:bg-gray-100 rounded transition cursor-pointer"
+                              className="p-1.5 text-ink-muted hover:text-ink hover:bg-surface-2 rounded-full transition cursor-pointer"
                               title="Edit group"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
@@ -563,7 +546,7 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
                                   onDeleteCustomGroup(group.id);
                                 }
                               }}
-                              className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition cursor-pointer"
+                              className="p-1.5 text-ink-faint hover:text-brand-red hover:bg-red-50 dark:hover:bg-red-950/50 rounded-full transition cursor-pointer"
                               title="Delete group"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -576,7 +559,7 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
                           {group.targets.map((t, idx) => (
                             <span
                               key={idx}
-                              className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200"
+                              className="text-[10.5px] px-2 py-0.5 rounded-full bg-surface-2 text-ink border border-gray-200 dark:border-zinc-800 font-medium"
                             >
                               {t.className} &bull; {t.sectionName}
                             </span>
@@ -584,14 +567,14 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
                         </div>
                       </div>
 
-                      {/* Footer Info */}
-                      <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-600">
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3 h-3 text-gray-500" />
-                          <strong>{studentCount}</strong> students matching
+                      {/* Footer */}
+                      <div className="pt-2 border-t border-gray-200 dark:border-zinc-800 flex items-center justify-between text-xs text-ink-muted">
+                        <span className="flex items-center gap-1 text-[11px]">
+                          <Users className="w-3 h-3 text-ink-faint" />
+                          <strong className="text-ink">{studentCount}</strong> students matching
                         </span>
-                        <span className="text-[10px] text-emerald-700 font-medium bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                          Active in Available
+                        <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                          In Available
                         </span>
                       </div>
                     </div>
@@ -604,11 +587,11 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-3 bg-white border-t border-gray-300 flex items-center justify-end">
+        <div className="p-3.5 bg-surface border-t border-gray-200 dark:border-zinc-800 flex items-center justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 text-xs font-semibold rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 transition cursor-pointer shadow-2xs"
+            className="px-5 py-2 text-xs font-semibold rounded-full bg-surface-2 hover:bg-surface-3 text-ink transition cursor-pointer shadow-2xs"
           >
             Close
           </button>
@@ -618,4 +601,3 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
     </div>
   );
 };
-
