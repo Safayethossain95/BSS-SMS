@@ -8,6 +8,7 @@ import {
   Users,
   Check,
   ChevronRight,
+  ChevronDown,
   Layers,
   Sparkles
 } from 'lucide-react';
@@ -309,17 +310,20 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
 
                 <ChevronRight className="w-3.5 h-3.5 text-ink-faint" />
 
-                <select
-                  value={quickAppendGroupId}
-                  onChange={(e) => setQuickAppendGroupId(e.target.value)}
-                  className="bg-surface border border-gray-200 dark:border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-ink focus:outline-none focus:border-[#1b1e42] shadow-2xs font-medium cursor-pointer"
-                >
-                  {customGroups.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      Add to &quot;{g.name}&quot;
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={quickAppendGroupId}
+                    onChange={(e) => setQuickAppendGroupId(e.target.value)}
+                    className="bg-surface border border-gray-200 dark:border-zinc-800 rounded-xl pl-3 pr-7 py-1.5 text-xs text-ink focus:outline-none focus:border-[#1b1e42] shadow-2xs font-medium appearance-none cursor-pointer"
+                  >
+                    {customGroups.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        Add to &quot;{g.name}&quot;
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
+                </div>
 
                 <button
                   type="button"
@@ -392,31 +396,37 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
               </label>
 
               <div className="flex flex-wrap items-center gap-2">
-                <select
-                  value={selectedClassId}
-                  onChange={(e) => handleClassChange(e.target.value)}
-                  className="bg-surface-2 border border-transparent focus:border-[#1b1e42] text-ink rounded-xl px-3 py-2 text-xs font-medium outline-none cursor-pointer"
-                >
-                  <option value="" disabled>Select Class</option>
-                  {classes.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={selectedClassId}
+                    onChange={(e) => handleClassChange(e.target.value)}
+                    className="bg-surface-2 border border-transparent focus:border-[#1b1e42] text-ink rounded-xl pl-3 pr-7 py-2 text-xs font-medium outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled>Select Class</option>
+                    {classes.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
+                </div>
 
-                <select
-                  value={selectedSectionId}
-                  onChange={(e) => setSelectedSectionId(e.target.value)}
-                  className="bg-surface-2 border border-transparent focus:border-[#1b1e42] text-ink rounded-xl px-3 py-2 text-xs font-medium outline-none cursor-pointer"
-                >
-                  <option value="all">All Sections</option>
-                  {sections.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={selectedSectionId}
+                    onChange={(e) => setSelectedSectionId(e.target.value)}
+                    className="bg-surface-2 border border-transparent focus:border-[#1b1e42] text-ink rounded-xl pl-3 pr-7 py-2 text-xs font-medium outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="all">All Sections</option>
+                    {sections.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
+                </div>
 
                 <button
                   type="button"

@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Smartphone, MessageSquareQuote } from 'lucide-react';
+import { Smartphone, MessageSquareQuote, ChevronDown } from 'lucide-react';
 import type { SmsTemplate, SmsMetrics } from '../types';
 
 interface MessageComposerProps {
@@ -54,19 +54,22 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
 
         {/* Template Picker & Preview Trigger */}
         <div className="flex items-center gap-2">
-          <select
-            id="template-select"
-            value={selectedTemplateId}
-            onChange={(e) => onSelectTemplate(e.target.value)}
-            className="bg-surface-2 border border-gray-200 dark:border-zinc-800 focus:border-[#1b1e42] dark:focus:border-accent rounded-xl px-3 py-1.5 text-xs text-ink font-medium outline-none cursor-pointer max-w-[210px] truncate transition-colors"
-          >
-            <option value="">-- Choose Template --</option>
-            {templates.map((tpl) => (
-              <option key={tpl.id} value={tpl.id}>
-                {tpl.title}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              id="template-select"
+              value={selectedTemplateId}
+              onChange={(e) => onSelectTemplate(e.target.value)}
+              className="bg-surface-2 border border-gray-200 dark:border-zinc-800 focus:border-[#1b1e42] dark:focus:border-accent rounded-xl pl-3 pr-7 py-1.5 text-xs text-ink font-medium outline-none appearance-none cursor-pointer max-w-[210px] truncate transition-colors"
+            >
+              <option value="">Template</option>
+              {templates.map((tpl) => (
+                <option key={tpl.id} value={tpl.id}>
+                  {tpl.title}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
+          </div>
 
           <button
             type="button"
@@ -118,7 +121,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
       </div>
 
       {/* Live Metrics Pill Strip */}
-      <div className="flex flex-wrap items-center justify-between pt-2.5 border-t border-gray-200 dark:border-zinc-800 mt-2 gap-2 text-xs">
+      <div className="flex flex-wrap items-center justify-between pt-2.5 border-t border-gray-200 dark:border-zinc-800 mt-2 gap-x-2 gap-y-[15px] text-xs">
         <div className="flex flex-wrap items-center gap-2">
           <span className="px-2.5 py-1 rounded-full bg-surface-2 border border-gray-200 dark:border-zinc-800 text-ink-muted text-[11.5px]">
             Length: <strong className="text-ink">{metrics.charCount}</strong>
@@ -134,8 +137,8 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
           </span>
         </div>
 
-        <div className='mt-2 md:mt-0'>
-          <span className="px-3 py-1  rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold text-xs">
+        <div>
+          <span className="px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300 font-bold text-xs">
             {metrics.totalSmsCost} Credits
           </span>
         </div>

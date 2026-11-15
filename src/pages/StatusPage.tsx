@@ -4,9 +4,7 @@ import {
   Search,
   Filter,
   X,
-  Send,
   RotateCcw,
-  Download,
   Copy,
   Check,
   ChevronDown,
@@ -18,12 +16,11 @@ import {
   Layers,
   Smartphone
 } from 'lucide-react';
-import type { ClassInfo, CustomGroup, AppPage, StatusLogRecord } from '../types';
+import type { ClassInfo, CustomGroup, StatusLogRecord } from '../types';
 
 interface StatusPageProps {
   classes: ClassInfo[];
   customGroups: CustomGroup[];
-  onNavigate: (page: AppPage) => void;
 }
 
 // Initial realistic status logs data
@@ -235,7 +232,6 @@ const INITIAL_STATUS_LOGS: StatusLogRecord[] = [
 export const StatusPage: React.FC<StatusPageProps> = ({
   classes,
   customGroups,
-  onNavigate,
 }) => {
   // Filters State
   const [alertQuery, setAlertQuery] = useState('');
@@ -342,28 +338,6 @@ export const StatusPage: React.FC<StatusPageProps> = ({
     }, 450);
   };
 
-  // Export CSV
-  const handleExportCsv = () => {
-    const headers = ['Time', 'Alert Name', 'Receiver Name', 'Receiver Mobile', 'Channel', 'Operator', 'Message Count', 'Status'];
-    const rows = filteredRecords.map((r) => [
-      `"${r.time}"`,
-      `"${r.alertName}"`,
-      `"${r.receiverName}"`,
-      `"${r.receiverMobile}"`,
-      `"${r.channel}"`,
-      `"${r.operator}"`,
-      r.messageCount,
-      `"${r.status}"`,
-    ]);
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `bss_status_logs_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   // Helper for operator color chip
   const renderOperatorBadge = (operator: StatusLogRecord['operator']) => {
@@ -463,31 +437,12 @@ export const StatusPage: React.FC<StatusPageProps> = ({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={handleExportCsv}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-2 hover:bg-surface text-ink text-xs font-semibold border border-gray-200 dark:border-zinc-800 transition cursor-pointer shadow-2xs"
-            title="Export filtered records to CSV"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Export CSV</span>
-          </button>
-
-          <button
-            type="button"
             onClick={handleRefresh}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-2 hover:bg-surface text-ink text-xs font-semibold border border-gray-200 dark:border-zinc-800 transition cursor-pointer shadow-2xs"
             title="Refresh logs"
           >
             <RotateCcw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onNavigate('delivery')}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white font-semibold text-xs transition cursor-pointer shadow-sm active:scale-[0.98]"
-          >
-            <Send className="w-3.5 h-3.5" />
-            <span>New Broadcast</span>
           </button>
         </div>
       </div>

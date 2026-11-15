@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, Trash2, FileText, Check, RotateCcw } from 'lucide-react';
+import { X, Plus, Trash2, FileText, Check, RotateCcw, ChevronDown } from 'lucide-react';
 import type { SmsTemplate } from '../types';
 
 interface TemplateManagerModalProps {
@@ -98,17 +98,20 @@ export const TemplateManagerModal: React.FC<TemplateManagerModalProps> = ({
                 className="sm:col-span-2 bg-surface border border-gray-200 dark:border-zinc-800 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-ink outline-none focus:border-[#1b1e42] dark:focus:border-accent"
                 required
               />
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value as SmsTemplate['category'])}
-                className="bg-surface border border-gray-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-ink outline-none focus:border-[#1b1e42] dark:focus:border-accent cursor-pointer"
-              >
-                <option value="general">General</option>
-                <option value="fee">Fee</option>
-                <option value="attendance">Attendance</option>
-                <option value="exam">Exam</option>
-                <option value="emergency">Emergency</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as SmsTemplate['category'])}
+                  className="w-full bg-surface border border-gray-200 dark:border-zinc-800 rounded-xl pl-3 pr-7 py-2 text-xs text-ink outline-none appearance-none focus:border-[#1b1e42] dark:focus:border-accent cursor-pointer"
+                >
+                  <option value="general">General</option>
+                  <option value="fee">Fee</option>
+                  <option value="attendance">Attendance</option>
+                  <option value="exam">Exam</option>
+                  <option value="emergency">Emergency</option>
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
+              </div>
             </div>
 
             <textarea

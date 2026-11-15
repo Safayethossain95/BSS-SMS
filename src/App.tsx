@@ -140,7 +140,7 @@ export function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      return window.innerWidth < 1350;
+      return window.innerWidth > 920 && window.innerWidth < 1350;
     }
     return false;
   });
@@ -679,7 +679,6 @@ export function App() {
             <StatusPage
               classes={classes}
               customGroups={customGroups}
-              onNavigate={setCurrentPage}
             />
           )}
 

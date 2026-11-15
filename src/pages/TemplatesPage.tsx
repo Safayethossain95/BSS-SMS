@@ -7,7 +7,8 @@ import {
   Search,
   Send,
   Sparkles,
-  Copy
+  Copy,
+  ChevronDown
 } from 'lucide-react';
 import type { SmsTemplate, AppPage } from '../types';
 
@@ -138,17 +139,20 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
                 <label className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1.5 select-none block">
                   Category
                 </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as SmsTemplate['category'])}
-                  className="w-full bg-surface-2 border border-gray-200 dark:border-zinc-800 text-ink rounded-xl px-3 py-2 text-xs sm:text-sm font-medium outline-none cursor-pointer"
-                >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value as SmsTemplate['category'])}
+                    className="w-full bg-surface-2 border border-gray-200 dark:border-zinc-800 text-ink rounded-xl pl-3.5 pr-8 py-2 text-xs sm:text-sm font-medium outline-none appearance-none cursor-pointer"
+                  >
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
+                </div>
               </div>
 
               <div>

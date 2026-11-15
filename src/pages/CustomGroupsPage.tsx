@@ -11,6 +11,7 @@ import {
   Layers,
   Sparkles,
   ChevronRight,
+  ChevronDown,
   AlertCircle
 } from 'lucide-react';
 import type { ClassInfo, Student, CustomGroup, CustomGroupTarget, AppPage } from '../types';
@@ -292,32 +293,38 @@ export const CustomGroupsPage: React.FC<CustomGroupsPageProps> = ({
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-[10px] font-bold uppercase text-ink-faint mb-1 block">Class</label>
-                    <select
-                      value={selectedClassId}
-                      onChange={(e) => handleClassChange(e.target.value)}
-                      className="w-full bg-surface border border-gray-200 dark:border-zinc-800 text-ink rounded-xl px-2.5 py-2 text-xs font-medium outline-none cursor-pointer"
-                    >
-                      {classes.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={selectedClassId}
+                        onChange={(e) => handleClassChange(e.target.value)}
+                        className="w-full bg-surface border border-gray-200 dark:border-zinc-800 text-ink rounded-xl pl-3 pr-7 py-2 text-xs font-medium outline-none appearance-none cursor-pointer"
+                      >
+                        {classes.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
+                    </div>
                   </div>
                   <div>
                     <label className="text-[10px] font-bold uppercase text-ink-faint mb-1 block">Section</label>
-                    <select
-                      value={selectedSectionId}
-                      onChange={(e) => setSelectedSectionId(e.target.value)}
-                      className="w-full bg-surface border border-gray-200 dark:border-zinc-800 text-ink rounded-xl px-2.5 py-2 text-xs font-medium outline-none cursor-pointer"
-                    >
-                      <option value="">All Sections</option>
-                      {sections.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={selectedSectionId}
+                        onChange={(e) => setSelectedSectionId(e.target.value)}
+                        className="w-full bg-surface border border-gray-200 dark:border-zinc-800 text-ink rounded-xl pl-3 pr-7 py-2 text-xs font-medium outline-none appearance-none cursor-pointer"
+                      >
+                        <option value="">All Sections</option>
+                        {sections.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
+                    </div>
                   </div>
                 </div>
 
@@ -401,17 +408,20 @@ export const CustomGroupsPage: React.FC<CustomGroupsPageProps> = ({
               <div className="space-y-2 text-xs">
                 <div>
                   <label className="text-[10px] uppercase font-bold text-ink-faint mb-1 block">Target Custom Group</label>
-                  <select
-                    value={quickAppendGroupId}
-                    onChange={(e) => setQuickAppendGroupId(e.target.value)}
-                    className="w-full bg-surface-2 border border-gray-200 dark:border-zinc-800 text-ink rounded-xl px-2.5 py-1.5 text-xs font-medium outline-none cursor-pointer"
-                  >
-                    {customGroups.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={quickAppendGroupId}
+                      onChange={(e) => setQuickAppendGroupId(e.target.value)}
+                      className="w-full bg-surface-2 border border-gray-200 dark:border-zinc-800 text-ink rounded-xl pl-3 pr-7 py-1.5 text-xs font-medium outline-none appearance-none cursor-pointer"
+                    >
+                      {customGroups.map((g) => (
+                        <option key={g.id} value={g.id}>
+                          {g.name}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
+                  </div>
                 </div>
                 <button
                   type="button"

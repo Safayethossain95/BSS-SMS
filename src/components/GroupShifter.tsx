@@ -57,11 +57,11 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
 
       {/* Card Header */}
       <div className="card-head !mb-3">
-        <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
+        <h3 className="text-xs sm:text-sm font-semibold text-ink flex items-center gap-2 whitespace-nowrap">
           <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
             <Users className="w-4 h-4" />
           </span>
-          Target Groups / Shifter
+          Target Groups
         </h3>
         {onOpenCustomGroupModal && (
           <button
@@ -71,7 +71,7 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
             title="Create or manage custom groups"
           >
             <FolderPlus className="w-3.5 h-3.5" />
-            <span>+ Custom Group</span>
+            <span>+ Custom</span>
           </button>
         )}
       </div>

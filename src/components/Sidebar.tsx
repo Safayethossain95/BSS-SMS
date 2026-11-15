@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Send,
   FileText,
@@ -42,6 +42,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onLogout,
   balance,
 }) => {
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth <= 920;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(max-width: 920px)');
+    const onChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+    };
+    if (mql.addEventListener) {
+      mql.addEventListener('change', onChange);
+      return () => mql.removeEventListener('change', onChange);
+    } else {
+      mql.addListener(onChange);
+      return () => mql.removeListener(onChange);
+    }
+  }, []);
+
+  // On mobile devices, the sidebar drawer must always remain expanded
+  const effectiveCollapsed = isMobile ? false : isCollapsed;
+
   const handleNav = (page: AppPage) => {
     onNavigate(page);
     onClose();
@@ -52,7 +77,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className={`scrim ${isOpen ? 'show' : ''}`} onClick={onClose} />
       <aside
         id="sidebar"
-        className={`sidebar relative ${isCollapsed ? 'collapsed' : ''} ${isOpen ? 'open' : ''}`}
+        className={`sidebar relative ${effectiveCollapsed ? 'collapsed' : ''} ${isOpen ? 'open' : ''}`}
       >
         {/* Brand */}
         <div className="sidebar-brand">
@@ -71,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 e.currentTarget.style.display = 'none';
               }}
             />
-            {!isCollapsed && (
+            {!effectiveCollapsed && (
               <div className="brand-text flex flex-col min-w-0">
                 <span className="font-serif italic font-bold text-base text-ink tracking-tight leading-tight">
                   BSS
@@ -86,7 +111,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Mobile Close Button */}
           <button
             type="button"
-            className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-2 text-ink-muted hover:text-ink transition-colors cursor-pointer"
+            className="sidebar-close-btn items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-2 text-ink-muted hover:text-ink transition-colors cursor-pointer"
             onClick={onClose}
             aria-label="Close navigation"
           >
@@ -98,10 +123,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             type="button"
             className="sidebar-collapse-btn !hidden md:!flex"
             onClick={onToggleCollapse}
-            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={effectiveCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-label="Toggle sidebar"
           >
-            {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {effectiveCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
         </div>
 
@@ -109,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <nav className="sidebar-nav flex flex-col">
           {/* Main Navigation Group */}
           <div className="nav-group">
-            <div className="nav-label">{isCollapsed ? '' : 'SMS Services'}</div>
+            <div className="nav-label">{effectiveCollapsed ? '' : 'SMS Services'}</div>
 
             <button
               type="button"
@@ -168,8 +193,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Footer & User Profile Section */}
         <div className="pt-3 border-t border-gray-200 dark:border-zinc-800 mt-auto space-y-2.5">
-          {/* Mobile-only Strip: Balance & Theme Toggle (hidden on md+) */}
-          <div className="md:hidden flex items-center justify-between px-1">
+          {/* Mobile-only Strip: Balance & Theme Toggle */}
+          <div className="sidebar-mobile-strip items-center justify-between px-1">
             {balance !== undefined && (
               <div
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs shadow-2xs"
@@ -203,7 +228,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           {/* User Account / Login & Logout Info */}
-          {!isCollapsed ? (
+          {!effectiveCollapsed ? (
             <div className="p-2 rounded-xl bg-surface-2 border border-gray-200 dark:border-zinc-800 flex items-center justify-between gap-2 shadow-2xs">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="avatar-circle w-8 h-8 text-[11px] flex-shrink-0">
@@ -254,7 +279,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
 
           {/* Branch Sub-footer */}
-          {!isCollapsed && (
+          {!effectiveCollapsed && (
             <div className="px-1 flex flex-col text-[10.5px] text-ink-faint">
               <span className="font-semibold text-ink">Campus 4 &bull; Wari Branch</span>
               <span>SMS Message Delivery</span>
