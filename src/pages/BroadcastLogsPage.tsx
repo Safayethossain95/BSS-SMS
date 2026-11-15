@@ -217,12 +217,12 @@ export const BroadcastLogsPage: React.FC<BroadcastLogsPageProps> = ({
                   </div>
 
                   {/* Footer actions */}
-                  <div className="flex items-center justify-between pt-1 text-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1 text-xs">
                     <span className="text-[11px] text-ink-muted font-mono">
                       Units: {record.totalSmsUnits} SMS
                     </span>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       {record.recipients && record.recipients.length > 0 && (
                         <button
                           type="button"

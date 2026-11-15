@@ -81,6 +81,11 @@ export const StudentTable: React.FC<StudentTableProps> = ({
         </div>
       </div>
 
+      {/* Mobile Scroll Hint */}
+      <div className="px-4 py-1.5 bg-surface-2/40 border-b border-gray-100 dark:border-zinc-800/80 text-[11px] text-ink-muted flex sm:hidden items-center justify-between">
+        <span>&larr; Swipe table to view phone numbers &amp; actions &rarr;</span>
+      </div>
+
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[900px] border-collapse text-left text-xs sm:text-sm">
@@ -231,7 +236,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
       </div>
 
       {/* Pagination Footer */}
-      <div className="p-3.5 border-t border-gray-200 dark:border-zinc-800 bg-surface-2/30 flex items-center justify-between text-xs text-ink-muted">
+      <div className="p-3.5 border-t border-gray-200 dark:border-zinc-800 bg-surface-2/30 flex flex-wrap items-center justify-between gap-2 text-xs text-ink-muted">
         <div>
           Showing <strong className="text-ink">{students.length}</strong> loaded student{students.length === 1 ? '' : 's'}
         </div>

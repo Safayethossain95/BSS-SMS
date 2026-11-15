@@ -112,6 +112,16 @@
     border-color: var(--border, #e2e8f0);
   }
 
+  select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+  }
+
+  select::-ms-expand {
+    display: none;
+  }
+
   body {
     background: var(--bg);
     color: var(--ink);
@@ -124,7 +134,9 @@
 .app-shell {
   display: flex;
   height: 100vh;
+  height: 100dvh;
   max-height: 100vh;
+  max-height: 100dvh;
   overflow: hidden;
   background: var(--bg);
 }
@@ -141,7 +153,9 @@
   flex-direction: column;
   min-width: 0;
   height: 100vh;
+  height: 100dvh;
   max-height: 100vh;
+  max-height: 100dvh;
   overflow: hidden;
 }
 
@@ -204,6 +218,7 @@
     min-width: 275px;
     max-width: 85vw;
     height: 100vh;
+    height: 100dvh;
     margin: 0;
     padding: 18px 14px 14px;
     border-radius: 0 20px 20px 0;

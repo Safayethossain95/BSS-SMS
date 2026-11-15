@@ -275,7 +275,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
                 <FileText className="w-8 h-8 text-ink-faint mx-auto opacity-50" />
                 <p className="font-semibold text-ink">No Templates Found</p>
                 <p className="text-[11px] text-ink-faint max-w-sm mx-auto">
-                  {searchQuery ? 'No templates match your search filters.' : 'Use the form on the left to add your first broadcast template.'}
+                  {searchQuery ? 'No templates match your search filters.' : 'Use the form to add your first broadcast template.'}
                 </p>
               </div>
             ) : (

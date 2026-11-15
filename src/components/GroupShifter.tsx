@@ -112,13 +112,13 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
         </div>
 
         {/* Center buttons: horizontal row on mobile, vertical stack on sm+ */}
-        <div className="w-full sm:w-auto sm:col-span-1 flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-1.5 py-1 sm:py-0 sm:pt-5">
+        <div className="w-full sm:w-auto sm:col-span-1 flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-1.5 py-1.5 sm:py-0 sm:pt-5">
           {/* Shift one */}
           <button
             type="button"
             onClick={handleShiftOneRight}
             disabled={availableGroups.length === 0}
-            className="w-7 h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
+            className="w-8 h-8 sm:w-7 sm:h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition touch-manipulation"
             title="Shift selected"
           >
             <ChevronDown className="w-3.5 h-3.5 sm:hidden" />
@@ -130,7 +130,7 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
             type="button"
             onClick={onTransferAllToDestination}
             disabled={availableGroups.length === 0}
-            className="w-7 h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
+            className="w-8 h-8 sm:w-7 sm:h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition touch-manipulation"
             title="Shift all"
           >
             <ChevronsDown className="w-3.5 h-3.5 sm:hidden" />
@@ -142,7 +142,7 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
             type="button"
             onClick={handleShiftOneLeft}
             disabled={destinationGroups.length === 0}
-            className="w-7 h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
+            className="w-8 h-8 sm:w-7 sm:h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition touch-manipulation"
             title="Return selected"
           >
             <ChevronUp className="w-3.5 h-3.5 sm:hidden" />
@@ -154,7 +154,7 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
             type="button"
             onClick={onTransferAllToAvailable}
             disabled={destinationGroups.length === 0}
-            className="w-7 h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition"
+            className="w-8 h-8 sm:w-7 sm:h-7 rounded-full border border-gray-200 dark:border-zinc-800 bg-surface hover:bg-surface-2 flex items-center justify-center text-ink-muted hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs cursor-pointer transition touch-manipulation"
             title="Return all"
           >
             <ChevronsUp className="w-3.5 h-3.5 sm:hidden" />

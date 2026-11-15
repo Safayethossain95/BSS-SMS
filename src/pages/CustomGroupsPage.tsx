@@ -474,7 +474,7 @@ export const CustomGroupsPage: React.FC<CustomGroupsPageProps> = ({
                 <FolderPlus className="w-8 h-8 text-ink-faint mx-auto opacity-50" />
                 <p className="font-semibold text-ink">No Custom Groups Found</p>
                 <p className="text-[11px] text-ink-faint max-w-sm mx-auto">
-                  {searchQuery ? 'No custom groups match your search query.' : 'Create your first custom group using the form on the left to start dispatching targeted cohort broadcasts.'}
+                  {searchQuery ? 'No custom groups match your search query.' : 'Create your first custom group using the form to start dispatching targeted cohort broadcasts.'}
                 </p>
               </div>
             ) : (

@@ -684,6 +684,11 @@ export const StatusPage: React.FC<StatusPageProps> = ({
           </div>
         </div>
 
+        {/* Mobile Swipe Hint */}
+        <div className="px-4 py-1.5 bg-surface-2/40 border-b border-gray-100 dark:border-zinc-800/80 text-[11px] text-ink-muted flex sm:hidden items-center justify-between">
+          <span>&larr; Swipe table horizontally to inspect all delivery logs &rarr;</span>
+        </div>
+
         {/* Table View */}
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] border-collapse text-left text-xs sm:text-sm">
