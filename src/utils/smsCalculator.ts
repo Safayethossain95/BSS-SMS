@@ -17,6 +17,7 @@ export function calculateSmsMetrics(text: string, recipientCount: number): SmsMe
       charCount: 0,
       charLimit: isUnicode ? 70 : 160,
       charRemain: isUnicode ? 70 : 160,
+      messageCount: 0,
       segments: 0,
       isUnicode,
       totalSmsCost: 0,
@@ -34,24 +35,25 @@ export function calculateSmsMetrics(text: string, recipientCount: number): SmsMe
     multiLimit = 153;
   }
 
-  let segments = 1;
+  let messageCount = 1;
   let charRemain = 0;
 
   if (charCount <= singleLimit) {
-    segments = 1;
+    messageCount = 1;
     charRemain = singleLimit - charCount;
   } else {
-    segments = Math.ceil(charCount / multiLimit);
-    charRemain = (segments * multiLimit) - charCount;
+    messageCount = Math.ceil(charCount / multiLimit);
+    charRemain = (messageCount * multiLimit) - charCount;
   }
 
-  const totalSmsCost = segments * recipientCount;
+  const totalSmsCost = messageCount * recipientCount;
 
   return {
     charCount,
-    charLimit: segments === 1 ? singleLimit : segments * multiLimit,
+    charLimit: messageCount === 1 ? singleLimit : messageCount * multiLimit,
     charRemain,
-    segments,
+    messageCount,
+    segments: messageCount,
     isUnicode,
     totalSmsCost,
   };

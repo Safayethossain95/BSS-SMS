@@ -33,6 +33,7 @@ export interface SmsMetrics {
   charCount: number;
   charLimit: number;
   charRemain: number;
+  messageCount: number;
   segments: number;
   isUnicode: boolean;
   totalSmsCost: number;

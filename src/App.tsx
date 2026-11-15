@@ -219,21 +219,26 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    fetchClasses();
-    fetchGroups();
-    fetchTemplates();
-    fetchBalance();
-    fetchHistory();
+    const loadInitialData = async () => {
+      await fetchClasses();
+      await fetchGroups();
+      await fetchTemplates();
+      await fetchBalance();
+      await fetchHistory();
+    };
+    loadInitialData();
   }, [fetchClasses, fetchGroups, fetchTemplates, fetchBalance, fetchHistory]);
 
   // Sync custom groups into available groups list
   useEffect(() => {
     const customNames = customGroups.map((cg) => cg.name);
-    setAvailableGroups((prev) => {
-      const activeInDest = new Set(destinationGroups);
-      const existingInAvail = new Set(prev);
-      const toAdd = customNames.filter((name) => !activeInDest.has(name) && !existingInAvail.has(name));
-      return toAdd.length > 0 ? [...toAdd, ...prev] : prev;
+    queueMicrotask(() => {
+      setAvailableGroups((prev) => {
+        const activeInDest = new Set(destinationGroups);
+        const existingInAvail = new Set(prev);
+        const toAdd = customNames.filter((name) => !activeInDest.has(name) && !existingInAvail.has(name));
+        return toAdd.length > 0 ? [...toAdd, ...prev] : prev;
+      });
     });
   }, [customGroups, destinationGroups]);
 

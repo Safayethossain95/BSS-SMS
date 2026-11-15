@@ -99,8 +99,8 @@ export const SendConfirmModal: React.FC<SendConfirmModalProps> = ({
                 <span className="font-bold text-sm text-ink">{selectedStudents.length}</span>
               </div>
               <div>
-                <span className="text-[10px] uppercase font-bold text-ink-faint block">Segments / SMS</span>
-                <span className="font-bold text-sm text-ink">{metrics.segments}</span>
+                <span className="text-[10px] uppercase font-bold text-ink-faint block">Message Count</span>
+                <span className="font-bold text-sm text-ink">{metrics.messageCount ?? metrics.segments}</span>
               </div>
               <div>
                 <span className="text-[10px] uppercase font-bold text-ink-faint block">Total Cost</span>

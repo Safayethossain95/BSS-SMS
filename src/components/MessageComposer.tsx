@@ -115,7 +115,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
 
         {metrics.isUnicode && (
           <div className="text-[10.5px] text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 px-2 py-0.5 rounded-md mt-1.5 inline-block self-start font-medium">
-            Unicode detected (70 chars / segment)
+            Unicode detected (70 chars / message)
           </div>
         )}
       </div>
@@ -130,7 +130,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
             Remain: <strong className={metrics.charRemain < 10 ? 'text-amber-600 font-bold' : 'text-emerald-600 font-bold'}>{metrics.charRemain}</strong>
           </span>
           <span className="px-2.5 py-1 rounded-full bg-surface-2 border border-gray-200 dark:border-zinc-800 text-ink-muted text-[11.5px]">
-            Segments: <strong className="text-ink">{metrics.segments}</strong>
+            Message Count: <strong className="text-ink">{metrics.messageCount ?? metrics.segments}</strong>
           </span>
           <span className="px-2.5 py-1 rounded-full bg-surface-2 border border-gray-200 dark:border-zinc-800 text-ink-muted text-[11.5px]">
             Recipients: <strong className="text-ink">{totalRecipients}</strong>

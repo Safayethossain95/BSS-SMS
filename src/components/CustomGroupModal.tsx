@@ -51,24 +51,26 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const clsId = initialSelectedClassId || (classes[0]?.id ?? '');
-      setSelectedClassId(clsId);
+      queueMicrotask(() => {
+        const clsId = initialSelectedClassId || (classes[0]?.id ?? '');
+        setSelectedClassId(clsId);
 
-      const cls = classes.find((c) => c.id === clsId);
-      if (initialSelectedSectionId) {
-        setSelectedSectionId(initialSelectedSectionId);
-      } else if (cls && cls.sections.length > 0) {
-        setSelectedSectionId(cls.sections[0].id);
-      } else {
-        setSelectedSectionId('');
-      }
+        const cls = classes.find((c) => c.id === clsId);
+        if (initialSelectedSectionId) {
+          setSelectedSectionId(initialSelectedSectionId);
+        } else if (cls && cls.sections.length > 0) {
+          setSelectedSectionId(cls.sections[0].id);
+        } else {
+          setSelectedSectionId('');
+        }
 
-      setEditingGroupId(null);
-      setGroupName('');
-      setStagedTargets([]);
-      setErrorMessage('');
-      setQuickAppendGroupId(customGroups[0]?.id || '');
-      setQuickAppendSuccess(false);
+        setEditingGroupId(null);
+        setGroupName('');
+        setStagedTargets([]);
+        setErrorMessage('');
+        setQuickAppendGroupId(customGroups[0]?.id || '');
+        setQuickAppendSuccess(false);
+      });
     }
   }, [isOpen, initialSelectedClassId, initialSelectedSectionId, classes, customGroups]);
 

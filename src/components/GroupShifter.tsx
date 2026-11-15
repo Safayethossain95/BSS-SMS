@@ -53,10 +53,10 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
   };
 
   return (
-    <div className="card !p-5 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card h-full flex flex-col justify-between">
+    <div className="card p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card h-full flex flex-col justify-between">
 
       {/* Card Header */}
-      <div className="card-head !mb-3">
+      <div className="card-head mb-3!">
         <h3 className="text-xs sm:text-sm font-semibold text-ink flex items-center gap-2 whitespace-nowrap">
           <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
             <Users className="w-4 h-4" />
@@ -84,7 +84,7 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
           <label className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1.5 select-none block">
             Available Group
           </label>
-          <div className="h-[130px] sm:h-[140px] bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-md p-1.5 overflow-y-auto space-y-1">
+          <div className="h-32.5 sm:h-35 bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-md p-1.5 overflow-y-auto space-y-1">
             {availableGroups.length === 0 ? (
               <div className="text-xs text-ink-faint text-center py-10 sm:py-12 italic">
                 All shifted
@@ -167,7 +167,7 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
           <label className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1.5 select-none block">
             Destination Group
           </label>
-          <div className="h-[130px] sm:h-[140px] bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-md p-1.5 overflow-y-auto space-y-1">
+          <div className="h-32.5 sm:h-35 bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-md p-1.5 overflow-y-auto space-y-1">
             {destinationGroups.length === 0 ? (
               <div className="text-xs text-ink-faint text-center py-10 sm:py-12 italic">
                 None selected
