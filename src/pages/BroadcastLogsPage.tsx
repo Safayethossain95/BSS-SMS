@@ -92,7 +92,7 @@ export const BroadcastLogsPage: React.FC<BroadcastLogsPageProps> = ({
 
       {/* Top Stat Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="card !p-4 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
+        <div className="card p-4! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
           <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent w-10 h-10 rounded-xl">
             <History className="w-5 h-5" />
           </span>
@@ -102,7 +102,7 @@ export const BroadcastLogsPage: React.FC<BroadcastLogsPageProps> = ({
           </div>
         </div>
 
-        <div className="card !p-4 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
+        <div className="card p-4! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
           <span className="icon-chip bg-surface-2 text-emerald-600 dark:text-emerald-400 w-10 h-10 rounded-xl">
             <Users className="w-5 h-5" />
           </span>
@@ -112,7 +112,7 @@ export const BroadcastLogsPage: React.FC<BroadcastLogsPageProps> = ({
           </div>
         </div>
 
-        <div className="card !p-4 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
+        <div className="card p-4! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
           <span className="icon-chip bg-surface-2 text-amber-600 dark:text-amber-400 w-10 h-10 rounded-xl">
             <CheckCheck className="w-5 h-5" />
           </span>
@@ -124,7 +124,7 @@ export const BroadcastLogsPage: React.FC<BroadcastLogsPageProps> = ({
       </div>
 
       {/* Main Logs Table Card */}
-      <div className="card !p-5 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card space-y-4">
+      <div className="card p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card space-y-4">
         {/* Controls Toolbar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Status Filter Pills */}

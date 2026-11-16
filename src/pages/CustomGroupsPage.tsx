@@ -6,7 +6,6 @@ import {
   Trash2,
   Edit2,
   Check,
-  Search,
   Send,
   Layers,
   Sparkles,
@@ -41,7 +40,6 @@ export const CustomGroupsPage: React.FC<CustomGroupsPageProps> = ({
   const [selectedSectionId, setSelectedSectionId] = useState(classes[0]?.sections[0]?.id || '');
   const [stagedTargets, setStagedTargets] = useState<CustomGroupTarget[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
   const [quickAppendGroupId, setQuickAppendGroupId] = useState(customGroups[0]?.id || '');
   const [quickAppendSuccess, setQuickAppendSuccess] = useState(false);
 
@@ -211,10 +209,7 @@ export const CustomGroupsPage: React.FC<CustomGroupsPageProps> = ({
     setTimeout(() => setQuickAppendSuccess(false), 3000);
   };
 
-  const filteredGroups = customGroups.filter((g) =>
-    g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    g.targets.some((t) => t.className.toLowerCase().includes(searchQuery.toLowerCase()) || t.sectionName.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredGroups = customGroups;
 
   return (
     <div className="space-y-4">
@@ -245,8 +240,8 @@ export const CustomGroupsPage: React.FC<CustomGroupsPageProps> = ({
 
         {/* Left Column: Form Card */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="card !p-5 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card space-y-4">
-            <div className="card-head !mb-1">
+          <div className="card p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card space-y-4">
+            <div className="card-head mb-1!">
               <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
                 <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
                   <FolderPlus className="w-4 h-4" />
@@ -266,7 +261,7 @@ export const CustomGroupsPage: React.FC<CustomGroupsPageProps> = ({
 
             {errorMessage && (
               <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl text-xs text-red-700 dark:text-red-300 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
             )}
@@ -400,7 +395,7 @@ export const CustomGroupsPage: React.FC<CustomGroupsPageProps> = ({
 
           {/* Quick Append Tool Card */}
           {customGroups.length > 0 && (
-            <div className="card !p-4 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card space-y-3">
+            <div className="card p-4! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card space-y-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-ink">
                 <Sparkles className="w-4 h-4 text-amber-500" />
                 <span>Quick Append to Existing Group</span>
@@ -442,30 +437,16 @@ export const CustomGroupsPage: React.FC<CustomGroupsPageProps> = ({
 
         {/* Right Column: Groups Directory */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="card !p-5 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
-                  <Layers className="w-4 h-4" />
+          <div className="card p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
+                <Layers className="w-4 h-4" />
+              </span>
+              <div>
+                <h3 className="text-sm font-semibold text-ink">Active Custom Groups</h3>
+                <span className="text-xs text-ink-muted">
+                  {customGroups.length} configured target group{customGroups.length === 1 ? '' : 's'}
                 </span>
-                <div>
-                  <h3 className="text-sm font-semibold text-ink">Active Custom Groups</h3>
-                  <span className="text-xs text-ink-muted">
-                    {customGroups.length} configured target group{customGroups.length === 1 ? '' : 's'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Search Groups */}
-              <div className="relative w-full sm:w-60">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search groups..."
-                  className="w-full bg-surface-2 border border-gray-200 dark:border-zinc-800 focus:border-[#1b1e42] dark:focus:border-accent text-ink rounded-xl pl-8 pr-3 py-1.5 text-xs outline-none transition-colors"
-                />
               </div>
             </div>
 
@@ -474,7 +455,7 @@ export const CustomGroupsPage: React.FC<CustomGroupsPageProps> = ({
                 <FolderPlus className="w-8 h-8 text-ink-faint mx-auto opacity-50" />
                 <p className="font-semibold text-ink">No Custom Groups Found</p>
                 <p className="text-[11px] text-ink-faint max-w-sm mx-auto">
-                  {searchQuery ? 'No custom groups match your search query.' : 'Create your first custom group using the form to start dispatching targeted cohort broadcasts.'}
+                  Create your first custom group using the form to start dispatching targeted cohort broadcasts.
                 </p>
               </div>
             ) : (

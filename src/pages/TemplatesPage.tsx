@@ -4,7 +4,6 @@ import {
   Plus,
   Trash2,
   Check,
-  Search,
   Send,
   Sparkles,
   Copy,
@@ -30,7 +29,6 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<SmsTemplate['category']>('general');
   const [body, setBody] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -74,11 +72,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
   };
 
   const filteredTemplates = templates.filter((t) => {
-    const matchCategory = selectedCategoryFilter === 'all' || t.category === selectedCategoryFilter;
-    const matchSearch =
-      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.body.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCategory && matchSearch;
+    return selectedCategoryFilter === 'all' || t.category === selectedCategoryFilter;
   });
 
   return (
@@ -110,8 +104,8 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
 
         {/* Left Column: Create Template Form */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="card !p-5 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card space-y-4">
-            <div className="card-head !mb-1">
+          <div className="card p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card space-y-4">
+            <div className="card-head mb-1!">
               <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
                 <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
                   <Plus className="w-4 h-4" />
@@ -213,30 +207,16 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
 
         {/* Right Column: Templates Directory */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="card !p-5 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
-                  <FileText className="w-4 h-4" />
+          <div className="card p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
+                <FileText className="w-4 h-4" />
+              </span>
+              <div>
+                <h3 className="text-sm font-semibold text-ink">Template Records</h3>
+                <span className="text-xs text-ink-muted">
+                  {filteredTemplates.length} available template{filteredTemplates.length === 1 ? '' : 's'}
                 </span>
-                <div>
-                  <h3 className="text-sm font-semibold text-ink">Template Records</h3>
-                  <span className="text-xs text-ink-muted">
-                    {filteredTemplates.length} available template{filteredTemplates.length === 1 ? '' : 's'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Search */}
-              <div className="relative w-full sm:w-60">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search templates..."
-                  className="w-full bg-surface-2 border border-gray-200 dark:border-zinc-800 focus:border-[#1b1e42] dark:focus:border-accent text-ink rounded-xl pl-8 pr-3 py-1.5 text-xs outline-none transition-colors"
-                />
               </div>
             </div>
 
@@ -275,7 +255,7 @@ export const TemplatesPage: React.FC<TemplatesPageProps> = ({
                 <FileText className="w-8 h-8 text-ink-faint mx-auto opacity-50" />
                 <p className="font-semibold text-ink">No Templates Found</p>
                 <p className="text-[11px] text-ink-faint max-w-sm mx-auto">
-                  {searchQuery ? 'No templates match your search filters.' : 'Use the form to add your first broadcast template.'}
+                  {selectedCategoryFilter !== 'all' ? 'No templates match the selected category.' : 'Use the form to add your first broadcast template.'}
                 </p>
               </div>
             ) : (

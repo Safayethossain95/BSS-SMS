@@ -26,7 +26,7 @@ export const PhonePreviewModal: React.FC<PhonePreviewModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
       <div
-        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 max-w-sm w-full shadow-2xl space-y-4 max-h-[90vh] max-h-[90dvh] overflow-y-auto"
+        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 max-w-sm w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-zinc-800">
@@ -49,7 +49,7 @@ export const PhonePreviewModal: React.FC<PhonePreviewModalProps> = ({
         </div>
 
         {/* Smartphone Shell */}
-        <div className="mx-auto w-[270px] bg-slate-950 rounded-[38px] p-3 shadow-2xl border-4 border-slate-700">
+        <div className="mx-auto w-67.5 bg-slate-950 rounded-[38px] p-3 shadow-2xl border-4 border-slate-700">
           {/* Top Speaker / Camera */}
           <div className="w-20 h-4 bg-slate-800 rounded-full mx-auto mb-2.5 flex items-center justify-center">
             <div className="w-2 h-2 rounded-full bg-slate-700 mr-2" />
@@ -57,7 +57,7 @@ export const PhonePreviewModal: React.FC<PhonePreviewModalProps> = ({
           </div>
 
           {/* Screen */}
-          <div className="bg-slate-100 dark:bg-zinc-900 rounded-[28px] p-3.5 min-h-[360px] flex flex-col justify-between text-slate-800 dark:text-zinc-100 font-sans">
+          <div className="bg-slate-100 dark:bg-zinc-900 rounded-[28px] p-3.5 min-h-90 flex flex-col justify-between text-slate-800 dark:text-zinc-100 font-sans">
             
             {/* Status bar */}
             <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium px-1">

@@ -92,7 +92,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 max-w-sm sm:max-w-md w-full px-4 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-red-600 text-white shadow-xl shadow-red-500/20 border border-red-500">
             <div className="flex items-center gap-2.5 min-w-0">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 text-white" />
+              <AlertCircle className="w-5 h-5 shrink-0 text-white" />
               <span className="text-xs sm:text-sm font-medium leading-snug truncate">
                 {toastMessage}
               </span>
@@ -113,7 +113,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       <button
         type="button"
         onClick={onToggleTheme}
-        className={`theme-toggle !fixed !top-5 !right-5 !z-50 ${isDark ? 'active' : ''}`}
+        className={`theme-toggle fixed! top-5! right-5! z-50! ${isDark ? 'active' : ''}`}
         style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 50 }}
         aria-label="Toggle dark mode"
         title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -156,7 +156,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             {/* Demo Credentials Pill */}
             <div className="mb-5 p-3 rounded-xl bg-surface-2 border border-gray-200 dark:border-zinc-800 flex items-center justify-between text-xs">
               <div className="flex items-center gap-2 text-ink-muted">
-                <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
                 <span>Demo:</span>
                 <span className="font-mono font-semibold text-ink">admin</span>
                 <span className="text-ink-faint">/</span>
@@ -272,7 +272,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <div className="space-y-4">
                 <div className="p-4 rounded-xl bg-surface-2 border border-gray-200 dark:border-zinc-800 space-y-3">
                   <div className="flex items-center gap-2.5 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
-                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
                     <span>Account Identified</span>
                   </div>
                   <div className="text-xs text-ink-muted leading-relaxed">

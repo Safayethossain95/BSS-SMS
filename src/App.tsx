@@ -140,7 +140,7 @@ export function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      return window.innerWidth > 920 && window.innerWidth < 1350;
+      return window.innerWidth < 1350;
     }
     return false;
   });
@@ -589,7 +589,6 @@ export function App() {
                 onClassChange={handleClassChange}
                 onSectionChange={handleSectionChange}
                 onLoadStudents={handleLoadFromDropdown}
-                onAddToCustomGroup={() => setCurrentPage('custom-groups')}
                 alertSentToText={alertSentToText}
                 totalLoadedStudents={displayedStudents.length}
                 isLoading={isLoadingStudents}

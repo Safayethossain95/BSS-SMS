@@ -449,7 +449,7 @@ export const StatusPage: React.FC<StatusPageProps> = ({
 
       {/* 2. Top Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="card !p-4 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
+        <div className="card p-4! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
           <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent w-10 h-10 rounded-xl">
             <Activity className="w-5 h-5" />
           </span>
@@ -459,7 +459,7 @@ export const StatusPage: React.FC<StatusPageProps> = ({
           </div>
         </div>
 
-        <div className="card !p-4 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
+        <div className="card p-4! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
           <span className="icon-chip bg-surface-2 text-emerald-600 dark:text-emerald-400 w-10 h-10 rounded-xl">
             <CheckCircle2 className="w-5 h-5" />
           </span>
@@ -469,7 +469,7 @@ export const StatusPage: React.FC<StatusPageProps> = ({
           </div>
         </div>
 
-        <div className="card !p-4 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
+        <div className="card p-4! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
           <span className="icon-chip bg-surface-2 text-indigo-600 dark:text-indigo-400 w-10 h-10 rounded-xl">
             <Radio className="w-5 h-5" />
           </span>
@@ -479,7 +479,7 @@ export const StatusPage: React.FC<StatusPageProps> = ({
           </div>
         </div>
 
-        <div className="card !p-4 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
+        <div className="card p-4! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card flex items-center gap-3.5">
           <span className="icon-chip bg-surface-2 text-amber-600 dark:text-amber-400 w-10 h-10 rounded-xl">
             <Smartphone className="w-5 h-5" />
           </span>
@@ -491,7 +491,7 @@ export const StatusPage: React.FC<StatusPageProps> = ({
       </div>
 
       {/* 3. Filter Controls Section */}
-      <div className="card !p-4 sm:!p-5 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card transition-colors">
+      <div className="card p-4! sm:p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card transition-colors">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between pb-1 border-b border-gray-100 dark:border-zinc-800/80">
             <div className="flex items-center gap-2">
@@ -654,7 +654,7 @@ export const StatusPage: React.FC<StatusPageProps> = ({
       </div>
 
       {/* 4. Results Status Table */}
-      <div className="card !p-0 overflow-hidden border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card transition-colors">
+      <div className="card p-0! overflow-hidden border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card transition-colors">
         {/* Table Top Header Info */}
         <div className="p-3.5 sm:p-4 border-b border-gray-200 dark:border-zinc-800 bg-surface-2/50 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -691,7 +691,7 @@ export const StatusPage: React.FC<StatusPageProps> = ({
 
         {/* Table View */}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] border-collapse text-left text-xs sm:text-sm">
+          <table className="w-full min-w-225 border-collapse text-left text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-dashed border-gray-200 dark:border-zinc-800 text-ink font-semibold bg-surface-2/60">
                 <th scope="col" className="py-3 px-4 border-r border-dashed border-gray-200 dark:border-zinc-800 whitespace-nowrap">
@@ -755,7 +755,7 @@ export const StatusPage: React.FC<StatusPageProps> = ({
                     {/* 1. Time */}
                     <td className="py-3.5 px-4 font-mono text-xs text-ink-muted border-r border-dashed border-gray-200 dark:border-zinc-800 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-ink-faint flex-shrink-0" />
+                        <Clock className="w-3.5 h-3.5 text-ink-faint shrink-0" />
                         <span>{record.time}</span>
                       </div>
                     </td>
@@ -763,7 +763,7 @@ export const StatusPage: React.FC<StatusPageProps> = ({
                     {/* 2. Alert Name */}
                     <td className="py-3.5 px-4 border-r border-dashed border-gray-200 dark:border-zinc-800">
                       <div className="flex items-center gap-2">
-                        <span className="p-1 rounded-lg bg-surface-2 text-[#1b1e42] dark:text-accent flex-shrink-0">
+                        <span className="p-1 rounded-lg bg-surface-2 text-[#1b1e42] dark:text-accent shrink-0">
                           <Bell className="w-3 h-3" />
                         </span>
                         <div className="min-w-0">
@@ -802,7 +802,7 @@ export const StatusPage: React.FC<StatusPageProps> = ({
                         <button
                           type="button"
                           onClick={() => handleCopyMobile(record.receiverMobile, record.id)}
-                          className="p-1 text-ink-muted hover:text-ink hover:bg-surface-2 rounded transition cursor-pointer flex-shrink-0"
+                          className="p-1 text-ink-muted hover:text-ink hover:bg-surface-2 rounded transition cursor-pointer shrink-0"
                           title="Copy phone number"
                         >
                           {copiedId === record.id ? (

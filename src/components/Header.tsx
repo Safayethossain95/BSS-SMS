@@ -81,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Center: Search pill */}
         <div className="tb-search" role="search">
-          <Search className="w-3.5 h-3.5 flex-shrink-0 text-ink-faint" />
+          <Search className="w-3.5 h-3.5 shrink-0 text-ink-faint" />
           <input
             type="text"
             placeholder="Search students..."
@@ -99,7 +99,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Right: Actions (Hidden on mobile, visible on desktop md+) */}
-        <div className="tb-actions !hidden md:!flex">
+        <div className="tb-actions hidden! md:flex!">
 
           {/* Theme Toggle Switch */}
           <button
@@ -164,7 +164,7 @@ export const Header: React.FC<HeaderProps> = ({
                   }}
                   className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition cursor-pointer text-left"
                 >
-                  <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
+                  <LogOut className="w-3.5 h-3.5 shrink-0" />
                   <span>Logout</span>
                 </button>
               </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Send,
   FileText,
@@ -42,30 +42,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onLogout,
   balance,
 }) => {
-  const [isMobile, setIsMobile] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth <= 920;
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mql = window.matchMedia('(max-width: 920px)');
-    const onChange = (e: MediaQueryListEvent) => {
-      setIsMobile(e.matches);
-    };
-    if (mql.addEventListener) {
-      mql.addEventListener('change', onChange);
-      return () => mql.removeEventListener('change', onChange);
-    } else {
-      mql.addListener(onChange);
-      return () => mql.removeListener(onChange);
-    }
-  }, []);
-
-  // On mobile devices, the sidebar drawer must always remain expanded
-  const effectiveCollapsed = isMobile ? false : isCollapsed;
+  // When opened as a mobile drawer (isOpen=true), always show expanded
+  const effectiveCollapsed = isOpen ? false : isCollapsed;
 
   const handleNav = (page: AppPage) => {
     onNavigate(page);
@@ -90,7 +68,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               alt="BSS Logo"
               width={42}
               height={42}
-              className="w-[42px] h-[42px] object-contain flex-shrink-0"
+              className="w-10.5 h-10.5 object-contain shrink-0"
               onError={(e) => {
                 // Fallback text icon if image fails
                 e.currentTarget.style.display = 'none';
@@ -121,7 +99,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Desktop Collapse Button */}
           <button
             type="button"
-            className="sidebar-collapse-btn !hidden md:!flex"
+            className="sidebar-collapse-btn hidden md:flex"
             onClick={onToggleCollapse}
             title={effectiveCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-label="Toggle sidebar"
@@ -142,7 +120,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={`nav-item ${currentPage === 'delivery' ? 'active' : ''}`}
               title="SMS Message Delivery"
             >
-              <Send className="w-4 h-4 flex-shrink-0" />
+              <Send className="w-4 h-4 shrink-0" />
               <span>SMS Delivery</span>
             </button>
 
@@ -152,7 +130,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={`nav-item ${currentPage === 'custom-groups' ? 'active' : ''}`}
               title="Custom Groups Manager"
             >
-              <FolderPlus className="w-4 h-4 flex-shrink-0" />
+              <FolderPlus className="w-4 h-4 shrink-0" />
               <span>Custom Groups</span>
             </button>
 
@@ -162,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={`nav-item ${currentPage === 'templates' ? 'active' : ''}`}
               title="SMS Templates"
             >
-              <FileText className="w-4 h-4 flex-shrink-0" />
+              <FileText className="w-4 h-4 shrink-0" />
               <span>SMS Templates</span>
             </button>
 
@@ -172,7 +150,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={`nav-item ${currentPage === 'status' ? 'active' : ''}`}
               title="Delivery Status"
             >
-              <Activity className="w-4 h-4 flex-shrink-0" />
+              <Activity className="w-4 h-4 shrink-0" />
               <span>Status</span>
             </button>
           </div>
@@ -185,7 +163,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={`nav-item ${currentPage === 'logs' ? 'active' : ''}`}
               title="Broadcast Logs"
             >
-              <History className="w-4 h-4 flex-shrink-0" />
+              <History className="w-4 h-4 shrink-0" />
               <span>Broadcast Logs</span>
             </button>
           </div>
@@ -200,7 +178,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs shadow-2xs"
                 title="Available SMS credits"
               >
-                <Coins className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                <Coins className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
                 <span className="text-ink-muted text-[11px] font-medium">Balance:</span>
                 <span className="text-amber-800 dark:text-amber-300 font-bold font-mono text-xs">
                   {balance.toLocaleString()}
@@ -231,7 +209,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {!effectiveCollapsed ? (
             <div className="p-2 rounded-xl bg-surface-2 border border-gray-200 dark:border-zinc-800 flex items-center justify-between gap-2 shadow-2xs">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="avatar-circle w-8 h-8 text-[11px] flex-shrink-0">
+                <div className="avatar-circle w-8 h-8 text-[11px] shrink-0">
                   {user?.initials || 'AD'}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -251,7 +229,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onClose();
                     onLogout();
                   }}
-                  className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition cursor-pointer flex-shrink-0"
+                  className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition cursor-pointer shrink-0"
                   title="Logout"
                   aria-label="Logout"
                 >

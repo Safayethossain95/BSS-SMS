@@ -46,7 +46,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
   };
 
   return (
-    <div id="students-table-section" className="card !p-0 overflow-hidden border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card transition-colors">
+    <div id="students-table-section" className="card p-0! overflow-hidden border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card transition-colors">
       
       {/* Top Filter Bar: Select All + Live Search */}
       <div className="p-4 border-b border-gray-200 dark:border-zinc-800 bg-surface-2/50 flex flex-wrap items-center justify-between gap-3">
@@ -88,7 +88,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] border-collapse text-left text-xs sm:text-sm">
+        <table className="w-full min-w-225 border-collapse text-left text-xs sm:text-sm">
           <thead>
             <tr className="border-b border-dashed border-gray-200 dark:border-zinc-800 text-ink font-semibold bg-surface-2/60">
               <th scope="col" className="w-12 py-3 px-3.5 text-center border-r border-dashed border-gray-200 dark:border-zinc-800">

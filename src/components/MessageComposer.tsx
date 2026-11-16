@@ -41,10 +41,10 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
   };
 
   return (
-    <div className="card !p-5 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card h-full flex flex-col justify-between">
+    <div className="card p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card h-full flex flex-col justify-between">
 
       {/* Card Header & Controls */}
-      <div className="card-head !mb-2 flex-wrap">
+      <div className="card-head mb-2! flex-wrap">
         <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
           <span className="icon-chip bg-surface-2 text-[#1b1e42] dark:text-accent">
             <MessageSquareQuote className="w-4 h-4" />
@@ -59,7 +59,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
               id="template-select"
               value={selectedTemplateId}
               onChange={(e) => onSelectTemplate(e.target.value)}
-              className="bg-surface-2 border border-gray-200 dark:border-zinc-800 focus:border-[#1b1e42] dark:focus:border-accent rounded-xl pl-3 pr-7 py-1.5 text-xs text-ink font-medium outline-none appearance-none cursor-pointer max-w-[210px] truncate transition-colors"
+              className="bg-surface-2 border border-gray-200 dark:border-zinc-800 focus:border-[#1b1e42] dark:focus:border-accent rounded-xl pl-3 pr-7 py-1.5 text-xs text-ink font-medium outline-none appearance-none cursor-pointer max-w-52.5 truncate transition-colors"
             >
               <option value="">Template</option>
               {templates.map((tpl) => (
@@ -110,7 +110,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
           value={message}
           onChange={(e) => onChangeMessage(e.target.value)}
           placeholder="Type SMS message or pick a template above..."
-          className="w-full flex-1 min-h-[105px] bg-surface-2 border border-gray-200 dark:border-zinc-800 focus:border-[#1b1e42] dark:focus:border-accent rounded-md p-3 text-xs sm:text-sm text-ink placeholder:text-ink-faint outline-none resize-none leading-relaxed transition-colors font-sans shadow-2xs"
+          className="w-full flex-1 min-h-26.25 bg-surface-2 border border-gray-200 dark:border-zinc-800 focus:border-[#1b1e42] dark:focus:border-accent rounded-md p-3 text-xs sm:text-sm text-ink placeholder:text-ink-faint outline-none resize-none leading-relaxed transition-colors font-sans shadow-2xs"
         />
 
         {metrics.isUnicode && (
@@ -121,7 +121,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
       </div>
 
       {/* Live Metrics Pill Strip */}
-      <div className="flex flex-wrap items-center justify-between pt-2.5 border-t border-gray-200 dark:border-zinc-800 mt-2 gap-x-2 gap-y-[15px] text-xs">
+      <div className="flex flex-wrap items-center justify-between pt-2.5 border-t border-gray-200 dark:border-zinc-800 mt-2 gap-x-2 gap-y-3.75 text-xs">
         <div className="flex flex-wrap items-center gap-2">
           <span className="px-2.5 py-1 rounded-full bg-surface-2 border border-gray-200 dark:border-zinc-800 text-ink-muted text-[11.5px]">
             Length: <strong className="text-ink">{metrics.charCount}</strong>

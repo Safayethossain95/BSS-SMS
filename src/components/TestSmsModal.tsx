@@ -36,7 +36,7 @@ export const TestSmsModal: React.FC<TestSmsModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
       <div
-        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] max-h-[90dvh] overflow-y-auto"
+        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-zinc-800">

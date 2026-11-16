@@ -157,7 +157,7 @@ export const TemplateManagerModal: React.FC<TemplateManagerModalProps> = ({
                     <p className="text-xs text-ink-muted line-clamp-2">{tpl.body}</p>
                   </div>
 
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       type="button"
                       onClick={() => {

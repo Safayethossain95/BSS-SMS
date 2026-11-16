@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, Users, FolderPlus } from 'lucide-react';
+import { ChevronDown, Users } from 'lucide-react';
 import type { ClassInfo, SectionInfo } from '../types';
 
 interface FilterSectionProps {
@@ -9,7 +9,6 @@ interface FilterSectionProps {
   onClassChange: (classId: string) => void;
   onSectionChange: (sectionId: string) => void;
   onLoadStudents: () => void;
-  onAddToCustomGroup: () => void;
   alertSentToText: string;
   totalLoadedStudents: number;
   isLoading: boolean;
@@ -22,7 +21,6 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   onClassChange,
   onSectionChange,
   onLoadStudents,
-  onAddToCustomGroup,
   alertSentToText: _alertSentToText,
   totalLoadedStudents: _totalLoadedStudents,
   isLoading,
@@ -31,14 +29,14 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
   const sections: SectionInfo[] = currentClass ? currentClass.sections : [];
 
   return (
-    <div className="card !p-4 sm:!p-5 border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card transition-colors">
+    <div className="card p-4! sm:p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card transition-colors">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
 
         {/* Dropdowns & Action Buttons */}
         <div className="flex flex-wrap items-end gap-3 flex-1">
 
           {/* Class Field */}
-          <div className="flex flex-col min-w-[140px] flex-1 sm:flex-initial">
+          <div className="flex flex-col min-w-35 flex-1 sm:flex-initial">
             <label
               htmlFor="class-select"
               className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1 select-none"
@@ -64,7 +62,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
           </div>
 
           {/* Section Field */}
-          <div className="flex flex-col min-w-[140px] flex-1 sm:flex-initial">
+          <div className="flex flex-col min-w-35 flex-1 sm:flex-initial">
             <label
               htmlFor="section-select"
               className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1 select-none"
@@ -104,18 +102,6 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
               <Users className="w-3.5 h-3.5" />
             )}
             <span>Load</span>
-          </button>
-
-          {/* Add to Custom Group Button */}
-          <button
-            type="button"
-            onClick={onAddToCustomGroup}
-            disabled={!selectedClassId}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-surface-2 hover:bg-surface-3 text-ink font-semibold text-xs sm:text-sm rounded-full border border-gray-200 dark:border-zinc-800 shadow-xs active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
-            title="Create or append this Class & Section to a Custom Group"
-          >
-            <FolderPlus className="w-3.5 h-3.5 text-[#1b1e42] dark:text-accent" />
-            <span>Add to Custom Group</span>
           </button>
 
         </div>
