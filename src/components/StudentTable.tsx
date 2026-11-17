@@ -59,6 +59,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
             checked={isAllSelected}
             onChange={onToggleSelectAll}
             disabled={students.length === 0}
+            aria-label="Select all students"
             className="w-4 h-4 rounded border-gray-300 dark:border-zinc-700 text-[#1b1e42] dark:text-accent focus:ring-accent cursor-pointer"
           />
           <span>Select All</span>
@@ -147,6 +148,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => onToggleStudent(student.id)}
+                        aria-label={`Select student ${student.name}`}
                         className="w-4 h-4 rounded border-gray-300 dark:border-zinc-700 text-[#1b1e42] dark:text-accent focus:ring-accent cursor-pointer"
                       />
                     </td>
@@ -168,6 +170,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                           }}
                           className="p-1 text-ink-faint hover:text-ink rounded transition"
                           title="Copy ID"
+                          aria-label={`Copy student ID ${student.id}`}
                         >
                           {copiedId === `id-${student.id}` ? (
                             <Check className="w-3.5 h-3.5 text-emerald-600" />
@@ -198,6 +201,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                           }}
                           className="p-1 text-ink-faint hover:text-ink rounded transition"
                           title="Copy Mobile"
+                          aria-label={`Copy phone number ${student.mobile}`}
                         >
                           {copiedId === `phone-${student.id}` ? (
                             <Check className="w-3.5 h-3.5 text-emerald-600" />
@@ -222,6 +226,7 @@ export const StudentTable: React.FC<StudentTableProps> = ({
                         onClick={() => onQuickSendSingle(student)}
                         className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface-2 hover:bg-surface-3 text-ink font-semibold text-xs border border-gray-200 dark:border-zinc-800 transition cursor-pointer shadow-2xs active:scale-[0.98]"
                         title="Send SMS to this student"
+                        aria-label={`Send test SMS to ${student.name}`}
                       >
                         <Send className="w-3 h-3 text-[#1b1e42] dark:text-accent" />
                         <span>Send</span>

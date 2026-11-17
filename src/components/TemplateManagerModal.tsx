@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, FileText, Check, RotateCcw, ChevronDown } from 'lucide-react';
 import type { SmsTemplate } from '../types';
 
@@ -25,6 +25,15 @@ export const TemplateManagerModal: React.FC<TemplateManagerModalProps> = ({
   const [category, setCategory] = useState<SmsTemplate['category']>('general');
   const [body, setBody] = useState('');
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleCreate = (e: React.FormEvent) => {
@@ -46,8 +55,11 @@ export const TemplateManagerModal: React.FC<TemplateManagerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" onClick={onClose}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="template-manager-title"
         className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 max-w-xl w-full shadow-2xl flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
@@ -57,7 +69,7 @@ export const TemplateManagerModal: React.FC<TemplateManagerModalProps> = ({
               <FileText className="w-4 h-4" />
             </span>
             <div>
-              <h3 className="text-base font-bold text-ink">SMS Templates Manager</h3>
+              <h3 id="template-manager-title" className="text-base font-bold text-ink">SMS Templates Manager</h3>
               <p className="text-xs text-ink-muted">Create and manage reusable SMS templates</p>
             </div>
           </div>
@@ -68,6 +80,7 @@ export const TemplateManagerModal: React.FC<TemplateManagerModalProps> = ({
                 onClick={onRefreshTemplates}
                 className="p-1.5 text-ink-muted hover:text-ink rounded-lg hover:bg-surface-2 transition cursor-pointer"
                 title="Refresh templates"
+                aria-label="Refresh templates"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -75,6 +88,7 @@ export const TemplateManagerModal: React.FC<TemplateManagerModalProps> = ({
             <button
               type="button"
               onClick={onClose}
+              aria-label="Close dialog"
               className="p-1.5 text-ink-muted hover:text-ink rounded-lg hover:bg-surface-2 transition cursor-pointer"
             >
               <X className="w-4 h-4" />

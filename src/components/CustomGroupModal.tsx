@@ -74,6 +74,15 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
     }
   }, [isOpen, initialSelectedClassId, initialSelectedSectionId, classes, customGroups]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const currentClass = classes.find((c) => c.id === selectedClassId);
@@ -254,8 +263,11 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs" onClick={onClose}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="custom-group-modal-title"
         className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl max-w-3xl w-full shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -266,7 +278,7 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
               <FolderPlus className="w-4 h-4" />
             </span>
             <div>
-              <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+              <h3 id="custom-group-modal-title" className="text-sm font-bold text-ink flex items-center gap-2">
                 Custom Groups Manager
                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-surface-2 text-ink border border-gray-200 dark:border-zinc-800">
                   {customGroups.length} Groups
@@ -281,6 +293,7 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close dialog"
             className="p-1.5 text-ink-muted hover:text-ink rounded-lg hover:bg-surface-2 transition cursor-pointer"
           >
             <X className="w-4 h-4" />

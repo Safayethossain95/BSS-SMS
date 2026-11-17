@@ -1,0 +1,5 @@
+# British Standard School - SMS Message Delivery System
+# Private Administrative Portal - Do Not Index
+
+User-agent: *
+Disallow: /

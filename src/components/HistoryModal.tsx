@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, History, CheckCheck, Users, RotateCcw } from 'lucide-react';
 import type { SentBroadcastRecord } from '../types';
 
@@ -17,11 +17,23 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
   onRefresh,
   isLoading,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" onClick={onClose}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="history-modal-title"
         className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 max-w-2xl w-full shadow-2xl flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
@@ -31,7 +43,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
               <History className="w-4 h-4" />
             </span>
             <div>
-              <h3 className="text-base font-bold text-ink">Broadcast Delivery Logs</h3>
+              <h3 id="history-modal-title" className="text-base font-bold text-ink">Broadcast Delivery Logs</h3>
               <p className="text-xs text-ink-muted">Historical SMS dispatches and delivery status</p>
             </div>
           </div>
@@ -43,6 +55,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                 disabled={isLoading}
                 className="p-1.5 text-ink-muted hover:text-ink rounded-lg hover:bg-surface-2 transition cursor-pointer disabled:opacity-50"
                 title="Refresh logs"
+                aria-label="Refresh logs"
               >
                 <RotateCcw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
               </button>
@@ -50,6 +63,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
             <button
               type="button"
               onClick={onClose}
+              aria-label="Close dialog"
               className="p-1.5 text-ink-muted hover:text-ink rounded-lg hover:bg-surface-2 transition cursor-pointer"
             >
               <X className="w-4 h-4" />

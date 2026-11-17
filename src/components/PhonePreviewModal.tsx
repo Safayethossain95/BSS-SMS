@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Smartphone, Signal, Wifi, Battery } from 'lucide-react';
 
 interface PhonePreviewModalProps {
@@ -14,6 +14,15 @@ export const PhonePreviewModal: React.FC<PhonePreviewModalProps> = ({
   message,
   sampleStudentName = 'Julaybib Muhammad',
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const renderedPreview = message
@@ -24,8 +33,11 @@ export const PhonePreviewModal: React.FC<PhonePreviewModalProps> = ({
     .replace(/{Roll}/g, '01');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs" onClick={onClose}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="phone-preview-title"
         className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 max-w-sm w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
@@ -35,13 +47,14 @@ export const PhonePreviewModal: React.FC<PhonePreviewModalProps> = ({
               <Smartphone className="w-4 h-4" />
             </span>
             <div>
-              <h3 className="text-base font-bold text-ink">Device Preview</h3>
+              <h3 id="phone-preview-title" className="text-base font-bold text-ink">Device Preview</h3>
               <p className="text-xs text-ink-muted">Preview rendered SMS notification</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close preview"
             className="p-1.5 text-ink-muted hover:text-ink rounded-lg hover:bg-surface-2 transition cursor-pointer"
           >
             <X className="w-4 h-4" />

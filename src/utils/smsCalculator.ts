@@ -59,7 +59,8 @@ export function calculateSmsMetrics(text: string, recipientCount: number): SmsMe
   };
 }
 
-export function formatPhoneNumber(phone: string): string {
+export function formatPhoneNumber(phone?: string | null): string {
+  if (!phone || typeof phone !== 'string') return '';
   // Format Bangladesh numbers like 8801749421005 or 01749421005
   const clean = phone.replace(/\D/g, '');
   if (clean.startsWith('880') && clean.length === 13) {

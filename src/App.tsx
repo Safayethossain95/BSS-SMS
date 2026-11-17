@@ -150,20 +150,28 @@ export function App() {
 
   // Custom Groups State
   const [customGroups, setCustomGroups] = useState<CustomGroup[]>(() => {
-    const saved = localStorage.getItem('bss_sms_custom_groups');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('bss_sms_custom_groups');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
   useEffect(() => {
-    localStorage.setItem('bss_sms_custom_groups', JSON.stringify(customGroups));
+    try {
+      localStorage.setItem('bss_sms_custom_groups', JSON.stringify(customGroups));
+    } catch {
+      // Storage quota or private mode protection
+    }
   }, [customGroups]);
 
   // Initial Data Fetching from ASP.NET Core 10 Web API
   const fetchClasses = useCallback(async () => {
     try {
       const data = await academicService.getClassesWithSections();
-      setClasses(data);
-      if (data.length > 0) {
+      setClasses(data || []);
+      if (data && data.length > 0) {
         setSelectedClassId(data[0].id);
         if (data[0].sections && data[0].sections.length > 0) {
           setSelectedSectionId(data[0].sections[0].id);
@@ -177,7 +185,7 @@ export function App() {
   const fetchGroups = useCallback(async () => {
     try {
       const data = await groupService.getAvailableGroups();
-      setAvailableGroups(data);
+      setAvailableGroups(data || []);
     } catch (err) {
       console.error('Failed to load recipient groups:', err);
     }
@@ -186,8 +194,8 @@ export function App() {
   const fetchTemplates = useCallback(async () => {
     try {
       const data = await templateService.getTemplates();
-      setTemplates(data);
-      if (data.length > 0 && !selectedTemplateId) {
+      setTemplates(data || []);
+      if (data && data.length > 0 && !selectedTemplateId) {
         setSelectedTemplateId(data[0].id);
         setMessage(data[0].body);
       }
@@ -255,10 +263,12 @@ export function App() {
     setIsLoadingStudents(true);
     try {
       const resolved = await groupService.resolveRecipients(destGroups);
-      setDisplayedStudents(resolved);
-      setSelectedStudentIds(new Set(resolved.map((s) => s.id)));
+      setDisplayedStudents(resolved || []);
+      setSelectedStudentIds(new Set((resolved || []).map((s) => s.id)));
     } catch (err) {
       console.error('Failed to resolve recipients from destination groups:', err);
+      setDisplayedStudents([]);
+      setSelectedStudentIds(new Set());
     } finally {
       setIsLoadingStudents(false);
     }
@@ -366,22 +376,24 @@ export function App() {
         selectedClassId,
         selectedSectionId || undefined
       );
-      setDisplayedStudents((prev) => {
-        const existingIds = new Set(prev.map((s) => s.id));
-        const combined = [...prev];
-        for (const s of loaded) {
-          if (!existingIds.has(s.id)) {
-            combined.push(s);
-            existingIds.add(s.id);
+      if (loaded && loaded.length > 0) {
+        setDisplayedStudents((prev) => {
+          const existingIds = new Set(prev.map((s) => s.id));
+          const combined = [...prev];
+          for (const s of loaded) {
+            if (!existingIds.has(s.id)) {
+              combined.push(s);
+              existingIds.add(s.id);
+            }
           }
-        }
-        return combined.length > 0 ? combined : loaded;
-      });
-      setSelectedStudentIds((prev) => {
-        const next = new Set(prev);
-        loaded.forEach((s) => next.add(s.id));
-        return next;
-      });
+          return combined.length > 0 ? combined : loaded;
+        });
+        setSelectedStudentIds((prev) => {
+          const next = new Set(prev);
+          loaded.forEach((s) => next.add(s.id));
+          return next;
+        });
+      }
     } catch (err) {
       console.error('Failed to load students from class/section:', err);
     } finally {

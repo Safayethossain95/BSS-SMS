@@ -1,7 +1,7 @@
 import axios, { type AxiosError } from 'axios';
 import type { ApiResponse } from '../types/api';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5252';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.PROD ? '' : 'http://localhost:5252');
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -11,6 +11,24 @@ export const apiClient = axios.create({
     'Accept': 'application/json',
   },
 });
+
+apiClient.interceptors.request.use(
+  (config) => {
+    try {
+      const savedUser = localStorage.getItem('bss_sms_auth_user');
+      if (savedUser) {
+        const user = JSON.parse(savedUser);
+        if (user?.id) {
+          config.headers.set('X-User-Id', user.id);
+        }
+      }
+    } catch {
+      // Ignore storage parse error
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 apiClient.interceptors.response.use(
   (response) => response,
