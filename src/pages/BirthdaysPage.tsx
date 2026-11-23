@@ -261,25 +261,25 @@ export const BirthdaysPage: React.FC<BirthdaysPageProps> = ({
   return (
     <div className="space-y-6">
       {/* Hero / Header Card */}
-      <div className="rounded-2xl p-6 bg-surface border border-border-default shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-linear-to-br from-amber-500 to-rose-500 text-white flex items-center justify-center shadow-sm">
-              <Cake className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-ink tracking-tight flex items-center gap-2">
-                <span>Student Birthday Management & Scheduler</span>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
-                  {settings.isAutoSendEnabled ? 'Auto-Dispatch ON' : 'Manual Mode'}
-                </span>
+      <div className="rounded-2xl p-5 sm:p-6 bg-surface border border-border-default shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+        <div className="flex items-start gap-3.5 flex-1 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-500 to-rose-500 text-white flex items-center justify-center shadow-sm shrink-0 mt-0.5">
+            <Cake className="w-5 h-5" />
+          </div>
+          <div className="space-y-1 flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-lg sm:text-xl font-bold text-ink tracking-tight">
+                Student Birthday Management &amp; Scheduler
               </h1>
-              <p className="text-xs text-ink-muted">
-                Automated scheduler runs every <strong className="text-ink">{settings.schedulerIntervalDays} day(s)</strong>.
-                Countdown activates <strong className="text-ink">{settings.lookaheadDays} days</strong> prior, with exact wishing at{' '}
-                <strong className="text-ink font-mono">{settings.exactWishTime}</strong>.
-              </p>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 shrink-0">
+                {settings.isAutoSendEnabled ? 'Auto-Dispatch ON' : 'Manual Mode'}
+              </span>
             </div>
+            <p className="text-xs text-ink-muted leading-relaxed">
+              Automated scheduler runs every <strong className="text-ink">{settings.schedulerIntervalDays} day(s)</strong>.
+              Countdown activates <strong className="text-ink">{settings.lookaheadDays} days</strong> prior, with exact wishing at{' '}
+              <strong className="text-ink font-mono">{settings.exactWishTime}</strong>.
+            </p>
           </div>
         </div>
 
@@ -289,7 +289,7 @@ export const BirthdaysPage: React.FC<BirthdaysPageProps> = ({
             type="button"
             onClick={handleRunSchedulerNow}
             disabled={isExecutingScheduler}
-            className="px-3.5 py-2 rounded-xl bg-surface-2 hover:bg-surface-3 text-ink text-xs font-semibold border border-border-default flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+            className="w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl bg-surface-2 hover:bg-surface-3 text-ink text-xs font-semibold border border-border-default flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
             title="Execute scheduler check immediately"
           >
             <RefreshCw
@@ -301,8 +301,8 @@ export const BirthdaysPage: React.FC<BirthdaysPageProps> = ({
           <button
             type="button"
             onClick={() => onNavigate('birthday-settings')}
-            className="px-3.5 py-2 rounded-xl bg-surface-2 hover:bg-surface-3 text-ink text-xs font-semibold border border-border-default flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-            title="Configure Birthday Scheduler Run Time & Parameters"
+            className="w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl bg-surface-2 hover:bg-surface-3 text-ink text-xs font-semibold border border-border-default flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+            title="Configure Birthday Scheduler"
           >
             <Sliders className="w-3.5 h-3.5 text-ink-muted" />
             <span>Scheduler Settings</span>
@@ -311,7 +311,7 @@ export const BirthdaysPage: React.FC<BirthdaysPageProps> = ({
           <button
             type="button"
             onClick={() => setIsAddStudentOpen(true)}
-            className="px-3.5 py-2 rounded-xl bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer active:scale-[0.98]"
+            className="w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer active:scale-[0.98]"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Register Birthday</span>
@@ -657,22 +657,17 @@ export const BirthdaysPage: React.FC<BirthdaysPageProps> = ({
                   ? 'No student birthdays today.'
                   : 'Try clearing your search query or class filter.'}
               </p>
-              <div className="mt-4 flex items-center justify-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('all')}
-                  className="px-3 py-1.5 rounded-xl border border-border-default hover:bg-surface-2 text-xs font-medium cursor-pointer"
-                >
-                  Show All Birthdays
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onNavigate('birthday-settings')}
-                  className="px-3 py-1.5 rounded-xl bg-primary text-white text-xs font-semibold cursor-pointer"
-                >
-                  Adjust Lookahead Window (N Days)
-                </button>
-              </div>
+              {activeTab === 'upcoming' && (
+                <div className="mt-4 flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('birthday-settings')}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white text-xs font-semibold cursor-pointer shadow-xs transition-colors"
+                  >
+                    Adjust Lookahead Window ({settings.lookaheadDays} Days)
+                  </button>
+                </div>
+              )}
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

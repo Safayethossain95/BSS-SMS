@@ -508,27 +508,29 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
         <div className="relative overflow-hidden p-5 rounded-2xl bg-linear-to-br from-indigo-900 via-indigo-950 to-slate-900 text-white shadow-md border border-indigo-700/50">
           <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
           
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wide uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Current Active SMS Gateway
-                </span>
-                <span className="px-2 py-0.5 rounded-md text-[10.5px] font-mono bg-white/10 text-white/80">
-                  ID #{activeGateway.setupId}
-                </span>
-                <span className="px-2 py-0.5 rounded-md text-[10.5px] bg-indigo-500/30 text-indigo-200">
-                  {activeGateway.gatewayTypeName}
-                </span>
-                <span className="px-2 py-0.5 rounded-md text-[10.5px] bg-white/10 text-white/80">
-                  {activeGateway.maskType === 1 ? 'Masking Approved' : 'Non-Masking Route'}
-                </span>
-              </div>
+          <div className="space-y-3.5 relative z-10">
+            {/* 1. Top Badges Strip - Single Row on Desktop, Wrapped on Mobile */}
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 py-0.5">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wide uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                Current Active SMS Gateway
+              </span>
+              <span className="px-2 py-0.5 rounded-md text-[10.5px] font-mono bg-white/10 text-white/80 shrink-0">
+                ID #{activeGateway.setupId}
+              </span>
+              <span className="px-2 py-0.5 rounded-md text-[10.5px] bg-indigo-500/30 text-indigo-200 shrink-0">
+                {activeGateway.gatewayTypeName}
+              </span>
+              <span className="px-2 py-0.5 rounded-md text-[10.5px] bg-white/10 text-white/80 shrink-0">
+                {activeGateway.maskType === 1 ? 'Masking Approved' : 'Non-Masking Route'}
+              </span>
+            </div>
 
-              <div>
-                <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                  {activeGateway.providerName}
+            {/* 2. Provider Info (Left) & Action Buttons (Right / Marked Spot) */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-0.5">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-2 flex-wrap">
+                  <span>{activeGateway.providerName}</span>
                   {activeGateway.senderId && (
                     <span className="text-xs font-mono font-normal text-indigo-300 bg-white/10 px-2 py-0.5 rounded">
                       SID: {activeGateway.senderId}
@@ -539,31 +541,32 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
                   [{activeGateway.httpMethod}] {activeGateway.url}
                 </p>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
-              <button
-                type="button"
-                onClick={() => handleTestCardConnectivity(activeGateway)}
-                disabled={testingId === activeGateway.setupId}
-                className="px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 active:bg-white/30 text-white text-xs font-semibold flex items-center gap-2 border border-white/20 transition cursor-pointer shadow-xs disabled:opacity-50"
-              >
-                <Zap className={`w-3.5 h-3.5 text-amber-300 ${testingId === activeGateway.setupId ? 'animate-bounce' : ''}`} />
-                <span>
-                  {testingId === activeGateway.setupId ? 'Testing Reachability...' : 'Check Connectivity'}
-                </span>
-              </button>
-
-              {canEdit && (
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
                 <button
                   type="button"
-                  onClick={() => handleOpenEdit(activeGateway)}
-                  className="px-3.5 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                  onClick={() => handleTestCardConnectivity(activeGateway)}
+                  disabled={testingId === activeGateway.setupId}
+                  className="w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 active:bg-white/30 text-white text-xs font-semibold flex items-center gap-2 border border-white/20 transition cursor-pointer shadow-xs disabled:opacity-50"
                 >
-                  <Edit2 className="w-3.5 h-3.5" />
-                  <span>Edit Configuration</span>
+                  <Zap className={`w-3.5 h-3.5 text-amber-300 ${testingId === activeGateway.setupId ? 'animate-bounce' : ''}`} />
+                  <span>
+                    {testingId === activeGateway.setupId ? 'Testing Reachability...' : 'Check Connectivity'}
+                  </span>
                 </button>
-              )}
+
+                {canEdit && (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEdit(activeGateway)}
+                    className="w-full sm:w-auto justify-center px-3.5 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Edit Configuration</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -612,26 +615,26 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {presets.map((preset) => (
             <button
               key={preset.id}
               type="button"
               onClick={() => handleOpenCreate(preset)}
-              className="p-2.5 rounded-xl bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-600 text-left transition-all group cursor-pointer shadow-2xs hover:shadow-xs flex flex-col justify-between"
+              className="p-3 rounded-xl bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-600 text-left transition-all group cursor-pointer shadow-2xs hover:shadow-xs flex flex-col justify-between"
               title={preset.description}
             >
               <div>
-                <div className="text-[11.5px] font-bold text-ink group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate">
+                <div className="text-xs font-bold text-ink group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate">
                   {preset.name}
                 </div>
-                <div className="text-[10px] text-ink-muted truncate mt-0.5 font-mono">
+                <div className="text-[10.5px] text-ink-muted truncate mt-0.5 font-mono">
                   {preset.defaultHttpMethod}
                 </div>
               </div>
-              <div className="mt-2 flex items-center justify-between text-[10px] text-indigo-600 dark:text-indigo-400 font-medium">
+              <div className="mt-2.5 flex items-center justify-between text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
                 <span>Setup</span>
-                <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </div>
             </button>
           ))}
@@ -836,7 +839,7 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
       {/* 5. Create / Edit Gateway Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/75 backdrop-blur-sm">
-          <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[88vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 z-50">
+          <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[88vh] max-h-[88dvh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 z-50">
             {/* Modal Header (Fixed at top) */}
             <div className="px-5 py-4 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between bg-gray-50 dark:bg-zinc-800/80 shrink-0">
               <div className="flex items-center gap-2.5">
@@ -1131,30 +1134,30 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
               </div>
 
               {/* Modal Footer Actions (FIXED DOCKED AT BOTTOM - ALWAYS VISIBLE) */}
-              <div className="px-5 py-3.5 border-t border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/90 flex items-center justify-between gap-3 shrink-0 shadow-xs">
+              <div className="px-4 sm:px-5 py-3.5 border-t border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/90 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 shrink-0 shadow-xs">
                 <button
                   type="button"
                   onClick={handleTestModalConnectivity}
                   disabled={testingId === 'modal'}
-                  className="btn-secondary text-xs flex items-center gap-1.5 px-3.5 py-2 cursor-pointer disabled:opacity-50"
+                  className="w-full sm:w-auto btn-secondary text-xs flex items-center justify-center gap-1.5 px-3.5 py-2 cursor-pointer disabled:opacity-50"
                   title="Check reachability to this gateway URL without saving"
                 >
                   <Zap className={`w-3.5 h-3.5 text-amber-500 ${testingId === 'modal' ? 'animate-bounce' : ''}`} />
                   <span>{testingId === 'modal' ? 'Testing Reachability...' : 'Test Connection'}</span>
                 </button>
 
-                <div className="flex items-center gap-2">
+                <div className="w-full sm:w-auto flex items-center justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="btn-secondary text-xs px-4 py-2 cursor-pointer"
+                    className="w-full sm:w-auto btn-secondary text-xs px-4 py-2 cursor-pointer text-center"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className="btn-primary text-xs flex items-center gap-1.5 px-4.5 py-2 cursor-pointer disabled:opacity-50 shadow-xs"
+                    className="w-full sm:w-auto btn-primary text-xs flex items-center justify-center gap-1.5 px-4.5 py-2 cursor-pointer disabled:opacity-50 shadow-xs"
                   >
                     {isSaving ? (
                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -1172,7 +1175,7 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
       {/* SQL Script View & Copy Modal */}
       {showSqlModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/75 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] max-h-[85dvh] flex flex-col overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between bg-gray-50 dark:bg-zinc-800/80 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400">

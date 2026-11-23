@@ -139,7 +139,7 @@ export const BirthdaySettingsPage: React.FC<BirthdaySettingsPageProps> = ({
           </div>
           <div>
             <h1 className="text-xl font-bold text-ink tracking-tight">
-              Birthday Scheduler Run Time &amp; Settings
+              Birthday Scheduler
             </h1>
             <p className="text-xs text-ink-muted mt-1 leading-relaxed">
               Control the scheduler execution frequency (n days), the countdown trigger threshold window (n days),
@@ -155,7 +155,7 @@ export const BirthdaySettingsPage: React.FC<BirthdaySettingsPageProps> = ({
           className={`px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition-all cursor-pointer ${
             saveSuccess
               ? 'bg-emerald-600 text-white'
-              : 'bg-primary hover:bg-primary-hover text-white'
+              : 'bg-[#1b1e42] hover:bg-[#20224A]/90 text-white dark:bg-white dark:hover:bg-gray-100 dark:text-[#1b1e42]'
           }`}
         >
           {saveSuccess ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
@@ -222,7 +222,7 @@ export const BirthdaySettingsPage: React.FC<BirthdaySettingsPageProps> = ({
                     onClick={() => handleChange('schedulerIntervalDays', n)}
                     className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
                       settings.schedulerIntervalDays === n
-                        ? 'bg-primary text-white font-semibold'
+                        ? 'bg-[#1b1e42] dark:bg-accent text-white font-semibold'
                         : 'bg-surface hover:bg-surface-3 text-ink-muted border border-border-default/40'
                     }`}
                   >

@@ -60,7 +60,7 @@ export const TemplateManagerModal: React.FC<TemplateManagerModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="template-manager-title"
-        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 max-w-xl w-full shadow-2xl flex flex-col max-h-[85vh]"
+        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 max-w-xl w-full shadow-2xl flex flex-col max-h-[85vh] max-h-[85dvh]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-zinc-800">

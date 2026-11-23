@@ -58,7 +58,7 @@ export const TestSmsModal: React.FC<TestSmsModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="test-sms-title"
-        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-zinc-800">
@@ -113,18 +113,18 @@ export const TestSmsModal: React.FC<TestSmsModalProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-200 dark:border-zinc-800">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 pt-3 border-t border-gray-200 dark:border-zinc-800">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-xs font-semibold rounded-full bg-surface-2 hover:bg-surface-3 text-ink transition cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-full bg-surface-2 hover:bg-surface-3 text-ink transition cursor-pointer text-center"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSending || !message.trim()}
-                className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white font-semibold text-xs sm:text-sm rounded-full transition shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-6 py-2.5 bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white font-semibold text-xs sm:text-sm rounded-full transition shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
               >
                 {isSending ? (
                   <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

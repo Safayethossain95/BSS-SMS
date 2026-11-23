@@ -37,9 +37,9 @@ export const Header: React.FC<HeaderProps> = ({
     'delivery': 'SMS Delivery System',
     'scheduler': 'Scheduled Messages',
     'birthdays': 'Student Birthday Management & Scheduler',
-    'birthday-settings': 'Birthday Scheduler Run Time Settings',
+    'birthday-settings': 'Birthday Scheduler',
     'system-messages': 'System Messages & Alert Notification Templates',
-    'database-indexer': 'Database Indexer & Performance Center',
+    'database-indexer': 'Database Indexer',
     'custom-groups': 'Custom Groups Manager',
     'templates': 'SMS Templates',
     'status': 'Message Delivery Status',
@@ -81,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="crumb select-none">
             <span className="crumb-prefix font-medium">BSS</span>
             <span className="crumb-separator text-ink-faint">/</span>
-            <span className="crumb-current font-semibold text-ink">{currentTitle}</span>
+            <span className="crumb-current font-semibold text-ink truncate max-w-[170px] xs:max-w-[220px] sm:max-w-none">{currentTitle}</span>
           </div>
         </div>
 

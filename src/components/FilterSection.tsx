@@ -93,7 +93,7 @@ export const FilterSection: React.FC<FilterSectionProps> = ({
             type="button"
             onClick={onLoadStudents}
             disabled={isLoading}
-            className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white font-semibold text-xs sm:text-sm rounded-full shadow-sm active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white font-semibold text-xs sm:text-sm rounded-full shadow-sm active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
             title="Load matching students from dropdown"
           >
             {isLoading ? (

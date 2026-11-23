@@ -72,7 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className={`scrim ${isOpen ? 'show' : ''}`} onClick={onClose} />
       <aside
         id="sidebar"
-        className={`sidebar relative ${effectiveCollapsed ? 'collapsed' : ''} ${isOpen ? 'open' : ''}`}
+        className={`sidebar ${effectiveCollapsed ? 'collapsed' : ''} ${isOpen ? 'open' : ''}`}
       >
         {/* Brand */}
         <div className="sidebar-brand">
@@ -403,6 +403,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
       </aside>
+      <div
+        className={`sidebar-spacer ${effectiveCollapsed ? 'collapsed' : ''}`}
+        aria-hidden="true"
+      />
     </>
   );
 };

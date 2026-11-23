@@ -179,7 +179,7 @@ export const SendConfirmModal: React.FC<SendConfirmModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
+        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -475,12 +475,12 @@ export const SendConfirmModal: React.FC<SendConfirmModalProps> = ({
             )}
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-gray-200 dark:border-zinc-800">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 pt-3 border-t border-gray-200 dark:border-zinc-800">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isSending}
-                className="px-4 py-2 text-xs font-semibold rounded-full bg-surface-2 hover:bg-surface-3 text-ink transition cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2 text-xs font-semibold rounded-full bg-surface-2 hover:bg-surface-3 text-ink transition cursor-pointer text-center"
               >
                 Cancel
               </button>
@@ -492,7 +492,7 @@ export const SendConfirmModal: React.FC<SendConfirmModalProps> = ({
                   selectedStudents.length === 0 ||
                   (dispatchMode === 'schedule' && !isFuture)
                 }
-                className={`inline-flex items-center gap-2 px-6 py-2.5 font-semibold text-xs sm:text-sm rounded-full transition shadow-sm active:scale-95 cursor-pointer disabled:opacity-50 text-white ${
+                className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 font-semibold text-xs sm:text-sm rounded-full transition shadow-sm active:scale-95 cursor-pointer disabled:opacity-50 text-white ${
                   dispatchMode === 'schedule'
                     ? 'bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600'
                     : 'bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover'

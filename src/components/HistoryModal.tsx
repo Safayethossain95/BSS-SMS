@@ -34,7 +34,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="history-modal-title"
-        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 max-w-2xl w-full shadow-2xl flex flex-col max-h-[85vh]"
+        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 max-w-2xl w-full shadow-2xl flex flex-col max-h-[85vh] max-h-[85dvh]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-zinc-800">
@@ -82,7 +82,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
                 key={rec.id}
                 className="p-4 bg-surface-2/40 border border-gray-200 dark:border-zinc-800 rounded-2xl space-y-2 hover:border-gray-300 dark:hover:border-zinc-700 transition shadow-2xs"
               >
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-bold text-ink">{rec.className}</span>
                     <span className="text-xs text-ink-faint">&bull;</span>

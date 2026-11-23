@@ -612,7 +612,7 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-2 text-ink flex transition-colors">
+    <div className="min-h-screen min-h-dvh bg-surface-2 text-ink flex transition-colors">
       {/* 1. Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
