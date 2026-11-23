@@ -8,6 +8,7 @@ export interface Student {
   section: string;
   roll?: string;
   status: 'active' | 'inactive';
+  dob?: string; // YYYY-MM-DD
 }
 
 export interface SectionInfo {
@@ -64,10 +65,19 @@ export interface CustomGroupTarget {
 
 export type AppPage =
   | 'delivery'
+  | 'scheduler'
+  | 'birthdays'
+  | 'birthday-settings'
+  | 'system-messages'
+  | 'database-indexer'
   | 'custom-groups'
   | 'templates'
   | 'status'
-  | 'logs';
+  | 'logs'
+  | 'sms-gateway';
+
+export * from './birthday';
+export * from './toast';
 
 export interface StatusLogRecord {
   id: string;
@@ -100,6 +110,8 @@ export interface AuthUser {
   username: string;
   name: string;
   role: string;
+  roles?: string[];
+  permissions?: string[];
   campus: string;
   initials: string;
 }

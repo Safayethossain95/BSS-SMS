@@ -35,10 +35,16 @@ export const Header: React.FC<HeaderProps> = ({
 
   const pageTitles: Record<AppPage, string> = {
     'delivery': 'SMS Delivery System',
+    'scheduler': 'Scheduled Messages',
+    'birthdays': 'Student Birthday Management & Scheduler',
+    'birthday-settings': 'Birthday Scheduler Run Time Settings',
+    'system-messages': 'System Messages & Alert Notification Templates',
+    'database-indexer': 'Database Indexer & Performance Center',
     'custom-groups': 'Custom Groups Manager',
     'templates': 'SMS Templates',
     'status': 'Message Delivery Status',
     'logs': 'Broadcast Delivery Logs',
+    'sms-gateway': 'SMS Gateway Settings',
   };
   const currentTitle = pageTitles[currentPage] || 'SMS Delivery System';
 

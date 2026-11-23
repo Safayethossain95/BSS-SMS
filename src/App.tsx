@@ -17,6 +17,7 @@ import { groupService } from './services/groupService';
 import { studentService } from './services/studentService';
 import { templateService } from './services/templateService';
 import { smsService } from './services/smsService';
+import { birthdayService } from './services/birthdayService';
 
 // Components
 import { Sidebar } from './components/Sidebar';
@@ -27,12 +28,19 @@ import { MessageComposer } from './components/MessageComposer';
 import { StudentTable } from './components/StudentTable';
 import { ActionBar } from './components/ActionBar';
 import { LoginPage } from './components/LoginPage';
+import { Toaster } from './components/Toaster';
 
 // Pages
 import { CustomGroupsPage } from './pages/CustomGroupsPage';
 import { TemplatesPage } from './pages/TemplatesPage';
 import { BroadcastLogsPage } from './pages/BroadcastLogsPage';
 import { StatusPage } from './pages/StatusPage';
+import { SmsGatewayPage } from './pages/SmsGatewayPage';
+import { ScheduledMessagesPage } from './pages/ScheduledMessagesPage';
+import { BirthdaysPage } from './pages/BirthdaysPage';
+import { BirthdaySettingsPage } from './pages/BirthdaySettingsPage';
+import { SystemMessagesPage } from './pages/SystemMessagesPage';
+import { DatabaseIndexerPage } from './pages/DatabaseIndexerPage';
 
 // Modals
 import { PhonePreviewModal } from './components/PhonePreviewModal';
@@ -48,6 +56,8 @@ export function App() {
   const [templates, setTemplates] = useState<SmsTemplate[]>([]);
   const [historyRecords, setHistoryRecords] = useState<SentBroadcastRecord[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState<boolean>(false);
+  const [pendingScheduledCount, setPendingScheduledCount] = useState<number>(0);
+  const [activeBirthdaysCount, setActiveBirthdaysCount] = useState<number>(0);
 
   const [balance, setBalance] = useState<number>(5000);
   const [_safetyInfo, setSafetyInfo] = useState<SmsBalanceInfo>({
@@ -122,6 +132,7 @@ export function App() {
   const handleLogout = () => {
     setAuthUser(null);
     localStorage.removeItem('bss_sms_auth_user');
+    localStorage.removeItem('bss_gateway_token');
   };
 
   useEffect(() => {
@@ -226,6 +237,25 @@ export function App() {
     }
   }, []);
 
+  const fetchPendingScheduledCount = useCallback(async () => {
+    try {
+      const list = await smsService.getScheduled();
+      setPendingScheduledCount(list.length);
+    } catch (err) {
+      console.error('Failed to load scheduled count:', err);
+    }
+  }, []);
+
+  const updateBirthdaysCount = useCallback(() => {
+    try {
+      const infos = birthdayService.getAllBirthdayInfos(new Date());
+      const count = infos.filter((i) => i.isWithinCountdownWindow || i.isToday).length;
+      setActiveBirthdaysCount(count);
+    } catch (e) {
+      console.error('Failed to update birthdays count:', e);
+    }
+  }, []);
+
   useEffect(() => {
     const loadInitialData = async () => {
       await fetchClasses();
@@ -233,9 +263,24 @@ export function App() {
       await fetchTemplates();
       await fetchBalance();
       await fetchHistory();
+      await fetchPendingScheduledCount();
+      updateBirthdaysCount();
     };
     loadInitialData();
-  }, [fetchClasses, fetchGroups, fetchTemplates, fetchBalance, fetchHistory]);
+  }, [fetchClasses, fetchGroups, fetchTemplates, fetchBalance, fetchHistory, fetchPendingScheduledCount, updateBirthdaysCount]);
+
+  // Birthday Scheduler Background Interval Loop (every 60 seconds)
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        await birthdayService.checkAndExecuteScheduler(new Date());
+        updateBirthdaysCount();
+      } catch (err) {
+        console.error('Background birthday scheduler error:', err);
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [updateBirthdaysCount]);
 
   // Sync custom groups into available groups list
   useEffect(() => {
@@ -493,38 +538,68 @@ export function App() {
     setDisplayedStudents([]);
   };
 
-  const handleSendSuccess = () => {
-    // Re-fetch real balance and updated history from SQL Server
-    fetchBalance();
-    fetchHistory();
-  };
-
   const selectedStudentsList = useMemo(() => {
     return displayedStudents.filter((s) => selectedStudentIds.has(s.id));
   }, [displayedStudents, selectedStudentIds]);
 
-  const alertSentToText = useMemo(() => {
+  const targetGroupSummary = useMemo(() => {
     if (destinationGroups.length > 0) {
       return destinationGroups.join(', ');
     }
     const currentCls = classes.find((c) => c.id === selectedClassId);
-    const currentSec = currentCls?.sections.find((s) => s.id === selectedSectionId);
-    if (currentCls && currentSec) {
-      return `${currentCls.name} - ${currentSec.name}`;
+    if (currentCls) {
+      const currentSec = currentCls.sections.find((s) => s.id === selectedSectionId);
+      return currentSec ? `${currentCls.name} - ${currentSec.name}` : currentCls.name;
     }
-    return '';
-  }, [classes, selectedClassId, selectedSectionId, destinationGroups]);
+    return 'All Classes';
+  }, [destinationGroups, classes, selectedClassId, selectedSectionId]);
 
-  const sampleStudent = displayedStudents[0] || {
-    headerId: '1',
-    id: '2606093807',
-    name: 'Julaybib Muhammad',
-    mobile: '8801749421005',
-    className: 'Play Group',
-    section: 'Starter',
-    roll: '01',
-    status: 'active' as const,
+  const handleSendSuccess = (
+    recipients: Student[],
+    sentMessage: string,
+    isScheduled?: boolean
+  ) => {
+    if (isScheduled) {
+      fetchPendingScheduledCount();
+      return;
+    }
+
+    const currentCls = classes.find((c) => c.id === selectedClassId);
+    const currentSec = currentCls?.sections.find((s) => s.id === selectedSectionId);
+
+    const now = new Date();
+    const timeStr = now.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }) + ' ' + now.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
+
+    const newRecord: SentBroadcastRecord = {
+      id: `BC-${Date.now().toString().slice(-4)}`,
+      timestamp: timeStr,
+      className: currentCls ? currentCls.name : 'Custom Selection',
+      section: currentSec ? currentSec.name : 'Multiple Sections',
+      message: sentMessage,
+      totalRecipients: recipients.length,
+      totalSmsUnits: metrics.totalSmsCost,
+      status: 'Delivered',
+      recipients: recipients.map((r) => ({
+        name: r.name,
+        mobile: r.mobile,
+        status: 'Delivered',
+      })),
+    };
+
+    setHistoryRecords((prev) => [newRecord, ...prev]);
+    fetchBalance();
+    fetchHistory();
   };
+
+  const sampleStudent = displayedStudents[0] || null;
 
   if (!authUser) {
     return (
@@ -537,14 +612,13 @@ export function App() {
   }
 
   return (
-    <div className={`app-shell ${isDark ? 'dark' : ''}`}>
-
-      {/* 1. Floating BSS Sidebar */}
+    <div className="min-h-screen bg-surface-2 text-ink flex transition-colors">
+      {/* 1. Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         isCollapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         currentPage={currentPage}
         onNavigate={setCurrentPage}
         isDark={isDark}
@@ -552,48 +626,28 @@ export function App() {
         user={authUser}
         onLogout={handleLogout}
         balance={balance}
+        pendingScheduledCount={pendingScheduledCount}
+        birthdaysCount={activeBirthdaysCount}
       />
 
-      <div className="main-content">
-        {/* 2. BSS Topbar */}
+      {/* 2. Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
         <Header
-          balance={balance}
-          isDark={isDark}
-          onToggleTheme={toggleTheme}
           onOpenMenu={() => setSidebarOpen(true)}
+          balance={balance}
           currentPage={currentPage}
           onNavigate={setCurrentPage}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
           user={authUser}
           onLogout={handleLogout}
         />
 
-        {/* 3. Main Page Content */}
-        <main className="page-main space-y-4">
+        <main className="p-3 sm:p-5 lg:p-6 max-w-7xl w-full mx-auto space-y-4">
 
           {currentPage === 'delivery' && (
             <>
-              {/* Page Head Banner */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold font-serif text-ink tracking-tight mb-0.5">
-                    SMS Message Delivery
-                  </h1>
-                  <p className="text-xs sm:text-sm text-ink-muted">
-                    Broadcast notifications, attendance updates, and alerts to classes, sections, and custom student groups.
-                  </p>
-                </div>
-                {/* 
-                {safetyInfo.isSafeTestMode && (
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 shadow-2xs">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>
-                      Safe Mode Active &bull; Test Redirect: <strong>{safetyInfo.safeTestPhoneNumber}</strong>
-                    </span>
-                  </div>
-                )} */}
-              </div>
-
-              {/* 4. Filter Section */}
+              {/* 3. Class & Section Filter Section */}
               <FilterSection
                 classes={classes}
                 selectedClassId={selectedClassId}
@@ -601,12 +655,12 @@ export function App() {
                 onClassChange={handleClassChange}
                 onSectionChange={handleSectionChange}
                 onLoadStudents={handleLoadFromDropdown}
-                alertSentToText={alertSentToText}
+                alertSentToText={targetGroupSummary}
                 totalLoadedStudents={displayedStudents.length}
                 isLoading={isLoadingStudents}
               />
 
-              {/* 5. Group Shifter (Left) & Compact Message Composer (Right) */}
+              {/* 4. Group Shifter (Left) & Compact Message Composer (Right) */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
 
                 {/* Left: Small Group Shifter */}
@@ -618,7 +672,7 @@ export function App() {
                     onTransferToAvailable={handleTransferToAvailable}
                     onTransferAllToDestination={handleTransferAllToDestination}
                     onTransferAllToAvailable={handleTransferAllToAvailable}
-                    onOpenCustomGroupModal={() => setCurrentPage('custom-groups')}
+                    onOpenCustomGroupModal={() => setIsCustomGroupModalOpen(true)}
                   />
                 </div>
 
@@ -639,7 +693,7 @@ export function App() {
 
               </div>
 
-              {/* 6. Action Bar */}
+              {/* 6. Sticky Action Bar */}
               <ActionBar
                 onSearchClick={() => {
                   const el = document.getElementById('class-select');
@@ -708,6 +762,44 @@ export function App() {
             />
           )}
 
+          {currentPage === 'sms-gateway' && (
+            <SmsGatewayPage onGatewayChanged={fetchBalance} user={authUser} />
+          )}
+
+          {currentPage === 'scheduler' && (
+            <ScheduledMessagesPage
+              onNavigate={setCurrentPage}
+              onRefreshParent={fetchPendingScheduledCount}
+            />
+          )}
+
+          {currentPage === 'birthdays' && (
+            <BirthdaysPage
+              classes={classes}
+              onNavigate={setCurrentPage}
+              onRefreshBalance={fetchBalance}
+            />
+          )}
+
+          {currentPage === 'birthday-settings' && (
+            <BirthdaySettingsPage
+              onNavigate={setCurrentPage}
+              onRefreshBalance={fetchBalance}
+            />
+          )}
+
+          {currentPage === 'system-messages' && (
+            <SystemMessagesPage
+              onNavigate={setCurrentPage}
+            />
+          )}
+
+          {currentPage === 'database-indexer' && (
+            <DatabaseIndexerPage
+              onNavigate={setCurrentPage}
+            />
+          )}
+
           {/* 8. Footer Ribbon */}
           <div className="pt-4 pb-2 text-center text-xs text-ink-faint">
             British Standard School &bull; SMS Message Delivery System
@@ -728,6 +820,7 @@ export function App() {
         isOpen={isSendConfirmOpen}
         onClose={() => setIsSendConfirmOpen(false)}
         message={message}
+        targetGroupSummary={targetGroupSummary}
         selectedStudents={selectedStudentsList}
         metrics={metrics}
         onSendSuccess={handleSendSuccess}
@@ -782,6 +875,9 @@ export function App() {
         initialSelectedClassId={selectedClassId}
         initialSelectedSectionId={selectedSectionId}
       />
+
+      {/* Global Toast Alerts */}
+      <Toaster />
 
     </div>
   );
