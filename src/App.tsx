@@ -686,9 +686,9 @@ export function App() {
                   />
 
                   {/* 4. Group Shifter (Left) & Compact Message Composer (Right) */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+                  <div className="flex flex-col lg:flex-row gap-4 items-stretch">
                     {/* Left: Small Group Shifter */}
-                    <div className="lg:col-span-5 flex flex-col">
+                    <div className="lg:w-[374px] min-w-[374px] shrink-0 flex flex-col">
                       <GroupShifter
                         availableGroups={availableGroups}
                         destinationGroups={destinationGroups}
@@ -701,7 +701,7 @@ export function App() {
                     </div>
 
                     {/* Right: Compact Message Composer */}
-                    <div className="lg:col-span-7 flex flex-col">
+                    <div className="flex-1 min-w-0 flex flex-col">
                       <MessageComposer
                         message={message}
                         onChangeMessage={setMessage}

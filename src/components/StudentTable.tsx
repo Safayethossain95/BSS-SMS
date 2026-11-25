@@ -214,8 +214,16 @@ export const StudentTable: React.FC<StudentTableProps> = ({
 
                     {/* SECTION */}
                     <td className="py-3 px-4 border-r border-dashed border-gray-200 dark:border-zinc-800">
-                      <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-2 border border-gray-200 dark:border-zinc-800 text-ink">
-                        {student.section}
+                      <span
+                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                          student.section && student.section.trim() && student.section.trim() !== '-'
+                            ? 'bg-surface-2 border-gray-200 dark:border-zinc-800 text-ink'
+                            : 'bg-surface-2/60 border-gray-200/60 dark:border-zinc-800/60 text-ink-muted'
+                        }`}
+                      >
+                        {student.section && student.section.trim() && student.section.trim() !== '-'
+                          ? student.section
+                          : 'N/A'}
                       </span>
                     </td>
 

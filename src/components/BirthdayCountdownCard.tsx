@@ -118,7 +118,7 @@ export const BirthdayCountdownCard: React.FC<BirthdayCountdownCardProps> = ({
                 </span>
                 <span>&bull;</span>
                 <span className="px-1.5 py-0.5 rounded bg-surface-2 font-medium text-ink-muted">
-                  {student.section}
+                  {student.section && student.section.trim() && student.section.trim() !== '-' ? student.section : 'N/A'}
                 </span>
               </div>
             </div>

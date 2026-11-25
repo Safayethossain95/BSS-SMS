@@ -53,7 +53,7 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
   };
 
   return (
-    <div className="card p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card h-full flex flex-col justify-between">
+    <div className="card p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card h-full flex flex-col justify-between min-w-83.5">
 
       {/* Card Header */}
       <div className="card-head mb-3!">
