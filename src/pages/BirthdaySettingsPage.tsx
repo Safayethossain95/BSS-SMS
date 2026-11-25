@@ -109,7 +109,7 @@ export const BirthdaySettingsPage: React.FC<BirthdaySettingsPageProps> = ({
   const metrics = calculateSmsMetrics(samplePreviewMessage, 1);
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-10">
+    <div className="space-y-6 w-full pb-10">
       {/* Top Breadcrumb & Nav */}
       <div className="flex items-center justify-between">
         <button

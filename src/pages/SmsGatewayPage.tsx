@@ -4,7 +4,6 @@ import {
   Server,
   Zap,
   CheckCircle2,
-  AlertTriangle,
   XCircle,
   Plus,
   RefreshCw,
@@ -112,7 +111,6 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
   const [gateways, setGateways] = useState<SmsGateway[]>([]);
   const [presets, setPresets] = useState<GatewayPreset[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Connectivity Test State per gateway ID (or 'new' for modal)
@@ -149,7 +147,6 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
-    setError(null);
     try {
       const [fetchedGateways, fetchedPresets] = await Promise.all([
         gatewayService.getGateways(),
@@ -158,8 +155,8 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
       setGateways(fetchedGateways);
       setPresets(fetchedPresets);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to load SMS gateways.';
-      setError(msg);
+      const msg = err instanceof Error ? err.message : 'Network Error';
+      toast.custom('Network Error', msg, 'error', 5000);
     } finally {
       setIsLoading(false);
     }
@@ -169,18 +166,41 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
     let isMounted = true;
     Promise.all([gatewayService.getGateways(), gatewayService.getPresets()])
       .then(([fetchedGateways, fetchedPresets]) => {
-        if (isMounted) {
-          setGateways(fetchedGateways);
-          setPresets(fetchedPresets);
-          setIsLoading(false);
+        if (!isMounted) return;
+        setGateways(fetchedGateways);
+        setPresets(fetchedPresets);
+        setIsLoading(false);
+
+        const hasActive = fetchedGateways && fetchedGateways.some((g) => g.isActive);
+        if (!hasActive) {
+          toast.custom(
+            'No Active SMS Gateway Selected!',
+            'Outbound messages will default to simulated mode until an active gateway is chosen.',
+            'warning',
+            5000
+          );
         }
       })
       .catch((err: unknown) => {
-        if (isMounted) {
-          const msg = err instanceof Error ? err.message : 'Failed to load SMS gateways.';
-          setError(msg);
-          setIsLoading(false);
-        }
+        if (!isMounted) return;
+        const msg = err instanceof Error ? err.message : 'Network Error';
+        setIsLoading(false);
+
+        // Show Network Error toast
+        toast.custom(
+          'Network Error',
+          msg === 'Network Error' ? 'Could not connect to SMS Gateway server.' : msg,
+          'error',
+          5000
+        );
+
+        // Show No Active SMS Gateway Selected toast
+        toast.custom(
+          'No Active SMS Gateway Selected!',
+          'Outbound messages will default to simulated mode until an active gateway is chosen.',
+          'warning',
+          5000
+        );
       });
 
     return () => {
@@ -290,12 +310,11 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.url.trim()) {
-      setError('Gateway URL is required.');
+      toast.warning('WARN_GATEWAY_URL_REQUIRED');
       return;
     }
 
     setIsSaving(true);
-    setError(null);
     try {
       await gatewayService.saveGateway(formData);
       flashSuccess(
@@ -308,7 +327,7 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
       if (onGatewayChanged) onGatewayChanged();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to save SMS gateway.';
-      setError(msg);
+      toast.error(msg);
     } finally {
       setIsSaving(false);
     }
@@ -330,7 +349,7 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
       if (onGatewayChanged) onGatewayChanged();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to activate SMS gateway.';
-      setError(msg);
+      toast.error(msg);
     }
   };
 
@@ -353,7 +372,7 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
       if (onGatewayChanged) onGatewayChanged();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to delete SMS gateway.';
-      setError(msg);
+      toast.error(msg);
     }
   };
 
@@ -476,33 +495,6 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
         </div>
       )}
 
-      {error && (
-        <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 text-xs flex items-center justify-between gap-3 shadow-2xs">
-          <div className="flex items-center gap-2 min-w-0">
-            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-            <span className="font-medium truncate">{error}</span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {error.includes('BSS_SMS_GATEWAY_SETUP') && (
-              <button
-                type="button"
-                onClick={() => setShowSqlModal(true)}
-                className="px-2.5 py-1 rounded-lg bg-amber-200 dark:bg-amber-800 text-amber-900 dark:text-amber-100 font-semibold text-[11px] hover:opacity-90 transition cursor-pointer"
-              >
-                View Table SQL Script
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setError(null)}
-              className="text-amber-700 dark:text-amber-300 hover:underline text-xs font-semibold cursor-pointer"
-            >
-              Dismiss
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* 2. Active Gateway Spotlight Banner */}
       {activeGateway ? (
         <div className="relative overflow-hidden p-5 rounded-2xl bg-linear-to-br from-indigo-900 via-indigo-950 to-slate-900 text-white shadow-md border border-indigo-700/50">
@@ -592,16 +584,7 @@ export const SmsGatewayPage: React.FC<SmsGatewayPageProps> = ({ onGatewayChanged
             </div>
           )}
         </div>
-      ) : (
-        <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-200 text-xs flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-            <span>
-              <strong>No Active SMS Gateway Selected!</strong> Outbound messages will default to simulated mode until an active gateway is chosen.
-            </span>
-          </div>
-        </div>
-      )}
+      ) : null}
 
       {/* 3. Bangladeshi SMS Provider Presets (1-Click Fill) */}
       <div className="space-y-2.5">

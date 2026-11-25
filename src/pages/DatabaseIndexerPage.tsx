@@ -131,7 +131,7 @@ GO`).join('\n\n')}
   const totalCount = indexes.length;
 
   return (
-    <div className="space-y-6 pb-12 animate-fadeIn max-w-6xl mx-auto">
+    <div className="space-y-6 pb-12 animate-fadeIn w-full">
       {/* Header & Breadcrumb */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

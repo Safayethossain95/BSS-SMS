@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import type {
   Student,
   ClassInfo,
@@ -10,6 +11,7 @@ import type {
 } from './types';
 import type { SmsBalanceInfo } from './types/api';
 import { calculateSmsMetrics } from './utils/smsCalculator';
+import { PAGE_ROUTES, getPageFromPath } from './routes';
 
 // API Services
 import { academicService } from './services/academicService';
@@ -147,17 +149,33 @@ export function App() {
 
   const toggleTheme = () => setIsDark((prev) => !prev);
 
-  // Sidebar State
+  // Sidebar State (never auto-collapsed by screen size)
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth < 1350;
+    try {
+      const saved = localStorage.getItem('bss_sms_sidebar_collapsed');
+      return saved !== null ? JSON.parse(saved) : false;
+    } catch {
+      return false;
     }
-    return false;
   });
 
-  // Active Navigation Page
-  const [currentPage, setCurrentPage] = useState<AppPage>('delivery');
+  useEffect(() => {
+    try {
+      localStorage.setItem('bss_sms_sidebar_collapsed', JSON.stringify(sidebarCollapsed));
+    } catch {
+      // Storage quota or private mode protection
+    }
+  }, [sidebarCollapsed]);
+
+  // Active Navigation Page derived from Route
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentPage = useMemo(() => getPageFromPath(location.pathname), [location.pathname]);
+
+  const handleNavigate = useCallback((page: AppPage) => {
+    navigate(PAGE_ROUTES[page] || '/delivery');
+  }, [navigate]);
 
   // Custom Groups State
   const [customGroups, setCustomGroups] = useState<CustomGroup[]>(() => {
@@ -620,7 +638,7 @@ export function App() {
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         currentPage={currentPage}
-        onNavigate={setCurrentPage}
+        onNavigate={handleNavigate}
         isDark={isDark}
         onToggleTheme={toggleTheme}
         user={authUser}
@@ -636,169 +654,222 @@ export function App() {
           onOpenMenu={() => setSidebarOpen(true)}
           balance={balance}
           currentPage={currentPage}
-          onNavigate={setCurrentPage}
+          onNavigate={handleNavigate}
           isDark={isDark}
           onToggleTheme={toggleTheme}
           user={authUser}
           onLogout={handleLogout}
         />
 
-        <main className="p-3 sm:p-5 lg:p-6 max-w-7xl w-full mx-auto space-y-4">
-
-          {currentPage === 'delivery' && (
-            <>
-              {/* 3. Class & Section Filter Section */}
-              <FilterSection
-                classes={classes}
-                selectedClassId={selectedClassId}
-                selectedSectionId={selectedSectionId}
-                onClassChange={handleClassChange}
-                onSectionChange={handleSectionChange}
-                onLoadStudents={handleLoadFromDropdown}
-                alertSentToText={targetGroupSummary}
-                totalLoadedStudents={displayedStudents.length}
-                isLoading={isLoadingStudents}
-              />
-
-              {/* 4. Group Shifter (Left) & Compact Message Composer (Right) */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-
-                {/* Left: Small Group Shifter */}
-                <div className="lg:col-span-5 flex flex-col">
-                  <GroupShifter
-                    availableGroups={availableGroups}
-                    destinationGroups={destinationGroups}
-                    onTransferToDestination={handleTransferToDestination}
-                    onTransferToAvailable={handleTransferToAvailable}
-                    onTransferAllToDestination={handleTransferAllToDestination}
-                    onTransferAllToAvailable={handleTransferAllToAvailable}
-                    onOpenCustomGroupModal={() => setIsCustomGroupModalOpen(true)}
+        <main className="p-3 sm:p-5 lg:p-6 w-full space-y-4">
+          <Routes>
+            {/* 1. SMS Delivery */}
+            <Route
+              path="/"
+              element={<Navigate to="/delivery" replace />}
+            />
+            <Route
+              path="/delivery"
+              element={
+                <>
+                  {/* 3. Class & Section Filter Section */}
+                  <FilterSection
+                    classes={classes}
+                    selectedClassId={selectedClassId}
+                    selectedSectionId={selectedSectionId}
+                    onClassChange={handleClassChange}
+                    onSectionChange={handleSectionChange}
+                    onLoadStudents={handleLoadFromDropdown}
+                    alertSentToText={targetGroupSummary}
+                    totalLoadedStudents={displayedStudents.length}
+                    isLoading={isLoadingStudents}
                   />
-                </div>
 
-                {/* Right: Compact Message Composer */}
-                <div className="lg:col-span-7 flex flex-col">
-                  <MessageComposer
-                    message={message}
-                    onChangeMessage={setMessage}
-                    templates={templates}
-                    selectedTemplateId={selectedTemplateId}
-                    onSelectTemplate={handleSelectTemplate}
-                    metrics={metrics}
-                    totalRecipients={selectedStudentIds.size}
-                    sampleStudentName={sampleStudent?.name}
-                    onOpenPhonePreview={() => setIsPhonePreviewOpen(true)}
+                  {/* 4. Group Shifter (Left) & Compact Message Composer (Right) */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+                    {/* Left: Small Group Shifter */}
+                    <div className="lg:col-span-5 flex flex-col">
+                      <GroupShifter
+                        availableGroups={availableGroups}
+                        destinationGroups={destinationGroups}
+                        onTransferToDestination={handleTransferToDestination}
+                        onTransferToAvailable={handleTransferToAvailable}
+                        onTransferAllToDestination={handleTransferAllToDestination}
+                        onTransferAllToAvailable={handleTransferAllToAvailable}
+                        onOpenCustomGroupModal={() => setIsCustomGroupModalOpen(true)}
+                      />
+                    </div>
+
+                    {/* Right: Compact Message Composer */}
+                    <div className="lg:col-span-7 flex flex-col">
+                      <MessageComposer
+                        message={message}
+                        onChangeMessage={setMessage}
+                        templates={templates}
+                        selectedTemplateId={selectedTemplateId}
+                        onSelectTemplate={handleSelectTemplate}
+                        metrics={metrics}
+                        totalRecipients={selectedStudentIds.size}
+                        sampleStudentName={sampleStudent?.name}
+                        onOpenPhonePreview={() => setIsPhonePreviewOpen(true)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* 6. Sticky Action Bar */}
+                  <ActionBar
+                    onSearchClick={() => {
+                      const el = document.getElementById('class-select');
+                      el?.focus();
+                    }}
+                    onResetClick={handleReset}
+                    onSendClick={() => setIsSendConfirmOpen(true)}
+                    onTestSendClick={() => setIsTestSmsOpen(true)}
+                    totalRecipientsSelected={selectedStudentIds.size}
+                    isMessageEmpty={!message.trim()}
+                    totalSmsCost={metrics.totalSmsCost}
                   />
-                </div>
 
-              </div>
-
-              {/* 6. Sticky Action Bar */}
-              <ActionBar
-                onSearchClick={() => {
-                  const el = document.getElementById('class-select');
-                  el?.focus();
-                }}
-                onResetClick={handleReset}
-                onSendClick={() => setIsSendConfirmOpen(true)}
-                onTestSendClick={() => setIsTestSmsOpen(true)}
-                totalRecipientsSelected={selectedStudentIds.size}
-                isMessageEmpty={!message.trim()}
-                totalSmsCost={metrics.totalSmsCost}
-              />
-
-              {/* 7. Student Table */}
-              <StudentTable
-                students={filteredStudents}
-                selectedStudentIds={selectedStudentIds}
-                onToggleStudent={handleToggleStudent}
-                onToggleSelectAll={handleToggleSelectAll}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onQuickSendSingle={(student) => {
-                  setSingleStudentForTest(student);
-                  setIsTestSmsOpen(true);
-                }}
-              />
-            </>
-          )}
-
-          {currentPage === 'custom-groups' && (
-            <CustomGroupsPage
-              classes={classes}
-              students={students}
-              customGroups={customGroups}
-              onCreateCustomGroup={handleCreateCustomGroup}
-              onUpdateCustomGroup={handleUpdateCustomGroup}
-              onDeleteCustomGroup={handleDeleteCustomGroup}
-              onNavigate={setCurrentPage}
+                  {/* 7. Student Table */}
+                  <StudentTable
+                    students={filteredStudents}
+                    selectedStudentIds={selectedStudentIds}
+                    onToggleStudent={handleToggleStudent}
+                    onToggleSelectAll={handleToggleSelectAll}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    onQuickSendSingle={(student) => {
+                      setSingleStudentForTest(student);
+                      setIsTestSmsOpen(true);
+                    }}
+                  />
+                </>
+              }
             />
-          )}
 
-          {currentPage === 'templates' && (
-            <TemplatesPage
-              templates={templates}
-              onAddTemplate={(tpl) => setTemplates((prev) => [tpl, ...prev])}
-              onDeleteTemplate={(id) => setTemplates((prev) => prev.filter((t) => t.id !== id))}
-              onApplyTemplate={(tpl) => handleSelectTemplate(tpl.id)}
-              onNavigate={setCurrentPage}
+            {/* 2. Scheduled Messages */}
+            <Route
+              path="/scheduler"
+              element={
+                <ScheduledMessagesPage
+                  onNavigate={handleNavigate}
+                  onRefreshParent={fetchPendingScheduledCount}
+                />
+              }
             />
-          )}
+            <Route path="/scheduled-messages" element={<Navigate to="/scheduler" replace />} />
 
-          {currentPage === 'status' && (
-            <StatusPage
-              classes={classes}
-              customGroups={customGroups}
+            {/* 3. Birthdays */}
+            <Route
+              path="/birthdays"
+              element={
+                <BirthdaysPage
+                  classes={classes}
+                  onNavigate={handleNavigate}
+                  onRefreshBalance={fetchBalance}
+                />
+              }
             />
-          )}
 
-          {currentPage === 'logs' && (
-            <BroadcastLogsPage
-              records={historyRecords}
-              onRefresh={fetchHistory}
-              isLoading={isLoadingHistory}
-              onNavigate={setCurrentPage}
-              onReuseMessage={(msg) => setMessage(msg)}
+            {/* 4. Custom Groups */}
+            <Route
+              path="/custom-groups"
+              element={
+                <CustomGroupsPage
+                  classes={classes}
+                  students={students}
+                  customGroups={customGroups}
+                  onCreateCustomGroup={handleCreateCustomGroup}
+                  onUpdateCustomGroup={handleUpdateCustomGroup}
+                  onDeleteCustomGroup={handleDeleteCustomGroup}
+                  onNavigate={handleNavigate}
+                />
+              }
             />
-          )}
 
-          {currentPage === 'sms-gateway' && (
-            <SmsGatewayPage onGatewayChanged={fetchBalance} user={authUser} />
-          )}
-
-          {currentPage === 'scheduler' && (
-            <ScheduledMessagesPage
-              onNavigate={setCurrentPage}
-              onRefreshParent={fetchPendingScheduledCount}
+            {/* 5. SMS Templates */}
+            <Route
+              path="/templates"
+              element={
+                <TemplatesPage
+                  templates={templates}
+                  onAddTemplate={(tpl) => setTemplates((prev) => [tpl, ...prev])}
+                  onDeleteTemplate={(id) => setTemplates((prev) => prev.filter((t) => t.id !== id))}
+                  onApplyTemplate={(tpl) => {
+                    handleSelectTemplate(tpl.id);
+                    handleNavigate('delivery');
+                  }}
+                  onNavigate={handleNavigate}
+                />
+              }
             />
-          )}
 
-          {currentPage === 'birthdays' && (
-            <BirthdaysPage
-              classes={classes}
-              onNavigate={setCurrentPage}
-              onRefreshBalance={fetchBalance}
+            {/* 6. Message Delivery Status */}
+            <Route
+              path="/status"
+              element={
+                <StatusPage
+                  classes={classes}
+                  customGroups={customGroups}
+                />
+              }
             />
-          )}
 
-          {currentPage === 'birthday-settings' && (
-            <BirthdaySettingsPage
-              onNavigate={setCurrentPage}
-              onRefreshBalance={fetchBalance}
+            {/* 7. Broadcast Delivery Logs */}
+            <Route
+              path="/logs"
+              element={
+                <BroadcastLogsPage
+                  records={historyRecords}
+                  onRefresh={fetchHistory}
+                  isLoading={isLoadingHistory}
+                  onNavigate={handleNavigate}
+                  onReuseMessage={(msg) => {
+                    setMessage(msg);
+                    handleNavigate('delivery');
+                  }}
+                />
+              }
             />
-          )}
+            <Route path="/broadcast-logs" element={<Navigate to="/logs" replace />} />
 
-          {currentPage === 'system-messages' && (
-            <SystemMessagesPage
-              onNavigate={setCurrentPage}
+            {/* 8. Settings: SMS Gateway */}
+            <Route
+              path="/settings/sms-gateway"
+              element={<SmsGatewayPage onGatewayChanged={fetchBalance} user={authUser} />}
             />
-          )}
+            <Route path="/sms-gateway" element={<Navigate to="/settings/sms-gateway" replace />} />
 
-          {currentPage === 'database-indexer' && (
-            <DatabaseIndexerPage
-              onNavigate={setCurrentPage}
+            {/* 9. Settings: Birthday Scheduler */}
+            <Route
+              path="/settings/birthday"
+              element={
+                <BirthdaySettingsPage
+                  onNavigate={handleNavigate}
+                  onRefreshBalance={fetchBalance}
+                />
+              }
             />
-          )}
+            <Route path="/birthday-settings" element={<Navigate to="/settings/birthday" replace />} />
+            <Route path="/settings/birthday-settings" element={<Navigate to="/settings/birthday" replace />} />
+
+            {/* 10. Settings: System Messages */}
+            <Route
+              path="/settings/system-messages"
+              element={<SystemMessagesPage onNavigate={handleNavigate} />}
+            />
+            <Route path="/system-messages" element={<Navigate to="/settings/system-messages" replace />} />
+
+            {/* 11. Settings: Database Indexer */}
+            <Route
+              path="/settings/database-indexer"
+              element={<DatabaseIndexerPage onNavigate={handleNavigate} />}
+            />
+            <Route path="/database-indexer" element={<Navigate to="/settings/database-indexer" replace />} />
+
+            {/* Catch-all */}
+            <Route path="*" element={<Navigate to="/delivery" replace />} />
+          </Routes>
 
           {/* 8. Footer Ribbon */}
           <div className="pt-4 pb-2 text-center text-xs text-ink-faint">

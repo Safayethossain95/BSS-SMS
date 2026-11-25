@@ -5,7 +5,6 @@ import {
   Trash2,
   Send,
   RefreshCw,
-  AlertCircle,
   CheckCircle2,
   ShieldCheck,
   Users,
@@ -29,7 +28,6 @@ export const ScheduledMessagesPage: React.FC<ScheduledMessagesPageProps> = ({
 }) => {
   const [scheduledItems, setScheduledItems] = useState<ScheduledBroadcastItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
 
   // Real-time ticking clock for live countdown calculation
@@ -44,7 +42,6 @@ export const ScheduledMessagesPage: React.FC<ScheduledMessagesPageProps> = ({
 
   const fetchScheduled = useCallback(async (quiet: boolean = false) => {
     if (!quiet) setIsLoading(true);
-    setError(null);
     try {
       const data = await smsService.getScheduled();
       setScheduledItems(data);
@@ -52,8 +49,13 @@ export const ScheduledMessagesPage: React.FC<ScheduledMessagesPageProps> = ({
     } catch (err: unknown) {
       console.error('Failed to load scheduled broadcasts:', err);
       if (!quiet) {
-        const msg = err instanceof Error ? err.message : 'Failed to fetch scheduled broadcasts.';
-        setError(msg);
+        const msg = err instanceof Error ? err.message : 'Network Error';
+        toast.custom(
+          'Network Error',
+          msg === 'Network Error' ? 'Could not connect to scheduler server.' : msg,
+          'error',
+          5000
+        );
       }
     } finally {
       if (!quiet) setIsLoading(false);
@@ -74,8 +76,13 @@ export const ScheduledMessagesPage: React.FC<ScheduledMessagesPageProps> = ({
       .catch((err: unknown) => {
         if (isMounted) {
           setIsLoading(false);
-          const msg = err instanceof Error ? err.message : 'Failed to fetch scheduled broadcasts.';
-          setError(msg);
+          const msg = err instanceof Error ? err.message : 'Network Error';
+          toast.custom(
+            'Network Error',
+            msg === 'Network Error' ? 'Could not connect to scheduler server.' : msg,
+            'error',
+            5000
+          );
         }
       });
 
@@ -185,12 +192,12 @@ export const ScheduledMessagesPage: React.FC<ScheduledMessagesPageProps> = ({
         </div>
 
         {/* Actions & Safety Info */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={() => fetchScheduled(false)}
             disabled={isLoading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-surface-2 hover:bg-surface-3 text-ink transition cursor-pointer border border-gray-200 dark:border-zinc-800"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-surface-2 hover:bg-surface-3 text-ink transition cursor-pointer border border-gray-200 dark:border-zinc-800 whitespace-nowrap shrink-0"
             title="Refresh scheduled list"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -201,9 +208,9 @@ export const ScheduledMessagesPage: React.FC<ScheduledMessagesPageProps> = ({
             <button
               type="button"
               onClick={() => onNavigate('delivery')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white transition cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-[#1b1e42] hover:bg-[#20224A]/90 dark:bg-accent dark:hover:bg-accent-hover text-white transition cursor-pointer shadow-xs whitespace-nowrap shrink-0"
             >
-              <CalendarClock className="w-3.5 h-3.5" />
+              <CalendarClock className="w-3.5 h-3.5 shrink-0" />
               <span>Schedule New</span>
             </button>
           )}
@@ -270,14 +277,6 @@ export const ScheduledMessagesPage: React.FC<ScheduledMessagesPageProps> = ({
         <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           <span>{actionSuccessMessage}</span>
-        </div>
-      )}
-
-      {/* Error Banner */}
-      {error && (
-        <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{error}</span>
         </div>
       )}
 

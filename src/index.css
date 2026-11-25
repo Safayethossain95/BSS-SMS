@@ -379,6 +379,7 @@
   text-align: left;
   font-family: inherit;
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .nav-item:hover {
@@ -703,3 +704,92 @@
 .group-shifter-box::-webkit-scrollbar-thumb:hover {
   background-color: var(--ink-muted);
 }
+
+/* ── Toast Sweep In / Out Animations ── */
+@keyframes toastSweepIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(115%, 0, 0) scale(0.92);
+    filter: blur(4px);
+  }
+  65% {
+    opacity: 1;
+    transform: translate3d(-6px, 0, 0) scale(1.01);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes toastSweepOut {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+    max-height: 140px;
+    margin-bottom: 0;
+  }
+  25% {
+    opacity: 0.95;
+    transform: translate3d(-10px, 0, 0) scale(0.99);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(125%, 0, 0) scale(0.9);
+    filter: blur(4px);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: -10px;
+  }
+}
+
+@keyframes toastShimmerSweep {
+  0% {
+    transform: translateX(-100%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(220%) skewX(-20deg);
+  }
+}
+
+@keyframes shrinkWidth {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.toast-sweep-in {
+  animation: toastSweepIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, filter;
+}
+
+.toast-sweep-out {
+  animation: toastSweepOut 0.32s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none !important;
+  will-change: transform, opacity, filter, max-height;
+}
+
+/* Luminous sweep highlight across the card as it enters */
+.toast-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 100%
+  );
+  animation: toastShimmerSweep 0.75s ease-out 0.1s 1 forwards;
+  pointer-events: none;
+}
+

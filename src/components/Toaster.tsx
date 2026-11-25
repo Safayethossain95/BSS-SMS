@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   CheckCircle2,
   AlertTriangle,
@@ -40,6 +40,24 @@ interface ToastCardProps {
 
 const ToastCard: React.FC<ToastCardProps> = ({ item, onDismiss }) => {
   const { type, title, message, durationMs = 4500 } = item;
+  const [isExiting, setIsExiting] = useState(false);
+
+  const triggerDismiss = useCallback(() => {
+    if (isExiting) return;
+    setIsExiting(true);
+    setTimeout(() => {
+      onDismiss();
+    }, 320);
+  }, [isExiting, onDismiss]);
+
+  useEffect(() => {
+    const exitDelay = Math.max(durationMs - 340, 500);
+    const timer = setTimeout(() => {
+      triggerDismiss();
+    }, exitDelay);
+
+    return () => clearTimeout(timer);
+  }, [durationMs, triggerDismiss]);
 
   const config = {
     success: {
@@ -77,8 +95,13 @@ const ToastCard: React.FC<ToastCardProps> = ({ item, onDismiss }) => {
   return (
     <div
       role="alert"
-      className={`relative overflow-hidden pointer-events-auto rounded-2xl border ${config.border} ${config.bg} shadow-lg p-3.5 flex items-start gap-3 transition-all duration-300 animate-slideInRight`}
+      className={`relative overflow-hidden pointer-events-auto rounded-2xl border ${config.border} ${config.bg} shadow-xl p-3.5 flex items-start gap-3 transition-all ${
+        isExiting ? 'toast-sweep-out' : 'toast-sweep-in'
+      }`}
     >
+      {/* Luminous Sweep Shimmer */}
+      <div className="toast-shimmer" />
+
       {/* Icon */}
       <div className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center ${config.iconBg}`}>
         <Icon className="w-4 h-4" />
@@ -98,7 +121,7 @@ const ToastCard: React.FC<ToastCardProps> = ({ item, onDismiss }) => {
       {/* Dismiss Button */}
       <button
         type="button"
-        onClick={onDismiss}
+        onClick={triggerDismiss}
         className="p-1 rounded-lg text-ink-faint hover:text-ink hover:bg-surface-2 transition-colors cursor-pointer shrink-0"
         aria-label="Close notification"
       >
@@ -107,7 +130,7 @@ const ToastCard: React.FC<ToastCardProps> = ({ item, onDismiss }) => {
 
       {/* Auto-Dismiss Animated Progress Bar */}
       <div
-        className={`absolute bottom-0 left-0 h-0.5 ${config.progressBg} transition-all duration-linear`}
+        className={`absolute bottom-0 left-0 h-0.5 ${config.progressBg}`}
         style={{
           width: '100%',
           animation: `shrinkWidth ${durationMs}ms linear forwards`,

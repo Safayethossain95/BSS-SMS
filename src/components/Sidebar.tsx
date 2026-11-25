@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   Send,
   FileText,
@@ -22,6 +23,7 @@ import {
   Database
 } from 'lucide-react';
 import type { AppPage, AuthUser } from '../types';
+import { PAGE_ROUTES } from '../routes';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -56,14 +58,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   // When opened as a mobile drawer (isOpen=true), always show expanded
   const effectiveCollapsed = isOpen ? false : isCollapsed;
-  const [isSettingsOpen, setIsSettingsOpen] = React.useState(true);
+  const [isSettingsExpanded, setIsSettingsExpanded] = React.useState(true);
+
+  // Settings active check & auto-expand (derived, no effect needed)
+  const isSettingsActive =
+    currentPage === 'sms-gateway' ||
+    currentPage === 'birthday-settings' ||
+    currentPage === 'system-messages' ||
+    currentPage === 'database-indexer';
+
+  const isSettingsOpen = isSettingsActive || isSettingsExpanded;
 
   // Granular Settings Menu Visibility Control
   const isSuperAdmin = user?.roles?.includes('SuperAdmin') || user?.role?.toLowerCase().includes('admin') || true;
   const canViewSettings = isSuperAdmin || user?.permissions?.includes('sms.settings.view') || user?.permissions?.includes('sms.*') || true;
 
   const handleNav = (page: AppPage) => {
-    onNavigate(page);
+    onNavigate?.(page);
     onClose();
   };
 
@@ -76,8 +87,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         {/* Brand */}
         <div className="sidebar-brand">
-          <div
-            className="flex items-center gap-3 cursor-pointer select-none"
+          <Link
+            to={PAGE_ROUTES['delivery']}
+            className="flex items-center gap-3 cursor-pointer select-none no-underline text-inherit"
             onClick={() => handleNav('delivery')}
           >
             <img
@@ -100,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </span>
               </div>
             )}
-          </div>
+          </Link>
 
           {/* Mobile Close Button */}
           <button
@@ -130,18 +142,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="nav-group">
             <div className="nav-label">{effectiveCollapsed ? '' : 'SMS Services'}</div>
 
-            <button
-              type="button"
+            <Link
+              to={PAGE_ROUTES['delivery']}
               onClick={() => handleNav('delivery')}
               className={`nav-item ${currentPage === 'delivery' ? 'active' : ''}`}
               title="SMS Message Delivery"
             >
               <Send className="w-4 h-4 shrink-0" />
               <span>SMS Delivery</span>
-            </button>
+            </Link>
 
-            <button
-              type="button"
+            <Link
+              to={PAGE_ROUTES['scheduler']}
               onClick={() => handleNav('scheduler')}
               className={`nav-item ${currentPage === 'scheduler' ? 'active' : ''}`}
               title="Scheduled Messages (Auto-dispatch)"
@@ -153,10 +165,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {pendingScheduledCount}
                 </span>
               )}
-            </button>
+            </Link>
 
-            <button
-              type="button"
+            <Link
+              to={PAGE_ROUTES['birthdays']}
               onClick={() => handleNav('birthdays')}
               className={`nav-item ${currentPage === 'birthdays' ? 'active' : ''}`}
               title="Student Birthday Management & Countdown Timers"
@@ -169,37 +181,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {birthdaysCount}
                 </span>
               )}
-            </button>
+            </Link>
 
-            <button
-              type="button"
+            <Link
+              to={PAGE_ROUTES['custom-groups']}
               onClick={() => handleNav('custom-groups')}
               className={`nav-item ${currentPage === 'custom-groups' ? 'active' : ''}`}
               title="Custom Groups Manager"
             >
               <FolderPlus className="w-4 h-4 shrink-0" />
               <span>Custom Groups</span>
-            </button>
+            </Link>
 
-            <button
-              type="button"
+            <Link
+              to={PAGE_ROUTES['templates']}
               onClick={() => handleNav('templates')}
               className={`nav-item ${currentPage === 'templates' ? 'active' : ''}`}
               title="SMS Templates"
             >
               <FileText className="w-4 h-4 shrink-0" />
               <span>SMS Templates</span>
-            </button>
+            </Link>
 
-            <button
-              type="button"
+            <Link
+              to={PAGE_ROUTES['status']}
               onClick={() => handleNav('status')}
               className={`nav-item ${currentPage === 'status' ? 'active' : ''}`}
               title="Delivery Status"
             >
               <Activity className="w-4 h-4 shrink-0" />
               <span>Status</span>
-            </button>
+            </Link>
           </div>
 
           {/* System Settings Navigation Group */}
@@ -208,25 +220,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="nav-label">{effectiveCollapsed ? '' : 'Settings'}</div>
 
               <div className="flex flex-col">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (effectiveCollapsed) {
-                      handleNav('sms-gateway');
-                    } else {
-                      setIsSettingsOpen(!isSettingsOpen);
-                    }
-                  }}
-                  className={`nav-item justify-between ${
-                    effectiveCollapsed && (currentPage === 'sms-gateway' || currentPage === 'birthday-settings' || currentPage === 'system-messages' || currentPage === 'database-indexer') ? 'active' : ''
-                  }`}
-                  title="Settings"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Settings className="w-4 h-4 shrink-0" />
-                    <span>Settings</span>
-                  </div>
-                  {!effectiveCollapsed && (
+                {effectiveCollapsed ? (
+                  <Link
+                    to={PAGE_ROUTES['sms-gateway']}
+                    onClick={() => handleNav('sms-gateway')}
+                    className={`nav-item justify-between ${
+                      isSettingsActive ? 'active' : ''
+                    }`}
+                    title="Settings"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Settings className="w-4 h-4 shrink-0" />
+                      <span>Settings</span>
+                    </div>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsSettingsExpanded(!isSettingsOpen)}
+                    className="nav-item justify-between"
+                    title="Settings"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Settings className="w-4 h-4 shrink-0" />
+                      <span>Settings</span>
+                    </div>
                     <span className="text-ink-muted">
                       {isSettingsOpen ? (
                         <ChevronDown className="w-3.5 h-3.5" />
@@ -234,14 +252,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <ChevronRight className="w-3.5 h-3.5" />
                       )}
                     </span>
-                  )}
-                </button>
+                  </button>
+                )}
 
                 {/* Submenu */}
                 {!effectiveCollapsed && isSettingsOpen && (
                   <div className="pl-6 pt-1 space-y-1">
-                    <button
-                      type="button"
+                    <Link
+                      to={PAGE_ROUTES['sms-gateway']}
                       onClick={() => handleNav('sms-gateway')}
                       className={`nav-item text-xs py-1.5 ${
                         currentPage === 'sms-gateway' ? 'active' : ''
@@ -250,10 +268,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     >
                       <Radio className="w-3.5 h-3.5 shrink-0" />
                       <span>SMS Gateway</span>
-                    </button>
+                    </Link>
 
-                    <button
-                      type="button"
+                    <Link
+                      to={PAGE_ROUTES['birthday-settings']}
                       onClick={() => handleNav('birthday-settings')}
                       className={`nav-item text-xs py-1.5 ${
                         currentPage === 'birthday-settings' ? 'active' : ''
@@ -262,10 +280,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     >
                       <Sliders className="w-3.5 h-3.5 shrink-0" />
                       <span>Birthday Scheduler</span>
-                    </button>
+                    </Link>
 
-                    <button
-                      type="button"
+                    <Link
+                      to={PAGE_ROUTES['system-messages']}
                       onClick={() => handleNav('system-messages')}
                       className={`nav-item text-xs py-1.5 ${
                         currentPage === 'system-messages' ? 'active' : ''
@@ -274,10 +292,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     >
                       <Bell className="w-3.5 h-3.5 shrink-0" />
                       <span>System Messages</span>
-                    </button>
+                    </Link>
 
-                    <button
-                      type="button"
+                    <Link
+                      to={PAGE_ROUTES['database-indexer']}
                       onClick={() => handleNav('database-indexer')}
                       className={`nav-item text-xs py-1.5 ${
                         currentPage === 'database-indexer' ? 'active' : ''
@@ -286,7 +304,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     >
                       <Database className="w-3.5 h-3.5 shrink-0" />
                       <span>Database Indexer</span>
-                    </button>
+                    </Link>
                   </div>
                 )}
               </div>
@@ -295,15 +313,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Bottom Nav: Broadcast Logs */}
           <div className="mt-auto pb-1.5">
-            <button
-              type="button"
+            <Link
+              to={PAGE_ROUTES['logs']}
               onClick={() => handleNav('logs')}
               className={`nav-item ${currentPage === 'logs' ? 'active' : ''}`}
               title="Broadcast Logs"
             >
               <History className="w-4 h-4 shrink-0" />
               <span>Broadcast Logs</span>
-            </button>
+            </Link>
           </div>
         </nav>
 

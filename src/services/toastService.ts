@@ -46,7 +46,35 @@ class ToastService {
 
     setTimeout(() => {
       this.dismiss(id);
-    }, item.durationMs);
+    }, (item.durationMs || this.defaultDuration) + 600);
+
+    return id;
+  }
+
+  custom(
+    title: string,
+    message: string,
+    type: ToastType = 'info',
+    durationMs?: number
+  ): string {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
+    const item: ToastItem = {
+      id,
+      key: '',
+      type,
+      title,
+      message,
+      durationMs: durationMs || this.defaultDuration,
+      createdAt: Date.now(),
+    };
+
+    this.toasts = [item, ...this.toasts].slice(0, 5);
+    this.notify();
+
+    setTimeout(() => {
+      this.dismiss(id);
+    }, (item.durationMs || this.defaultDuration) + 600);
 
     return id;
   }
