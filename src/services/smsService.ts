@@ -4,7 +4,9 @@ import type {
   SmsBalanceInfo, 
   BroadcastSubmissionResult, 
   BroadcastSmsPayload, 
-  TestSmsPayload 
+  TestSmsPayload,
+  ScheduleBroadcastPayload,
+  ScheduledBroadcastItem
 } from '../types/api';
 import type { SentBroadcastRecord } from '../types';
 
@@ -16,6 +18,26 @@ export const smsService = {
 
   async sendBroadcast(payload: BroadcastSmsPayload): Promise<BroadcastSubmissionResult> {
     const response = await apiClient.post<ApiResponse<BroadcastSubmissionResult>>('/api/sms/send-broadcast', payload);
+    return response.data.data;
+  },
+
+  async scheduleBroadcast(payload: ScheduleBroadcastPayload): Promise<ScheduledBroadcastItem> {
+    const response = await apiClient.post<ApiResponse<ScheduledBroadcastItem>>('/api/sms/schedule', payload);
+    return response.data.data;
+  },
+
+  async getScheduled(): Promise<ScheduledBroadcastItem[]> {
+    const response = await apiClient.get<ApiResponse<ScheduledBroadcastItem[]>>('/api/sms/scheduled');
+    return response.data.data;
+  },
+
+  async cancelScheduled(jobId: string): Promise<boolean> {
+    const response = await apiClient.delete<ApiResponse<boolean>>(`/api/sms/scheduled/${jobId}`);
+    return response.data.data;
+  },
+
+  async triggerScheduledNow(jobId: string): Promise<boolean> {
+    const response = await apiClient.post<ApiResponse<boolean>>(`/api/sms/scheduled/${jobId}/send-now`);
     return response.data.data;
   },
 

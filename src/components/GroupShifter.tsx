@@ -53,7 +53,7 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
   };
 
   return (
-    <div className="card p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card h-full flex flex-col justify-between">
+    <div className="card p-5! border border-gray-200 dark:border-zinc-800 bg-surface rounded-2xl shadow-card h-full flex flex-col justify-between min-w-83.5">
 
       {/* Card Header */}
       <div className="card-head mb-3!">
@@ -84,30 +84,32 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
           <label className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1.5 select-none block">
             Available Group
           </label>
-          <div className="h-32.5 sm:h-35 bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-md p-1.5 overflow-y-auto space-y-1">
-            {availableGroups.length === 0 ? (
-              <div className="text-xs text-ink-faint text-center py-10 sm:py-12 italic">
-                All shifted
-              </div>
-            ) : (
-              availableGroups.map((group) => (
-                <div
-                  key={group}
-                  onClick={() => setSelectedAvailable(group)}
-                  onDoubleClick={() => {
-                    onTransferToDestination(group);
-                    setSelectedAvailable('');
-                  }}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition select-none truncate ${selectedAvailable === group
-                    ? 'bg-[#1b1e42] dark:bg-accent text-white font-semibold shadow-xs'
-                    : 'text-ink hover:bg-surface'
-                    }`}
-                  title={`${group} (Double-click to shift)`}
-                >
-                  {group}
+          <div className="h-32.5 sm:h-35 bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-xl p-1.5 pr-2.5 overflow-hidden">
+            <div className="group-shifter-box h-full overflow-y-auto space-y-1 pr-1">
+              {availableGroups.length === 0 ? (
+                <div className="text-xs text-ink-faint text-center py-10 sm:py-12 italic">
+                  All shifted
                 </div>
-              ))
-            )}
+              ) : (
+                availableGroups.map((group) => (
+                  <div
+                    key={group}
+                    onClick={() => setSelectedAvailable(group)}
+                    onDoubleClick={() => {
+                      onTransferToDestination(group);
+                      setSelectedAvailable('');
+                    }}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition select-none truncate ${selectedAvailable === group
+                      ? 'bg-[#1b1e42] dark:bg-accent text-white font-semibold shadow-xs'
+                      : 'text-ink hover:bg-surface'
+                      }`}
+                    title={`${group} (Double-click to shift)`}
+                  >
+                    {group}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 
@@ -167,30 +169,32 @@ export const GroupShifter: React.FC<GroupShifterProps> = ({
           <label className="text-[11px] font-bold uppercase tracking-wider text-ink-faint mb-1.5 select-none block">
             Destination Group
           </label>
-          <div className="h-32.5 sm:h-35 bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-md p-1.5 overflow-y-auto space-y-1">
-            {destinationGroups.length === 0 ? (
-              <div className="text-xs text-ink-faint text-center py-10 sm:py-12 italic">
-                None selected
-              </div>
-            ) : (
-              destinationGroups.map((group) => (
-                <div
-                  key={group}
-                  onClick={() => setSelectedDestination(group)}
-                  onDoubleClick={() => {
-                    onTransferToAvailable(group);
-                    setSelectedDestination('');
-                  }}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition select-none truncate ${selectedDestination === group
-                    ? 'bg-[#1b1e42] dark:bg-accent text-white font-semibold shadow-xs'
-                    : 'text-ink hover:bg-surface'
-                    }`}
-                  title={`${group} (Double-click to remove)`}
-                >
-                  &bull; {group}
+          <div className="h-32.5 sm:h-35 bg-surface-2 border border-gray-200 dark:border-zinc-800 rounded-xl p-1.5 pr-2.5 overflow-hidden">
+            <div className="group-shifter-box h-full overflow-y-auto space-y-1 pr-1">
+              {destinationGroups.length === 0 ? (
+                <div className="text-xs text-ink-faint text-center py-10 sm:py-12 italic">
+                  None selected
                 </div>
-              ))
-            )}
+              ) : (
+                destinationGroups.map((group) => (
+                  <div
+                    key={group}
+                    onClick={() => setSelectedDestination(group)}
+                    onDoubleClick={() => {
+                      onTransferToAvailable(group);
+                      setSelectedDestination('');
+                    }}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition select-none truncate ${selectedDestination === group
+                      ? 'bg-[#1b1e42] dark:bg-accent text-white font-semibold shadow-xs'
+                      : 'text-ink hover:bg-surface'
+                      }`}
+                    title={`${group} (Double-click to remove)`}
+                  >
+                    &bull; {group}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 

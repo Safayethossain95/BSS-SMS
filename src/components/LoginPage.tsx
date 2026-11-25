@@ -79,7 +79,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 relative bg-bg text-ink transition-colors duration-200">
+    <div className="min-h-screen min-h-dvh flex items-center justify-center p-4 sm:p-6 relative bg-bg text-ink transition-colors duration-200">
       <style>{`
         input[type="password"]::-ms-reveal,
         input[type="password"]::-ms-clear {

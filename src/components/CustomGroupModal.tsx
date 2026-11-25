@@ -268,7 +268,7 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="custom-group-modal-title"
-        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl max-w-3xl w-full shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+        className="relative bg-surface border border-gray-200 dark:border-zinc-800 rounded-2xl max-w-3xl w-full shadow-2xl flex flex-col max-h-[90vh] max-h-[90dvh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -411,11 +411,11 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
               </label>
 
               <div className="flex flex-wrap items-center gap-2">
-                <div className="relative">
+                <div className="relative w-full sm:w-auto">
                   <select
                     value={selectedClassId}
                     onChange={(e) => handleClassChange(e.target.value)}
-                    className="bg-surface-2 border border-transparent focus:border-[#1b1e42] text-ink rounded-xl pl-3 pr-7 py-2 text-xs font-medium outline-none appearance-none cursor-pointer"
+                    className="w-full sm:w-auto bg-surface-2 border border-transparent focus:border-[#1b1e42] text-ink rounded-xl pl-3 pr-7 py-2 text-xs font-medium outline-none appearance-none cursor-pointer"
                   >
                     <option value="" disabled>Select Class</option>
                     {classes.map((c) => (
@@ -427,11 +427,11 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
                   <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
                 </div>
 
-                <div className="relative">
+                <div className="relative w-full sm:w-auto">
                   <select
                     value={selectedSectionId}
                     onChange={(e) => setSelectedSectionId(e.target.value)}
-                    className="bg-surface-2 border border-transparent focus:border-[#1b1e42] text-ink rounded-xl pl-3 pr-7 py-2 text-xs font-medium outline-none appearance-none cursor-pointer"
+                    className="w-full sm:w-auto bg-surface-2 border border-transparent focus:border-[#1b1e42] text-ink rounded-xl pl-3 pr-7 py-2 text-xs font-medium outline-none appearance-none cursor-pointer"
                   >
                     <option value="all">All Sections</option>
                     {sections.map((s) => (
@@ -446,7 +446,7 @@ export const CustomGroupModal: React.FC<CustomGroupModalProps> = ({
                 <button
                   type="button"
                   onClick={handleAddTargetToStage}
-                  className="inline-flex items-center gap-1 px-4 py-2 bg-surface-2 hover:bg-surface-3 text-ink font-semibold text-xs rounded-full border border-gray-200 dark:border-zinc-800 transition shadow-2xs cursor-pointer active:scale-95"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1 px-4 py-2 bg-surface-2 hover:bg-surface-3 text-ink font-semibold text-xs rounded-full border border-gray-200 dark:border-zinc-800 transition shadow-2xs cursor-pointer active:scale-95"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add to Group</span>
